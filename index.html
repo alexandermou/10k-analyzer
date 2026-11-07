@@ -1028,7 +1028,8 @@ async function openCompany(t, view){
     if (seq !== openSeq) return;
   }
   const c = LIBRARY[t];
-  state.ticker = t; $("#missing").hidden = true; $("#filing").hidden = false;
+  state.ticker = t;
+  try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(c.fy)}</em>`;
   $("#fmeta").innerHTML = `<span><b>${c.form || "Form 10-K"}</b> · ${esc(c.fy)}</span><span>${esc(c.period)}</span><span>Filed ${esc(c.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
   renderReport(c); renderInfographic(c); loadSlides(c); loadVideo(c); renderSpines(); setView(view || state.view);
@@ -1081,7 +1082,10 @@ window.addEventListener("hashchange", () => { const h = readHash(); if (h && LIB
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
-  const start = readHash(); await openCompany(start && LIBRARY[start.t] ? start.t : "AMZN", start ? start.v : "infographic");
+  const start = readHash();
+  let last = null; try { last = localStorage.getItem("10k-last-ticker"); } catch (e) {}
+  const first = start && LIBRARY[start.t] ? start.t : (last && LIBRARY[last] ? last : "AMZN");
+  await openCompany(first, start ? start.v : "infographic");
 })();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
