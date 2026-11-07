@@ -165,6 +165,20 @@ tr.key td{font-weight:700}
 .screen canvas{display:block;width:100%;height:100%}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .controls .btn{height:44px}
+.fs-box{display:flex;flex-direction:column;gap:12px}
+.fs-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
+.fs-btn .fs-out,.fs-box.is-fs .fs-btn .fs-in{display:none}
+.fs-box.is-fs .fs-btn .fs-out{display:inline}
+.fs-box.is-fs{position:fixed;inset:0;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
+  padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 92px) * 16 / 9));flex:none}
+.fs-box.is-fs>.controls{justify-content:center}
+.fs-btn svg{flex:none}
+.fs-box.is-fs .status{display:none}
+.fs-box.is-fs .stage{border-radius:10px}
+html.fs-lock,html.fs-lock body{overflow:hidden}
+@media (max-width:640px){.fs-btn span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.fs-btn{padding:0 12px}}
+@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 88px) * 16 / 9))}}
 .toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
 .toggle input{width:18px;height:18px;accent-color:var(--accent)}
 .status{font-size:13px;color:var(--muted)}
@@ -274,6 +288,7 @@ tr.key td{font-weight:700}
     </div>
     <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
+        <div class="fs-box" id="fsSlides">
         <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div></div>
         <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
         <div class="controls">
@@ -281,6 +296,8 @@ tr.key td{font-weight:700}
           <button class="btn" type="button" id="voSlide">Play voice-over</button>
           <button class="btn ghost" type="button" id="nextSlide" aria-label="Next slide">Next</button>
           <span class="status num" id="scount"></span>
+          <button class="btn ghost fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span>Full screen</span></button>
+        </div>
         </div>
         <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
         <p class="status" id="sstatus">Voice-over reads each slide aloud and moves on by itself. It uses your device's voice.</p>
@@ -288,6 +305,7 @@ tr.key td{font-weight:700}
     </div>
     <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
+        <div class="fs-box" id="fsVideo">
         <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas></div>
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         <div class="controls">
@@ -295,6 +313,8 @@ tr.key td{font-weight:700}
           <button class="btn ghost" type="button" id="restartBtn">Restart</button>
           <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Voice narration</label>
           <button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button>
+          <button class="btn ghost fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span>Full screen</span></button>
+        </div>
         </div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
       </div>
@@ -1033,7 +1053,42 @@ function setView(v){
   if (v !== "video" && player.playing && !player.recording) stop(false);
   if (v !== "slides" && deck.playing) stopDeck(false);
   if (v === "slides") fitSlide();
+  if (fsActive() && !$("#view-" + v).contains(fsActive())) exitFs();
 }
+/* Full screen for slides and video. Uses the browser's real full screen where it exists; on iPhone,
+   which only allows that for <video>, the box is pinned over the whole page instead. Either way the
+   player keeps its 16:9 shape and grows to fill the screen, so turning a phone sideways enlarges it. */
+let fakeFs = null;
+const realFsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+const fsActive = () => realFsEl() || fakeFs;
+function syncFs(){
+  const on = fsActive();
+  document.querySelectorAll(".fs-box").forEach(b => {
+    const is = b === on; b.classList.toggle("is-fs", is);
+    const btn = b.querySelector(".fs-btn"); const lab = is ? "Exit full screen" : "Full screen";
+    btn.setAttribute("aria-label", lab); btn.querySelector("span").textContent = lab;
+  });
+  document.documentElement.classList.toggle("fs-lock", !!fakeFs);
+  fitSlide();
+}
+function enterFs(box){
+  const req = box.requestFullscreen || box.webkitRequestFullscreen;
+  const fake = () => { fakeFs = box; syncFs(); };
+  if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+    try { const r = req.call(box); if (r && r.catch) r.catch(fake); } catch (e) { fake(); }
+  } else fake();
+  if (box.id === "fsSlides") setTimeout(() => $("#stage").focus({preventScroll: true}), 50);
+}
+function exitFs(){
+  if (fakeFs) { fakeFs = null; syncFs(); return; }
+  const ex = document.exitFullscreen || document.webkitExitFullscreen;
+  if (realFsEl() && ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+}
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, syncFs));
+[["fsSlidesBtn", "fsSlides"], ["fsVideoBtn", "fsVideo"]].forEach(([b, x]) =>
+  $("#" + b).addEventListener("click", () => fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x))));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && fakeFs) exitFs(); });
+window.addEventListener("orientationchange", () => setTimeout(fitSlide, 250));
 let openSeq = 0;
 async function openCompany(t, view){
   if (!LIBRARY[t]) return;
