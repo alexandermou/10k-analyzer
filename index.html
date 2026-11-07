@@ -73,6 +73,12 @@ button,input{font:inherit}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.media-bar{display:flex;align-items:center;gap:12px;margin-bottom:-4px}
+.media-bar[hidden]{display:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg-btn{min-height:40px;min-width:88px;padding:0 16px;border:0;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.seg-btn+.seg-btn{border-left:1px solid var(--line)}
+.seg-btn[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
 
 /* Shared blocks */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -254,14 +260,19 @@ tr.key td{font-weight:700}
       </div>
       <div class="tabs" role="tablist" aria-label="Views">
         <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
-        <button class="tab" role="tab" id="tab-slides" data-view="slides" aria-selected="false">Slides</button>
-        <button class="tab" role="tab" id="tab-video" data-view="video" aria-selected="false">Video</button>
+        <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
         <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
       </div>
     </div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
-    <div id="view-slides" role="tabpanel" aria-labelledby="tab-slides" hidden>
+    <div class="media-bar" id="mediaBar" hidden>
+      <div class="seg" role="group" aria-label="Media type">
+        <button type="button" class="seg-btn" id="seg-slides" data-media="slides" aria-pressed="true">Slides</button>
+        <button type="button" class="seg-btn" id="seg-video" data-media="video" aria-pressed="false">Video</button>
+      </div>
+    </div>
+    <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div></div>
         <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
@@ -275,7 +286,7 @@ tr.key td{font-weight:700}
         <p class="status" id="sstatus">Voice-over reads each slide aloud and moves on by itself. It uses your device's voice.</p>
       </div>
     </div>
-    <div id="view-video" role="tabpanel" aria-labelledby="tab-video" hidden>
+    <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas></div>
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
@@ -1002,7 +1013,7 @@ $("#stage").addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.p
 
 /* ---------------- Shelf, routing ---------------- */
 const VIEWS = ["infographic", "slides", "video", "report"];
-let state = {ticker: "AMZN", view: "infographic"};
+let state = {ticker: "AMZN", view: "infographic", media: "slides"};
 function renderSpines(){
   const sel = $("#pick");
   if (!sel.options.length) {
@@ -1013,7 +1024,12 @@ function renderSpines(){
 }
 function setView(v){
   state.view = v;
-  VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; $("#tab-" + x).setAttribute("aria-selected", x === v); });
+  const media = v === "slides" || v === "video";
+  if (media) state.media = v;
+  VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
+  ["infographic", "media", "report"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  $("#mediaBar").hidden = !media;
+  ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
   if (v !== "video" && player.playing && !player.recording) stop(false);
   if (v !== "slides" && deck.playing) stopDeck(false);
   if (v === "slides") fitSlide();
@@ -1037,7 +1053,8 @@ async function openCompany(t, view){
 function writeHash(){ const h = state.ticker.toLowerCase() + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
 function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const [t, v] = h.split("-"); return {t: (t || "").toUpperCase(), v: VIEWS.includes(v) ? v : "infographic"}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
-document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view); writeHash(); }));
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
+document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
 const ALIASES = {GOOGL: "GOOG", "BRK.B": null};
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
