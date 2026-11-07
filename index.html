@@ -1,0 +1,1089 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>10-K Analyzer by Alexander</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a filing-room shelf — search bar on top, one company's filing below, three tabs (report, infographic, video). */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E9EDF2; --ink:#15202B; --muted:#55606E; --line:#D7DDE5;
+  --navy:#1D3557; --node-rev:#1D3557; --accent:#A9550D; --accent-soft:#FBEBD8;
+  --pos:#17703F; --neg:#A8321F; --pos-bg:#E2F2E8; --neg-bg:#FAE5E0; --n-bg:#E6EAF0; --n-fg:#3B4452;
+  --flow-src:#E9A23B; --flow-pos:#3DA56B; --flow-neg:#DD6A55; --node-pos:#1E7B4A; --node-neg:#B23A27;
+  --src-fill:#FFF3E0; --src-stroke:#EFC27E; --bar:#1D3557; --bar2:#9AAFC9; --on-node:#FFFFFF; --on-node-soft:#DCE6F2;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#17202A; --sunk:#1E2833; --ink:#E6EBF0; --muted:#9DA9B7; --line:#2C3744;
+  --navy:#9DBDE6; --node-rev:#2A4A74; --accent:#EBA05A; --accent-soft:#33261A;
+  --pos:#6BCF95; --neg:#F28E78; --pos-bg:#173326; --neg-bg:#3A1F1A; --n-bg:#26313E; --n-fg:#C7D0DB;
+  --flow-src:#D89536; --flow-pos:#3DA56B; --flow-neg:#D9604B; --node-pos:#1F7A4A; --node-neg:#A9392A;
+  --src-fill:#2A2318; --src-stroke:#6A5128; --bar:#7FA6D8; --bar2:#3B4B5E; --on-node:#FFFFFF; --on-node-soft:#D2DDEA;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#17202A; --sunk:#1E2833; --ink:#E6EBF0; --muted:#9DA9B7; --line:#2C3744;
+  --navy:#9DBDE6; --node-rev:#2A4A74; --accent:#EBA05A; --accent-soft:#33261A;
+  --pos:#6BCF95; --neg:#F28E78; --pos-bg:#173326; --neg-bg:#3A1F1A; --n-bg:#26313E; --n-fg:#C7D0DB;
+  --flow-src:#D89536; --flow-pos:#3DA56B; --flow-neg:#D9604B; --node-pos:#1F7A4A; --node-neg:#A9392A;
+  --src-fill:#2A2318; --src-stroke:#6A5128; --bar:#7FA6D8; --bar2:#3B4B5E; --on-node:#FFFFFF; --on-node-soft:#D2DDEA;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+p{margin:0}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button,input{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Shelf */
+.shelf{display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.brand p{color:var(--muted);font-size:14px}
+.search{display:flex;gap:8px;flex-wrap:wrap}
+.search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.search input{flex:1 1 220px;min-width:0;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-family:var(--f-mono);font-size:17px;text-transform:uppercase;letter-spacing:.04em}
+.search input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);color:var(--muted)}
+.btn{height:48px;padding:0 18px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.picker label{font-weight:600;font-size:14px;color:var(--muted)}
+.picker select{height:48px;flex:1 1 260px;min-width:0;max-width:520px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px;cursor:pointer}
+.spine{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.spine b{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:6px 8px;border-radius:6px}
+.spine small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
+.spine[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.missing{background:var(--accent-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.missing .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.missing code{font-family:var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:8px 10px;border-radius:8px;user-select:all;overflow-wrap:anywhere}
+
+/* Filing header + tabs */
+.filing{display:flex;flex-direction:column;gap:16px}
+.fhead{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px}
+.fhead h2{font-size:clamp(28px,5vw,44px);font-weight:700;letter-spacing:-.015em}
+.fhead h2 span{color:var(--accent)}
+.fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
+.meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.meta b{color:var(--ink);font-weight:600}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
+.tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Shared blocks */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec>h3{font-size:22px;font-weight:700}
+.sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
+.lbl{font-size:14px;font-weight:600;color:var(--muted)}
+.big{font-family:var(--f-mono);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.sub{font-size:13px;color:var(--muted)}
+.up{color:var(--pos);font-weight:700}.down{color:var(--neg);font-weight:700}.flat{color:var(--n-fg);font-weight:700}
+.chip{font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.chip.up{background:var(--pos-bg)}.chip.down{background:var(--neg-bg)}.chip.flat{background:var(--n-bg)}
+.kpi.hero{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.kpi.hero .lbl,.kpi.hero .sub{color:var(--on-node-soft)}
+.kpi.hero .up{color:#9BE7BC}
+.tile-top{border-top:4px solid var(--accent)}
+.barhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.barhead p{line-height:1.3}
+.card>.bars{margin-top:auto}
+.two-line .barhead p{min-height:2.6em}
+.barhead p{font-weight:700;font-size:16px}
+.bars{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-size:13px}
+.bars span{color:var(--muted)}
+.track{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.fill{height:100%;border-radius:6px;background:var(--bar)}
+.fill.prior{background:var(--bar2)}
+.fill.neg{background:var(--node-neg)}
+.fill.prior.neg{background:var(--flow-neg)}
+.bars strong{font-family:var(--f-mono);font-weight:600;text-align:right}
+.stat{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.stat .big{font-size:28px}.stat .sub{color:var(--on-node-soft);font-size:14px}
+.callout{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-size:14px}
+.bridge{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.bridge span{padding:4px 10px;border-radius:8px;background:var(--sunk);font-family:var(--f-mono);font-size:13px}
+.bridge span.first{background:var(--pos-bg);color:var(--pos);font-weight:600}
+.bridge span.last{background:var(--node-rev);color:var(--on-node);font-weight:600}
+.bridge i{font-style:normal;color:var(--muted)}
+.foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.foot b{color:var(--ink)}
+
+/* Sankey */
+.sankey{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
+.fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
+.ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
+.nrev{fill:var(--node-rev)}.npos{fill:var(--node-pos)}.nneg{fill:var(--node-neg)}
+.sbox{fill:var(--src-fill);stroke:var(--src-stroke)}
+.t-m{fill:var(--muted)}.t-i{fill:var(--ink)}.t-w{fill:var(--on-node)}.t-ws{fill:var(--on-node-soft)}.t-p{fill:var(--pos)}.t-n{fill:var(--neg)}
+
+/* Quarters */
+.qgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;overflow-x:auto}
+.q-top{height:212px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.q-note{min-height:3em;line-height:1.5}
+.q{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:96px}
+.q .col{width:56px;border-radius:6px 6px 0 0;background:var(--bar);display:flex;flex-direction:column;overflow:hidden}
+.q .col.prior{background:var(--bar2)}
+.q .col i{display:block;background:var(--flow-src)}
+.q strong{font-family:var(--f-mono);font-size:14px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--sw)}
+
+/* Report */
+.report{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:820px){.report{grid-template-columns:minmax(0,1fr)}}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:68ch}
+.prose p{font-size:16px;line-height:1.65}
+.prose h3{font-size:20px;margin-top:6px}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--f-body)}
+tr.key td{font-weight:700}
+.side{display:flex;flex-direction:column;gap:14px}
+.side a{color:var(--navy);overflow-wrap:anywhere}
+
+/* Video */
+.player{display:flex;flex-direction:column;gap:12px}
+.screen{position:relative;border-radius:14px;overflow:hidden;background:#0E1A2B;aspect-ratio:16/9;max-width:100%}
+.screen canvas{display:block;width:100%;height:100%}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.controls .btn{height:44px}
+.toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.status{font-size:13px;color:var(--muted)}
+.progress{height:4px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.progress div{height:100%;width:0;background:var(--accent)}
+/* Segment results */
+.seg-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.seg-card.total{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.seg-card.total .lbl{color:var(--on-node-soft)}
+.seg-card.total .seg-metric{border-top-color:rgba(255,255,255,.22)}
+.seg-name{font-family:var(--f-display);font-size:20px;font-weight:700}
+.seg-card{gap:14px;border-top:4px solid var(--accent)}
+.seg-metric{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}
+.seg-metrics{display:flex;flex-direction:column;gap:14px}
+.seg-card.wide{grid-column:1/-1}
+.seg-card.wide .seg-metric{border-top:0;padding-top:0}
+.seg-card.wide{border-top-width:1px}
+.seg-card.wide .seg-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+@media (max-width:640px){.seg-card.wide .seg-metrics{gap:10px}.seg-card.wide .seg-val{gap:4px}.seg-card.wide .seg-val b{font-size:18px;letter-spacing:-.03em}.seg-card.wide .seg-val .chip{font-size:10.5px;padding:2px 6px;white-space:normal}.seg-card.wide .lbl{font-size:12px}}
+.seg-val{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg-val b{font-family:var(--f-mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
+.seg-val .chip{font-size:13px}
+.segtable th,.segtable td{padding:7px 6px;font-size:13.5px}
+.segtable th{font-size:11.5px}
+.segtable .chip{font-size:12px;padding:2px 8px}
+
+/* Infographic download */
+.info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.ov[hidden]{display:none}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ov-box{background:var(--surface);border-radius:14px;padding:16px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
+.ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+
+/* Slides (authored at 1280x720, scaled to fit) */
+.stage{position:relative;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.slide{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;padding:56px 80px 40px;display:flex;flex-direction:column;gap:22px;color:var(--ink)}
+.sl-kick{font-family:var(--f-body);font-size:20px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.sl-h{font-family:var(--f-display);font-size:54px;font-weight:700;line-height:1.05}
+.sl-big{font-family:var(--f-mono);font-size:84px;font-weight:600;letter-spacing:-.02em;line-height:1}
+.sl-sub{font-size:24px;color:var(--muted)}
+.sl-center{margin:auto 0;display:flex;flex-direction:column;gap:14px}
+.sl-tick{font-family:var(--f-display);font-size:120px;font-weight:700;color:var(--accent);line-height:1}
+.sl-rows{display:flex;flex-direction:column;gap:12px}
+.sl-row{display:grid;grid-template-columns:320px 1fr 190px;align-items:center;gap:20px;font-size:21px}
+.sl-row b{font-family:var(--f-mono);font-weight:600;text-align:right}
+.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.sl-track i{display:block;height:100%;background:var(--flow-src);border-radius:6px}
+.sl-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.sl-kpi{border:1px solid var(--line);border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:6px}
+.sl-kpi .v{font-family:var(--f-mono);font-size:44px;font-weight:600}
+.sl-kpi .l{font-size:20px;font-weight:600;color:var(--muted)}
+.sl-kpi .s{font-size:19px;color:var(--muted)}
+.sl-stack{display:flex;height:84px;border-radius:8px;overflow:hidden}
+.sl-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 24px;font-size:19px}
+.sl-legend div{display:flex;gap:12px;align-items:flex-start}
+.sl-legend i{width:18px;height:18px;border-radius:4px;flex:none;margin-top:4px}
+.sl-legend b{display:block;font-family:var(--f-mono);font-weight:600;color:var(--ink)}
+.sl-legend span{color:var(--muted)}
+.slide table td,.slide table th{font-size:24px;padding:12px 14px}
+.slide table th{font-size:16px}
+.sl-list{margin:0;padding-left:30px;display:flex;flex-direction:column;gap:18px;font-size:27px;line-height:1.4;max-width:1060px}
+.sl-lines{display:flex;flex-direction:column;gap:14px;font-size:28px}
+.sl-lines p{border-left:6px solid var(--bar);padding-left:16px}
+.sl-foot{margin-top:auto;display:flex;justify-content:space-between;font-size:16px;color:var(--muted);font-family:var(--f-mono)}
+.notes #snote{font-size:15px;line-height:1.6;max-width:72ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <section class="shelf" aria-label="Find a company">
+    <div class="brand">
+      <h1>10-K <span>Analyzer</span> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
+      <p>Annual reports, read and drawn. Figures from each company's latest annual filing with the SEC.</p>
+    </div>
+    <form class="search" id="searchForm">
+      <label for="ticker">Search the library</label>
+      <input id="ticker" name="ticker" list="libList" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
+      <datalist id="libList"></datalist>
+      <button class="btn" type="submit">Open</button>
+    </form>
+    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select></div>
+    <div class="missing" id="missing" hidden role="status">
+      <p id="missingText"></p>
+      <div class="row" id="matchRow"></div>
+    </div>
+  </section>
+
+  <section class="filing" id="filing">
+    <div class="fhead">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <h2 id="fname"></h2>
+        <div class="meta" id="fmeta"></div>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Views">
+        <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
+        <button class="tab" role="tab" id="tab-slides" data-view="slides" aria-selected="false">Slides</button>
+        <button class="tab" role="tab" id="tab-video" data-view="video" aria-selected="false">Video</button>
+        <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
+      </div>
+    </div>
+    <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
+    <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
+    <div id="view-slides" role="tabpanel" aria-labelledby="tab-slides" hidden>
+      <div class="player">
+        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div></div>
+        <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
+        <div class="controls">
+          <button class="btn ghost" type="button" id="prevSlide" aria-label="Previous slide">Previous</button>
+          <button class="btn" type="button" id="voSlide">Play voice-over</button>
+          <button class="btn ghost" type="button" id="nextSlide" aria-label="Next slide">Next</button>
+          <span class="status num" id="scount"></span>
+        </div>
+        <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
+        <p class="status" id="sstatus">Voice-over reads each slide aloud and moves on by itself. It uses your device's voice.</p>
+      </div>
+    </div>
+    <div id="view-video" role="tabpanel" aria-labelledby="tab-video" hidden>
+      <div class="player">
+        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas></div>
+        <div class="progress" aria-hidden="true"><div id="prog"></div></div>
+        <div class="controls">
+          <button class="btn" type="button" id="playBtn">Play</button>
+          <button class="btn ghost" type="button" id="restartBtn">Restart</button>
+          <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Voice narration</label>
+          <button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button>
+        </div>
+        <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box">
+    <div class="barhead"><p id="ovTitle" style="font-weight:600">Press and hold the image to save it. On a computer, right-click it and choose Save Image.</p><button class="btn ghost" type="button" id="ovClose">Close</button></div>
+    <img id="ovImg" alt="Infographic image">
+  </div>
+</div>
+
+<script>
+/* ---------------- Library data (each entry from that company's Form 10-K) ---------------- */
+const LIBRARY = {};   // filled from data/index.json; full entries load from data/companies/TICKER.json when opened
+const FULL = new Set();
+async function loadIndex(){
+  const res = await fetch("data/index.json", {cache: "no-cache"}); if (!res.ok) throw new Error("index");
+  (await res.json()).forEach(c => { LIBRARY[c.ticker] = c; });
+}
+const pending = {};
+function loadCompany(t){
+  if (FULL.has(t)) return Promise.resolve(LIBRARY[t]);
+  if (!pending[t]) pending[t] = fetch(`data/companies/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("company"); return r.json(); })
+    .then(c => { LIBRARY[t] = c; FULL.add(t); return c; }).finally(() => { delete pending[t]; });
+  return pending[t];
+}
+
+/* ---------------- Helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+function money(c, v, kind){
+  const cur = c.cur || "$";
+  if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toFixed(2);
+  const a = Math.abs(v);
+  const d = c.dec || 0;
+  const s = c.unit === "B" ? cur + a.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1}) + "B" : cur + a.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}) + "M";
+  return v < 0 ? "(" + s + ")" : s;
+}
+function spoken(c, v){
+  if (c.cur === "NT$") return spokenUSD(c, v).replace(/dollars$/, "New Taiwan dollars");
+  if (c.cur === "€") return spokenUSD(c, v).replace(/dollars$/, "euros");
+  if (c.cur === "C$") return spokenUSD(c, v).replace(/dollars$/, "Canadian dollars");
+  if (c.cur === "R$") return spokenUSD(c, v).replace(/dollars$/, "Brazilian reais");
+  if (c.cur === "R") return spokenUSD(c, v).replace(/dollars$/, "rand");
+  if (c.cur === "₩") return spokenUSD(c, v).replace(/dollars$/, "won");
+  return spokenUSD(c, v);
+}
+function spokenUSD(c, v){
+  const a = Math.abs(v);
+  if (c.unit === "B") return a.toFixed(1).replace(/\.0$/,"") + " billion dollars";
+  if (a >= 1000) return (a/1000).toFixed(2).replace(/0$/,"") + " billion dollars";
+  return (c.dec ? a.toFixed(c.dec).replace(/\.0$/, "") : Math.round(a)) + " million dollars";
+}
+const yr = s => s.replace("FY20", "FY");
+const pctOf = (c, v) => (c.revenue > 0 && Math.abs(v / c.revenue) <= 10) ? (v / c.revenue * 100).toFixed(1) + "%" : "n/m";
+const yoy = (cur, prior) => (prior > 0 && cur > 0) ? ((cur / prior - 1) * 100) : null;
+const yoyStr = (cur, prior) => { const y = yoy(cur, prior); if (y !== null && y >= 100) return (cur / prior).toFixed(1) + "×"; return y === null ? "n/m" : (y >= 0 ? "+" : "−") + Math.abs(y).toFixed(1) + "%"; };
+
+/* ---------------- Report ---------------- */
+function renderReport(c){
+  const r = c.report;
+  const rows = r.table.map(([label, cur, prior, key, kind]) => {
+    const y = yoy(cur, prior);
+    const cls = y === null ? "" : (y >= 0 ? "up" : "down");
+    return `<tr class="${key ? "key" : ""}"><td>${esc(label)}</td><td>${money(c, cur, kind)}</td><td>${money(c, prior, kind)}</td><td class="${cls}">${yoyStr(cur, prior)}</td></tr>`;
+  }).join("");
+  $("#view-report").innerHTML = `
+  <div class="report">
+    <div class="prose">
+      ${r.summary.map(p => `<p>${esc(p)}</p>`).join("")}
+      <h3>What stood out</h3>
+      <ul>${r.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+      <h3>What to watch</h3>
+      <ul>${r.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+    </div>
+    <div class="side">
+      <div class="card">
+        <p class="lbl">Key figures · ${c.unit === "B" ? "USD billions" : "USD millions"}</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Line item</th><th>${c.fy}</th><th>${c.fyPrior}</th><th>YoY</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>
+      ${c.segments ? `<p class="lbl">Segment results</p>${segCards(c)}${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}` : ""}
+      <div class="card">
+        <p class="lbl">Sources</p>
+        ${r.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}
+        <p class="sub">${c.footnotes.map(esc).join(" ")}</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- Sankey ---------------- */
+function ribbon(x0,a0,b0,x1,a1,b1,cls){
+  const xm = (x0 + x1) / 2;
+  if (b0 - a0 < 1.2) { const m0 = (a0 + b0) / 2, m1 = (a1 + b1) / 2; return `<path class="ln" d="M${x0} ${m0}C${xm} ${m0} ${xm} ${m1} ${x1} ${m1}"/>`; }
+  return `<path class="${cls}" d="M${x0} ${a0}C${xm} ${a0} ${xm} ${a1} ${x1} ${a1}L${x1} ${b1}C${xm} ${b1} ${xm} ${b0} ${x0} ${b0}Z"/>`;
+}
+function txt(x,y,s,size,cls,weight,anchor){ if (anchor === "middle" && /^t-w/.test(cls)) { const n = String(s).replace(/<[^>]+>/g, "").length; if (n * size * 0.6 > 88) size = Math.max(9.5, +(88 / (n * 0.6)).toFixed(1)); } return `<text x="${x}" y="${y}" font-size="${size}" class="${cls}" font-weight="${weight||500}"${anchor ? ` text-anchor="${anchor}"` : ""}>${s}</text>`; }
+function sankey(c){
+  if (c.opIncome < 0) return sankeyLoss(c);
+  const s = 358 / c.revenue, H = v => Math.max(v * s, 0);
+  const SX1 = 180, RX = 260, NW = 92, GX = 440, OX = 620, PX = 780, FX = 940, LX = 958;
+  const f = v => money(c, v), out = [];
+  const gp = c.revenue - c.cogs, gpH = H(gp), cogsH = H(c.cogs), revH = H(c.revenue);
+  const credT = (c.opexCredits || []).reduce((a, x) => a + x[1], 0), showCred = credT > 0.02 * c.revenue && gp >= c.opIncome, credH = showCred ? H(credT) : 0;
+  const gpY = 30, credY = gpY + gpH + 16, cogsY = gpY + gpH + 70 + (showCred ? Math.max(credH, 44) + 30 : 0), revY = cogsY + cogsH - revH;
+  // sources
+  const gap = 6, boxes = c.sources.map(([n, v]) => ({n, v, h: H(v), bh: Math.max(46, H(v))}));
+  const total = boxes.reduce((a, b) => a + b.bh, 0) + gap * (boxes.length - 1);
+  let y = Math.max(6, revY + revH / 2 - total / 2), acc = revY;
+  boxes.forEach(b => {
+    const cy = y + b.bh / 2;
+    out.push(ribbon(SX1, cy - b.h / 2, cy + b.h / 2, RX, acc, acc + b.h, "fs"));
+    out.push(`<rect x="0" y="${y}" width="180" height="${b.bh}" rx="9" class="sbox"/>`);
+    out.push(txt(12, cy - 4, esc(b.n), 12.5, "t-m", 600));
+    out.push(`<text x="12" y="${cy + 15}" font-size="15" class="t-i" font-weight="700">${f(b.v)} <tspan font-size="12" font-weight="500" class="t-m">· ${pctOf(c, b.v)}</tspan></text>`);
+    acc += b.h; y += b.bh + gap;
+  });
+  const srcBottom = y;
+  // revenue → GP / COGS
+  out.push(ribbon(RX + NW, revY, revY + gpH, GX, gpY, gpY + gpH, "fp"));
+  if (c.cogs > 0) out.push(ribbon(RX + NW, revY + gpH, revY + revH, GX, cogsY, cogsY + cogsH, "fn"));
+  // GP → OI / opex
+  const oiH = H(c.opIncome), oiY = 50, opexT = c.opex.reduce((a, o) => a + o[1], 0), opexH = H(opexT), opexY = Math.max(oiY + oiH + 110, c.nonOp > 0 ? oiY + Math.max(oiH + 14, 34) + H(c.nonOp) + 44 : 0);
+  out.push(ribbon(GX + NW, gpY, gpY + oiH, OX, oiY, oiY + oiH, "fp"));
+  if (gp - c.opIncome > 0.0005 * c.revenue) out.push(ribbon(GX + NW, gpY + oiH, gpY + gpH, OX, opexY, opexY + gpH - oiH, "fn"));
+  if (showCred) {
+    out.push(ribbon(GX + NW, credY, credY + credH, OX, opexY + Math.max(gpH - oiH, 0), opexY + Math.max(gpH - oiH, 0) + credH, "fp"));
+    out.push(`<rect x="${GX}" y="${credY}" width="${NW}" height="${Math.max(credH, 16)}" rx="5" class="npos"/>`);
+    const cl = (c.opexCredits.length === 1 ? c.opexCredits[0][0] : "Gains & credits");
+    out.push(txt(GX + NW/2, credY + Math.max(credH, 16) / 2 + 5, "+" + f(credT), 13, "t-w", 700, "middle"));
+    out.push(txt(GX + NW/2, credY + Math.max(credH, 16) + 15, esc(cl), 11, "t-m", 600, "middle"));
+  }
+  // pretax
+  const pretax = c.opIncome + c.nonOp, ptH = H(pretax), ptY = 30;
+  const lossBelow = pretax <= 0; // operating profit fully absorbed by non-operating costs
+  const toPt = c.nonOp < 0 ? ptH : oiH; // net interest expense leaves the operating income node on its own band
+  if (!lossBelow) out.push(ribbon(OX + NW, oiY, oiY + toPt, PX, ptY, ptY + toPt, "fp"));
+  const noY = oiY + Math.max(oiH + 14, 34);
+  if (c.nonOp > 0) out.push(ribbon(OX + NW, noY, noY + H(c.nonOp), PX, ptY + oiH, ptY + ptH, "fp"));
+  // finals
+  const finals = lossBelow ? [] : [{n: c.netLabel, v: c.netFlow, show: c.netIncome, from: [PX + NW, ptY], net: true}];
+  let pacc = ptY + H(c.netFlow);
+  if (!lossBelow) {
+    if (c.tax > 0) { finals.push({n: "Income tax", v: c.tax, from: [PX + NW, pacc]}); pacc += H(c.tax); }
+    c.belowTax.forEach(([n, v, lab]) => { finals.push({n, v, lab, from: [PX + NW, pacc]}); pacc += H(v); });
+  }
+  if (lossBelow) finals.push({n: c.nonOpLabel, v: c.opIncome, pv: -c.nonOp, lab: "(" + f(-c.nonOp) + ")", from: [OX + NW, oiY], summary: true});
+  else if (c.nonOp < 0) finals.push({n: c.nonOpLabel, v: -c.nonOp, from: [OX + NW, oiY + ptH]});
+  let oacc = opexY;
+  c.opex.forEach(([n, v]) => { finals.push({n, v, from: [OX + NW, oacc], opex: true}); oacc += H(v); });
+  let cur = 20;
+  finals.forEach((it, i) => {
+    if (it.opex && i > 0 && finals[i - 1] && !finals[i - 1].opex) cur = Math.max(cur, opexY - 50);
+    const h = Math.max(H(it.v), 1.5), y0 = cur, cy = y0 + h / 2;
+    out.push(ribbon(it.from[0], it.from[1], it.from[1] + H(it.v), FX, y0, y0 + H(it.v), it.net ? "fp" : "fn"));
+    out.push(`<rect x="${FX}" y="${y0}" width="8" height="${h}" class="${it.net ? "npos" : "nneg"}"/>`);
+    if (it.net) {
+      out.push(txt(LX, cy - 4, esc(it.n), 13, "t-m", 600));
+      out.push(`<text x="${LX}" y="${cy + 18}" font-size="21" class="t-p" font-weight="700">${f(it.show)} <tspan font-size="13" font-weight="600" class="t-m">· ${pctOf(c, it.show)}</tspan></text>`);
+    } else {
+      out.push(txt(LX, cy - 3, esc(it.n), 12, "t-m", 600));
+      out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="700">${it.lab || "(" + f(it.v) + ")"} <tspan font-size="12" font-weight="500" class="t-m">· ${pctOf(c, it.pv ?? it.v)}</tspan></text>`);
+    }
+    cur = y0 + Math.max(h, 26) + (it.net ? 26 : 16);
+    if (it.summary) {
+      const rows = [["Pre-tax loss", "(" + f(-pretax) + ")"]];
+      if (c.tax) rows.push([c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax)]);
+      c.belowTax.forEach(([n, v]) => rows.push([n, "(" + f(v) + ")"]));
+      rows.forEach(([n, v]) => { out.push(`<text x="${LX}" y="${cur + 12}" font-size="12" class="t-m" font-weight="600">${esc(n)} <tspan class="t-n" font-weight="700">${v}</tspan></text>`); cur += 20; });
+      out.push(txt(LX, cur + 14, esc(c.netLabel), 13, "t-m", 600));
+      out.push(txt(LX, cur + 36, f(c.netIncome), 21, c.netIncome < 0 ? "t-n" : "t-p", 700));
+      cur += 60;
+    }
+  });
+  // nodes
+  out.push(`<rect x="${RX}" y="${revY}" width="${NW}" height="${revH}" rx="8" class="nrev"/>`);
+  const rc = revY + revH / 2;
+  out.push(txt(RX + NW/2, rc - 22, "Revenue", 13, "t-ws", 600, "middle"));
+  out.push(txt(RX + NW/2, rc + 2, f(c.revenue), 16, "t-w", 700, "middle"));
+  out.push(txt(RX + NW/2, rc + 22, yoyStr(c.revenue, c.revenuePrior) + " YoY", 12.5, "t-ws", 600, "middle"));
+  const node = (x, y0, h, cls, l1, l2, l3) => {
+    out.push(`<rect x="${x}" y="${y0}" width="${NW}" height="${h}" rx="8" class="${cls}"/>`);
+    const cy = y0 + h / 2;
+    if (h > 70) { out.push(txt(x + NW/2, cy - 20, l1, 11.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 3, l2, 15, "t-w", 700, "middle")); out.push(txt(x + NW/2, cy + 21, l3, 12.5, "t-ws", 500, "middle")); }
+    else out.push(txt(x + NW/2, cy + 5, l2, 13, "t-w", 700, "middle"));
+  };
+  node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
+  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  if (opexT > 0) node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
+  out.push(txt(OX + NW/2, 18, c.totalLabels ? c.totalLabels[0] : "Operating income", 12, "t-m", 600, "middle"));
+  out.push(txt(OX + NW/2, 36, pctOf(c, c.opIncome) + " margin", 12, "t-p", 700, "middle"));
+  out.push(`<rect x="${OX}" y="${oiY}" width="${NW}" height="${Math.max(oiH, 16)}" rx="5" class="npos"/>`);
+  out.push(txt(OX + NW/2, oiY + Math.max(oiH, 16) / 2 + 5, f(c.opIncome), 13.5, "t-w", 700, "middle"));
+  if (c.nonOp > 0) {
+    out.push(`<rect x="${OX + NW - 8}" y="${noY}" width="8" height="${Math.max(H(c.nonOp), 1.5)}" class="npos"/>`);
+    out.push(txt(OX + NW - 14, noY + 2, esc(c.nonOpLabel), 11.5, "t-m", 600, "end"));
+    out.push(txt(OX + NW - 14, noY + 18, "+" + f(c.nonOp), 13, "t-p", 700, "end"));
+  }
+  if (lossBelow) {} else { out.push(`<rect x="${PX}" y="${ptY}" width="${NW}" height="${Math.max(ptH, 18)}" rx="5" class="npos"/>`); }
+  if (lossBelow) {} else if (ptH >= 40) { out.push(txt(PX + NW/2, ptY + ptH/2 - 4, "Pre-tax income", 11, "t-ws", 600, "middle")); out.push(txt(PX + NW/2, ptY + ptH/2 + 14, f(pretax), 14, "t-w", 700, "middle")); }
+  else out.push(txt(PX + NW/2, ptY + Math.max(ptH, 18)/2 + 4, "Pre-tax " + f(pretax), 11.5, "t-w", 700, "middle"));
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} ${c.cogsLabel.replace("*","").toLowerCase()}, ${f(opexT)} operating expenses, ${f(c.opIncome)} operating income, ${f(c.netIncome)} net income.`)}">${out.join("")}</svg>`;
+}
+
+/* Flow chart for a company with an operating loss: gross profit, any expense credits and the loss together fund operating expenses */
+function sankeyLoss(c){
+  const s = 358 / Math.max(c.revenue, 0.75 * c.opex.reduce((a, o) => a + o[1], 0)), H = v => Math.max(v * s, 0);
+  const SX1 = 180, RX = 260, NW = 92, GX = 440, OX = 620, FX = 940, LX = 958;
+  const f = v => money(c, v), out = [], credits = c.opexCredits || [];
+  const gp = c.revenue - c.cogs, gpH = H(gp), cogsH = H(c.cogs), revH = H(c.revenue);
+  const opexT = c.opex.reduce((a, o) => a + o[1], 0), opexH = H(opexT), loss = -c.opIncome;
+  const gpY = 30; let yy = gpY + gpH + 16;
+  const extras = credits.map(([n, v]) => ({n, v, credit: true})).concat([{n: "Operating loss", v: loss}]);
+  extras.forEach(e => { e.y = yy; e.h = H(e.v); e.box = Math.max(44, e.h); yy += e.box + 12; });
+  const cogsY = yy + 18, revY = cogsY + cogsH - revH;
+  // sources
+  const gap = 6, boxes = c.sources.map(([n, v]) => ({n, v, h: H(v), bh: Math.max(46, H(v))}));
+  const total = boxes.reduce((a, b) => a + b.bh, 0) + gap * (boxes.length - 1);
+  let y = Math.max(6, revY + revH / 2 - total / 2), acc = revY;
+  boxes.forEach(b => {
+    const cy = y + b.bh / 2;
+    out.push(ribbon(SX1, cy - b.h / 2, cy + b.h / 2, RX, acc, acc + b.h, "fs"));
+    out.push(`<rect x="0" y="${y}" width="180" height="${b.bh}" rx="9" class="sbox"/>`);
+    out.push(txt(12, cy - 4, esc(b.n), 12.5, "t-m", 600));
+    out.push(`<text x="12" y="${cy + 15}" font-size="15" class="t-i" font-weight="700">${f(b.v)} <tspan font-size="12" font-weight="500" class="t-m">· ${pctOf(c, b.v)}</tspan></text>`);
+    acc += b.h; y += b.bh + gap;
+  });
+  const srcBottom = y;
+  out.push(ribbon(RX + NW, revY, revY + gpH, GX, gpY, gpY + gpH, "fp"));
+  if (c.cogs > 0) out.push(ribbon(RX + NW, revY + gpH, revY + revH, GX, cogsY, cogsY + cogsH, "fn"));
+  // inflows to operating expenses: gross profit, credits, then the operating loss
+  const opexY = 30; let oacc = opexY;
+  out.push(ribbon(GX + NW, gpY, gpY + gpH, OX, oacc, oacc + gpH, "fp")); oacc += gpH;
+  extras.forEach(e => { out.push(ribbon(GX + NW, e.y, e.y + e.h, OX, oacc, oacc + e.h, e.credit ? "fp" : "fn")); oacc += e.h; });
+  // operating expense lines
+  let cur = 160 + 24 * (c.belowTax || []).length, facc = opexY;
+  c.opex.forEach(([n, v]) => {
+    const h = Math.max(H(v), 1.5), cy = cur + h / 2;
+    out.push(ribbon(OX + NW, facc, facc + H(v), FX, cur, cur + H(v), "fn"));
+    out.push(`<rect x="${FX}" y="${cur}" width="8" height="${h}" class="nneg"/>`);
+    out.push(txt(LX, cy - 3, esc(n), 12, "t-m", 600));
+    out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="700">(${f(v)}) <tspan font-size="12" font-weight="500" class="t-m">· ${pctOf(c, v)}</tspan></text>`);
+    facc += H(v); cur += Math.max(h, 26) + 16;
+  });
+  // nodes
+  out.push(`<rect x="${RX}" y="${revY}" width="${NW}" height="${revH}" rx="8" class="nrev"/>`);
+  const rc = revY + revH / 2;
+  out.push(txt(RX + NW/2, rc - 22, "Revenue", 13, "t-ws", 600, "middle"));
+  out.push(txt(RX + NW/2, rc + 2, f(c.revenue), 15, "t-w", 700, "middle"));
+  out.push(txt(RX + NW/2, rc + 22, yoyStr(c.revenue, c.revenuePrior) + " YoY", 12.5, "t-ws", 600, "middle"));
+  const node = (x, y0, h, cls, l1, l2, l3) => {
+    out.push(`<rect x="${x}" y="${y0}" width="${NW}" height="${h}" rx="8" class="${cls}"/>`);
+    const cy = y0 + h / 2;
+    if (l3) { out.push(txt(x + NW/2, cy - 20, l1, 11.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 3, l2, 14, "t-w", 700, "middle")); out.push(txt(x + NW/2, cy + 21, l3, 12, "t-ws", 500, "middle")); }
+    else { out.push(txt(x + NW/2, cy - 4, l1, 10.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 13, l2, 13, "t-w", 700, "middle")); }
+  };
+  if (gpH >= 20) node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
+  extras.forEach(e => node(GX, e.y, e.box, e.credit ? "npos" : "nneg", esc(e.n), e.credit ? "+" + f(e.v) : "(" + f(e.v) + ")"));
+  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
+  // below the operating line
+  const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : 12, "t-m", 600)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
+  row(30, "Operating loss", "(" + f(loss) + ")", "t-n");
+  row(54, esc(c.nonOpLabel), (c.nonOp >= 0 ? "+" : "") + f(c.nonOp), c.nonOp >= 0 ? "t-p" : "t-n");
+  let ry = 78;
+  if (c.tax) { row(ry, c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax), c.tax > 0 ? "t-n" : "t-p"); ry += 24; }
+  (c.belowTax || []).forEach(([n, v]) => { row(ry, esc(n), "(" + f(v) + ")", "t-n"); ry += 24; });
+  out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
+  row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
+  out.push(txt(LX, ry + 30, pctOf(c, c.netIncome) + " of revenue", 11.5, "t-m", 500));
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} cost of revenue, ${f(opexT)} operating expenses before credits, operating loss ${f(loss)}, net loss ${f(-c.netIncome)}.`)}">${out.join("")}</svg>`;
+}
+
+/* ---------------- Infographic ---------------- */
+function chipFor(it){
+  if (it.chip) return {t: it.chip, cls: it.tone || "up"};
+  const y = yoy(it.cur, it.prior);
+  if (y === null) return {t: "n/m", cls: "flat"};
+  return {t: (y >= 0 ? "+" : "−") + Math.abs(y).toFixed(1) + "%", cls: it.tone || (y >= 0 ? "up" : "down")};
+}
+function barCard(c, it){
+  const m = Math.max(Math.abs(it.cur), Math.abs(it.prior)) || 1;
+  const w = v => (Math.abs(v) / m * 100).toFixed(1);
+  const ch = chipFor(it);
+  return `<div class="card">
+    <div class="barhead"><p>${esc(it.label)}</p><span class="chip ${ch.cls}">${esc(ch.t)}</span></div>
+    <div class="bars">
+      <span>${yr(c.fy)}</span><div class="track"><div class="fill${it.cur < 0 ? " neg" : ""}" style="width:${w(it.cur)}%"></div></div><strong class="${it.cur < 0 ? "down" : ""}">${money(c, it.cur, it.money)}</strong>
+      <span>${yr(c.fyPrior)}</span><div class="track"><div class="fill prior${it.prior < 0 ? " neg" : ""}" style="width:${w(it.prior)}%"></div></div><strong class="${it.prior < 0 ? "down" : ""}">${money(c, it.prior, it.money)}</strong>
+    </div>
+    ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
+  </div>`;
+}
+/* Adds the comparison year to "vs ..." text that lacks one, and to margin-change notes */
+function withYear(c, sub, bs){
+  if (!sub) return sub || "";
+  const m = sub.match(/^vs ([^·]+?)(\s·.*)?$/);
+  if (!m || /\b(19|20)\d\d\b/.test(m[1])) return sub;
+  return `vs ${m[1]} ${bs ? `at ${c.fyPrior} year-end` : `in ${c.fyPrior}`}${m[2] || ""}`;
+}
+const footYear = (c, foot) => (!foot || /\bvs\b/.test(foot)) ? foot : foot.replace(/ pp\b/, " pp YoY");
+/* Tiles with a change badge drop the prior-year value; the badge says YoY */
+const stripPrior = sub => { if (!sub) return ""; const m = sub.match(/^vs [^·]+?(?:\s·\s(.*))?$/); return m ? (m[1] || "") : sub; };
+const yoyDelta = d => { if (!d || /YoY/.test(d)) return d; if (d === "flat") return "flat YoY"; if (/ dilution$/.test(d)) return d.replace(" dilution", " YoY (dilution)"); return /^[+−-]?[\d.,]+(%| pp|×)$/.test(d) ? d + " YoY" : d; };
+function tileCard(t, top, c, bs){
+  return `<div class="card${top ? " tile-top" : ""}">
+    <p class="lbl">${esc(t.label)}</p>
+    <p class="big">${esc(t.value)}</p>
+    <p class="sub">${[esc(t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs)), t.delta ? `<span class="${t.tone}">${esc(yoyDelta(t.delta))}</span>` : ""].filter(Boolean).join(" · ")}</p>
+    ${t.foot ? `<p class="sub">${esc(t.foot)}</p>` : ""}
+  </div>`;
+}
+function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
+function renderSection(c, sec){
+  if (sec.type === "tiles") return `<div class="sec">${head(sec)}<div class="grid">${sec.tiles.map(t => tileCard(t, sec.top, c, sec.title === "Balance sheet")).join("")}</div></div>`;
+  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : ""}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
+  if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
+  if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
+  if (sec.type === "quarters") {
+    const m = Math.max(...sec.items.map(q => q.v));
+    return `<div class="sec">${head(sec)}<div class="card">
+      <div class="legend">${sec.legend.map(([sw, l]) => `<span style="--sw:${sw}">${esc(l)}</span>`).join("")}</div>
+      <div class="qgrid">${sec.items.map(q => {
+        const h = Math.round(q.v / m * 150), ih = q.inset ? Math.max(3, Math.round(q.inset / m * 150)) : 0;
+        const prev = sec.items[sec.items.indexOf(q) - 4];
+        return `<div class="q"><div class="q-top"><strong>${money(c, q.v)}</strong>${prev ? `<span class="sub up">${yoyStr(q.v, prev.v)} YoY</span>` : ""}
+          <div class="col${q.prior ? " prior" : ""}" style="height:${h}px">${ih ? `<i style="height:${ih}px"></i>` : ""}</div></div>
+          <b>${esc(q.q)}</b><span class="sub q-note">${[q.s, q.s2].filter(Boolean).map(esc).join("<br>")}</span></div>`;
+      }).join("")}</div>
+      ${sec.callout ? `<p class="callout">${sec.callout}</p>` : ""}
+    </div></div>`;
+  }
+  return "";
+}
+const fromLoss = (c, prior, cur) => {
+  if (cur !== undefined && cur < 0 && prior >= 0) return "swung to a loss";
+  if (cur !== undefined && cur < 0) return `loss ${cur > prior ? "narrowed" : "widened"} from ${money(c, Math.abs(prior))}`;
+  return `up from a ${money(c, Math.abs(prior))} loss`;
+};
+function segChange(cur, prior, c){
+  const y = yoy(cur, prior);
+  if (y === null) return (prior < 0 || cur < 0) ? `<span class="chip ${cur > prior ? "up" : "down"}">${fromLoss(c, prior, cur)}</span>` : `<span class="chip flat">n/m</span>`;
+  return `<span class="chip ${y >= 0 ? "up" : "down"}">${yoyStr(cur, prior)}</span>`;
+}
+const segPct = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "%";
+function segMargins(s){ const mc = s.oi / s.rev * 100, mp = s.oiPrior / s.revPrior * 100; return {mc, mp, d: mc - mp}; }
+const ppStr = d => Math.abs(d) < 0.05 ? "0.0 pp" : (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + " pp";
+/* Total company first, then the segments (a single-segment company is its own total) */
+function segItems(c){
+  const items = c.segments.items;
+  return items.length > 1
+    ? [{name: "Total company", rev: c.revenue, revPrior: c.revenuePrior, oi: c.opIncome, oiPrior: c.opIncomePrior, total: true}].concat(items)
+    : items.map(s => Object.assign({}, s, {total: true}));
+}
+/* Segment profit labels: some companies report segment gross profit or EBT instead of operating income */
+function segL(c, s){
+  if (s.total) return c.totalLabels || null;
+  if (!c.segments) return null;
+  if (c.segments.labels) return c.segments.labels;
+  if (c.segments.metric === "gross") return ["Segment gross profit", "Gross margin"];
+  return null;
+}
+function segBig(c, which){
+  const chip = (cur, prior) => { const y = yoy(cur, prior);
+    if (y === null) return (prior < 0 || cur < 0) ? `<span class="chip ${cur > prior ? "up" : "down"}">${fromLoss(c, prior, cur)}</span>` : `<span class="chip flat">n/m</span>`;
+    return `<span class="chip ${y >= 0 ? "up" : "down"}">${yoyStr(cur, prior)} YoY</span>`; };
+  const list = which === "total"
+    ? [{rev: c.revenue, revPrior: c.revenuePrior, oi: c.opIncome, oiPrior: c.opIncomePrior, total: true}]
+    : c.segments.items;
+  return list.map(s => { const {mc, mp, d} = segMargins(s);
+    return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
+      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${chip(s.rev, s.revPrior)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${chip(s.oi, s.oiPrior)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b><span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>`}</div></div></div>
+    </div>`; }).join("");
+}
+function segCards(c){
+  return segItems(c).map(s => { const {mc, mp, d} = segMargins(s);
+    return `<div class="card"><p class="seg-name">${esc(s.name)}</p><div class="tablewrap"><table class="segtable"><thead><tr><th></th><th>${yr(c.fy)}</th><th>${yr(c.fyPrior)}</th><th>Change</th></tr></thead><tbody>
+      <tr><td>Revenue</td><td>${money(c, s.rev)}</td><td>${money(c, s.revPrior)}</td><td>${segChange(s.rev, s.revPrior, c)}</td></tr>
+      <tr><td>${segL(c, s) ? segL(c, s)[0] : "Operating income"}</td><td>${money(c, s.oi)}</td><td class="${s.oiPrior < 0 ? "down" : ""}">${money(c, s.oiPrior)}</td><td>${segChange(s.oi, s.oiPrior, c)}</td></tr>
+      <tr class="key"><td>${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</td><td>${segPct(mc)}</td><td>${segPct(mp)}</td><td><span class="chip ${d >= 0 ? "up" : "down"}">${ppStr(d)}</span></td></tr>
+    </tbody></table></div></div>`; }).join("");
+}
+function renderInfographic(c){
+  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
+  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
+    ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
+    <div class="card" style="padding:18px 20px">
+      <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
+      <div class="sankey">${sankey(c)}</div>
+    </div>
+    ${c.sections.map(sec => renderSection(c, sec)).join("")}
+    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(c.period)}; filed ${esc(c.filed)}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
+  </div>`;
+  $("#dlInfo").addEventListener("click", downloadInfographic);
+}
+
+/* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
+function loadImgLib(){
+  // html-to-image 1.11.13 (MIT), bundled with the site under vendor/
+  if (window.htmlToImage) return Promise.resolve();
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = "vendor/html-to-image.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+async function makeInfographicBlob(c){
+  // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
+  await loadImgLib();
+  const root = document.documentElement, prevTheme = root.getAttribute("data-theme");
+  root.setAttribute("data-theme", "light");
+  const host = document.createElement("div");
+  host.style.cssText = "position:fixed;left:-20000px;top:0;width:1224px;pointer-events:none";
+  document.body.appendChild(host);
+  try {
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const n = $("#infoBody").cloneNode(true); n.removeAttribute("id");
+    n.style.width = "1160px"; n.style.padding = "32px"; n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
+    n.querySelectorAll(".seg-card.wide .seg-metrics").forEach(x => { x.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))"; x.style.gap = "28px"; });
+    n.querySelectorAll(".seg-card.wide .seg-val").forEach(x => { x.style.gap = "10px"; });
+    n.querySelectorAll(".seg-card.wide .seg-val b").forEach(x => { x.style.fontSize = "32px"; x.style.letterSpacing = "-.02em"; });
+    n.querySelectorAll(".seg-card.wide .seg-val .chip").forEach(x => { x.style.fontSize = "13px"; x.style.padding = "3px 10px"; x.style.whiteSpace = "nowrap"; });
+    n.querySelectorAll(".seg-card.wide .lbl").forEach(x => { x.style.fontSize = "14px"; });
+    n.querySelectorAll(".barhead .sub").forEach(x => { x.textContent = x.textContent.replace(" · scroll sideways on a phone", ""); });
+    const h = document.createElement("div");
+    h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
+    h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer by Alexander</p>`;
+    n.prepend(h);
+    host.appendChild(n);
+    n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
+      svg.style.minWidth = "0";
+      const vb = svg.viewBox.baseVal, w = box.clientWidth || 1160, hgt = Math.round(w * vb.height / vb.width);
+      const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      svg.replaceWith(cv); });
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const opts = {pixelRatio: 2, backgroundColor: "#F3F5F8", cacheBust: false};
+    await window.htmlToImage.toBlob(n, opts).catch(() => null);   // first pass warms fonts and images (Safari)
+    const blob = await window.htmlToImage.toBlob(n, opts);
+    if (!blob) throw new Error("blob");
+    return blob;
+  } finally {
+    host.remove();
+    if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
+  }
+}
+let lastImgUrl = null;
+async function downloadInfographic(){
+  const c = LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
+  const name = `${c.ticker}-${c.fy}-10K-infographic.png`;
+  btn.disabled = true; st.textContent = "Drawing the image…";
+  try {
+    const blob = await makeInfographicBlob(c);
+    if (downloads) {
+      try { await downloads.save({filename: name, data: blob}); st.textContent = "Saved " + name + "."; return; }
+      catch (e) { if (e && e.code === "declined") { st.textContent = "Download cancelled."; return; } }
+    }
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
+    lastImgUrl = URL.createObjectURL(blob);
+    st.textContent = ""; showImage(lastImgUrl);
+  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+  finally { btn.disabled = false; }
+}
+/* Paints the flow chart's paths, rects and text onto a canvas (no SVG-image decoding, which Safari can leave blank) */
+/* Fixed light-theme colors, so the image looks the same whatever theme the viewer's device uses */
+const PAINT = {
+  fs: {fill: "#E9A23B", a: .42}, fp: {fill: "#3DA56B", a: .38}, fn: {fill: "#DD6A55", a: .34}, ln: {stroke: "#DD6A55", lw: 1.2},
+  nrev: {fill: "#1D3557"}, npos: {fill: "#1E7B4A"}, nneg: {fill: "#B23A27"}, sbox: {fill: "#FFF3E0", stroke: "#EFC27E", lw: 1},
+  "t-m": {fill: "#55606E"}, "t-i": {fill: "#15202B"}, "t-w": {fill: "#FFFFFF"}, "t-ws": {fill: "#DCE6F2"}, "t-p": {fill: "#17703F"}, "t-n": {fill: "#A8321F"}
+};
+const paintOf = el => PAINT[(el.getAttribute("class") || "").split(" ")[0]] || {};
+function drawSvgToCanvas(svg, W, H){
+  const vb = svg.viewBox.baseVal, sx = W / vb.width, sy = H / vb.height;
+  const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = H;
+  const g = cvs.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H);
+  g.setTransform(sx, 0, 0, sy, -vb.x * sx, -vb.y * sy);
+  const paint = (el, shape) => {
+    const p = paintOf(el);
+    if (p.fill) { g.globalAlpha = p.a || 1; g.fillStyle = p.fill; shape ? g.fill(shape) : g.fill(); }
+    if (p.stroke) { g.globalAlpha = 1; g.strokeStyle = p.stroke; g.lineWidth = p.lw || 1; shape ? g.stroke(shape) : g.stroke(); }
+    g.globalAlpha = 1;
+  };
+  const FAM = '"IBM Plex Sans", Helvetica, Arial, sans-serif';
+  svg.querySelectorAll("path, rect, text").forEach(el => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "path") { paint(el, new Path2D(el.getAttribute("d"))); return; }
+    if (tag === "rect") {
+      const x = +el.getAttribute("x") || 0, y = +el.getAttribute("y") || 0, rw = +el.getAttribute("width") || 0, rh = +el.getAttribute("height") || 0, rx = Math.min(+el.getAttribute("rx") || 0, rw / 2, rh / 2);
+      g.beginPath(); if (rx && g.roundRect) g.roundRect(x, y, rw, rh, rx); else g.rect(x, y, rw, rh); paint(el); return;
+    }
+    const fs = el.getAttribute("font-size") || "12", fw = el.getAttribute("font-weight") || "500", ff = paintOf(el).fill || "#15202B";
+    const runs = Array.from(el.childNodes).map(nd => nd.nodeType === 3 ? {t: nd.textContent, s: fs, w: fw, f: ff}
+      : {t: nd.textContent, s: nd.getAttribute("font-size") || fs, w: nd.getAttribute("font-weight") || fw, f: paintOf(nd).fill || ff}).filter(r => r.t);
+    let total = 0; runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; r.width = g.measureText(r.t).width; total += r.width; });
+    const anchor = el.getAttribute("text-anchor") || "start", x0 = +el.getAttribute("x") || 0, y0 = +el.getAttribute("y") || 0;
+    let x = anchor === "middle" ? x0 - total / 2 : anchor === "end" ? x0 - total : x0;
+    g.textAlign = "left"; g.textBaseline = "alphabetic";
+    runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; g.fillStyle = r.f; g.fillText(r.t, x, y0); x += r.width; });
+  });
+  return cvs;
+}
+function showImage(url){
+  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovClose").focus();
+}
+$("#ovClose").addEventListener("click", () => { const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
+
+/* ---------------- Video ---------------- */
+const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
+const FD = '"IBM Plex Sans Condensed","Arial Narrow",sans-serif', FB = '"IBM Plex Sans",system-ui,sans-serif', FM = '"IBM Plex Mono",monospace';
+const ease = p => 1 - Math.pow(1 - Math.min(1, Math.max(0, p)), 3);
+function T(ctx, s, x, y, size, color, font, weight, align){ ctx.font = `${weight || 500} ${size}px ${font || FB}`; ctx.fillStyle = color; ctx.textAlign = align || "left"; ctx.fillText(s, x, y); }
+function rr(ctx, x, y, w, h, r, color){ ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, Math.max(w,0), h, Math.min(r, Math.max(w,0)/2)) : ctx.rect(x, y, Math.max(w,0), h); ctx.fill(); }
+function wrapLines(ctx, text, maxW){ const words = text.split(" "), lines = []; let line = ""; for (const w of words){ const t = line ? line + " " + w : w; if (ctx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; } if (line) lines.push(line); return lines; }
+function frame(ctx, c, kicker){
+  ctx.fillStyle = V.bg; ctx.fillRect(0, 0, 1280, 720);
+  T(ctx, c.ticker + " · " + c.fy + " 10-K", 64, 60, 20, V.muted, FM, 600);
+  if (kicker) T(ctx, kicker.toUpperCase(), 64, 112, 22, V.amber, FB, 700);
+}
+function buildScenes(c){
+  const f = v => money(c, v), sp = v => spoken(c, v), gp = c.revenue - c.cogs, opexT = c.opex.reduce((a, o) => a + o[1], 0);
+  const ry = yoyStr(c.revenue, c.revenuePrior);
+  const cash = (c.sections.find(s => s.title === "Cash flow & earnings") || {items: []}).items;
+  const ocf = cash[0], capex = cash[1], fcf = cash[2], eps = cash.find(i => i.money === "eps");
+  const scenes = [];
+  scenes.push({cap: `${c.short}'s ${c.fy.replace("FY", "fiscal ")} annual report, in about a minute.`, say: `${c.short}'s ${c.fy.replace("FY", "fiscal ")} annual report, in about a minute.`,
+    draw(ctx, p){ ctx.fillStyle = V.bg; ctx.fillRect(0,0,1280,720);
+      ctx.globalAlpha = ease(p); T(ctx, c.ticker, 640, 300, 150, V.amber, FD, 700, "center"); T(ctx, c.name, 640, 380, 44, V.white, FD, 600, "center");
+      T(ctx, (c.form || "Form 10-K") + " · " + c.period, 640, 432, 24, V.muted, FB, 500, "center"); ctx.globalAlpha = 1; }});
+  scenes.push({cap: `Revenue grew ${ry} to ${f(c.revenue)}. ${c.video.revenueLine.cap}`, say: `${c.short} grew revenue ${ry.replace("+","")} to ${sp(c.revenue)}. ${c.video.revenueLine.say}`,
+    draw(ctx, p){ frame(ctx, c, "Revenue"); const e = ease(p);
+      T(ctx, money(c, c.revenue * e), 64, 230, 96, V.white, FM, 600); T(ctx, ry + " vs " + c.fyPrior + " (" + f(c.revenuePrior) + ")", 64, 280, 26, V.green, FB, 700);
+      const m = Math.max(...c.sources.map(s => s[1])), n = c.sources.length, rowH = Math.min(52, 280 / n);
+      c.sources.forEach(([name, v], i) => { const y = 312 + i * rowH; const w = 640 * v / m * ease(p * 1.3 - i * 0.08);
+        T(ctx, name, 64, y + rowH * 0.55, Math.min(22, rowH * 0.45), V.muted, FB, 600); rr(ctx, 420, y + rowH * 0.18, w, rowH * 0.5, 6, V.amber);
+        if (e > 0.6) T(ctx, f(v), 430 + w, y + rowH * 0.55, Math.min(22, rowH * 0.45), V.white, FM, 600); }); }});
+  const cr = (c.opexCredits || [])[0], isLoss = c.opIncome < 0;
+  const tailCap = isLoss ? `${cr ? `, partly offset by a ${f(cr[1])} ${cr[0].toLowerCase()}` : ""}, for an operating loss of ${f(-c.opIncome)}.` : `, leaving operating income of ${f(c.opIncome)}, a ${pctOf(c, c.opIncome)} margin.`;
+  const tailSay = isLoss ? `${cr ? `, partly offset by a ${sp(cr[1])} ${cr[0].toLowerCase()}` : ""}, for an operating loss of ${sp(-c.opIncome)}.` : `, leaving operating income of ${sp(c.opIncome)}, a ${pctOf(c, c.opIncome)} margin.`;
+  scenes.push({cap: c.cogs > 0 ? `${c.cogsLabel.replace("*","")} took ${pctOf(c, c.cogs)} of revenue and operating expenses ${pctOf(c, opexT)}${tailCap}` : `With no cost of sales, operating expenses took ${pctOf(c, opexT)} of revenue${tailCap}`,
+    say: c.cogs > 0 ? `${c.cogsLabel.replace("*","")} took ${pctOf(c, c.cogs)} of revenue, and operating expenses another ${pctOf(c, opexT)}${tailSay}` : `With no cost of sales, operating expenses took ${pctOf(c, opexT)} of revenue${tailSay}`,
+    draw(ctx, p){ frame(ctx, c, "Where each dollar went"); const W = 1152, x0 = 64; let x = x0; const e = ease(p);
+      const parts = [[c.cogsLabel.replace("*",""), c.cogs, V.red]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? V.red2 : "#E39A87"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, V.green]] : []);
+      const denom = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
+      parts.forEach(([n, v, col]) => { const w = W * v / denom * e; rr(ctx, x, 200, w, 90, 4, col); x += w; });
+      parts.forEach(([n, v, col], i) => { const cx = x0 + (i % 3) * 384, cy = 360 + Math.floor(i / 3) * 70; rr(ctx, cx, cy - 18, 20, 20, 4, col);
+        T(ctx, n, cx + 32, cy - 2, 20, V.muted, FB, 600); T(ctx, f(v) + " · " + pctOf(c, v), cx + 32, cy + 26, 22, V.white, FM, 600); }); }});
+  const prof = [[c.gpLabel.replace("*",""), gp, c.gpPrior], ["Operating income", c.opIncome, c.opIncomePrior], [c.netLabel, c.netIncome, c.netIncomePrior]];
+  const lossNI = c.netIncome < 0;
+  scenes.push({cap: lossNI ? `${c.netIncomePrior < 0 ? `Net loss narrowed to ${f(-c.netIncome)} from ${f(-c.netIncomePrior)}` : `${c.short} swung to a net loss of ${f(-c.netIncome)} from net income of ${f(c.netIncomePrior)}`}${eps ? `; loss per share was $${Math.abs(eps.cur).toFixed(2)}` : ""}.` : `Net income was ${f(c.netIncome)}, up from ${f(c.netIncomePrior)}${eps ? `; diluted EPS was $${eps.cur.toFixed(2)}` : ""}.`,
+    say: lossNI ? `${c.netIncomePrior < 0 ? `The net loss narrowed to ${sp(-c.netIncome)}, from ${sp(-c.netIncomePrior)} a year earlier` : `${c.short} swung to a net loss of ${sp(-c.netIncome)}, from net income of ${sp(c.netIncomePrior)} a year earlier`}${eps ? `, or ${Math.abs(eps.cur).toFixed(2)} dollars per share` : ""}.` : `Net income came in at ${sp(c.netIncome)}, up from ${sp(c.netIncomePrior)} a year earlier${eps ? `, and diluted earnings per share were ${eps.cur.toFixed(2)} dollars` : ""}.`,
+    draw(ctx, p){ frame(ctx, c, "Profitability"); groupBars(ctx, c, prof, p); }});
+  if (ocf && fcf) scenes.push({cap: `Operating cash flow was ${f(ocf.cur)}. After ${f(capex.cur)} of capital spending, free cash flow was ${f(fcf.cur)} (${yoyStr(fcf.cur, fcf.prior)}).`,
+    say: `Operating cash flow was ${sp(ocf.cur)}. After capital spending of ${sp(capex.cur)}, free cash flow was ${sp(fcf.cur)}.`,
+    draw(ctx, p){ frame(ctx, c, "Cash flow"); groupBars(ctx, c, [["Operating cash flow", ocf.cur, ocf.prior], [capex.label, capex.cur, capex.prior], ["Free cash flow", fcf.cur, fcf.prior]], p); }});
+  c.video.spotlights.forEach(sl => scenes.push({cap: sl.cap, say: sl.say, draw(ctx, p){ frame(ctx, c, sl.kicker); const e = ease(p);
+    ctx.globalAlpha = e; T(ctx, sl.big, 64, 300, 110, V.white, FM, 600); T(ctx, sl.sub, 64, 360, 30, V.amber, FB, 600);
+    sl.lines.forEach((l, i) => { ctx.globalAlpha = ease(p * 1.4 - 0.3 - i * 0.2); rr(ctx, 64, 412 + i * 56, 8, 34, 2, V.blue); T(ctx, l, 90, 440 + i * 56, 28, V.white, FB, 500); }); ctx.globalAlpha = 1; }}));
+  scenes.push({cap: `Source: ${c.name} ${c.form || "Form 10-K"}, filed ${c.filed}. The full report and infographic are in the other tabs.`, say: `That's ${c.short}'s ${c.fy.replace("FY", "fiscal ")} in brief. The full report and infographic are in the other tabs.`,
+    draw(ctx, p){ ctx.fillStyle = V.bg; ctx.fillRect(0,0,1280,720); ctx.globalAlpha = ease(p);
+      T(ctx, "10-K Analyzer", 640, 300, 64, V.white, FD, 700, "center"); T(ctx, c.name + " · " + c.fy, 640, 360, 30, V.amber, FB, 600, "center");
+      T(ctx, c.accession ? "SEC accession " + c.accession : "SEC CIK " + c.cik, 640, 410, 22, V.muted, FM, 500, "center"); ctx.globalAlpha = 1; }});
+  scenes.forEach(sc => { sc.dur = Math.max(6, sc.say.split(" ").length / 2.6 + 1.5); });
+  return scenes;
+}
+function groupBars(ctx, c, groups, p){
+  const base = 460, maxH = 250;
+  const m = Math.max(...groups.flatMap(g => [Math.abs(g[1]), Math.abs(g[2])]));
+  groups.forEach(([label, cur, prior], i) => { const gx = 110 + i * 380, e = ease(p * 1.3 - i * 0.12);
+    const hp = prior > 0 ? maxH * prior / m * e : 0, hc = cur > 0 ? maxH * cur / m * e : 0;
+    rr(ctx, gx, base - hp, 110, hp, 6, V.blue2); rr(ctx, gx + 130, base - hc, 110, hc, 6, V.blue);
+    T(ctx, money(c, prior), gx + 55, base - hp - 14, 22, prior < 0 ? V.red : V.muted, FM, 600, "center");
+    T(ctx, money(c, cur), gx + 185, base - hc - 14, 24, V.white, FM, 600, "center");
+    T(ctx, c.fyPrior, gx + 55, base + 30, 18, V.muted, FB, 500, "center"); T(ctx, c.fy, gx + 185, base + 30, 18, V.muted, FB, 500, "center");
+    T(ctx, label, gx + 120, base + 66, 22, V.white, FB, 600, "center");
+    const y = yoy(cur, prior); T(ctx, y === null ? ((prior < 0 || cur < 0) ? fromLoss(c, prior, cur) : "n/m") : yoyStr(cur, prior), gx + 120, base + 96, 20, (y === null ? cur >= prior : y >= 0) ? V.green : V.red, FB, 700, "center"); });
+  ctx.fillStyle = V.blue2; ctx.fillRect(80, base, 1120, 2);
+}
+const player = {scenes: [], i: 0, t: 0, playing: false, last: 0, spoken: true, recording: null, company: null};
+const cv = $("#cv"), ctx = cv.getContext("2d");
+function drawCaption(text){
+  ctx.font = `500 26px ${FB}`; const lines = wrapLines(ctx, text, 1100).slice(0, 2);
+  rr(ctx, 0, 720 - 40 - lines.length * 36, 1280, 40 + lines.length * 36, 0, "rgba(6,12,22,0.82)");
+  lines.forEach((l, k) => T(ctx, l, 640, 720 - 26 - (lines.length - 1 - k) * 36, 26, V.white, FB, 500, "center"));
+}
+function render(){
+  const sc = player.scenes[player.i]; if (!sc) return;
+  sc.draw(ctx, player.t / 1.4, player.t); drawCaption(sc.cap);
+  const total = player.scenes.reduce((a, s) => a + s.dur, 0), done = player.scenes.slice(0, player.i).reduce((a, s) => a + s.dur, 0) + Math.min(player.t, sc.dur);
+  $("#prog").style.width = (done / total * 100).toFixed(1) + "%";
+}
+function speak(sc){
+  player.spoken = true;
+  if (!$("#voiceOn").checked || !("speechSynthesis" in window) || player.recording) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(sc.say); u.rate = 1.02; player.spoken = false;
+    u.onend = u.onerror = () => { player.spoken = true; }; speechSynthesis.speak(u); } catch (e) { player.spoken = true; }
+}
+function tick(now){
+  if (!player.playing) return;
+  const dt = Math.min(0.1, (now - player.last) / 1000); player.last = now; player.t += dt;
+  const sc = player.scenes[player.i];
+  if (player.t >= sc.dur && (player.spoken || player.t > sc.dur + 10)) {
+    if (player.i < player.scenes.length - 1) { player.i++; player.t = 0; speak(player.scenes[player.i]); }
+    else { player.t = sc.dur; render(); stop(true); return; }
+  }
+  render(); requestAnimationFrame(tick);
+}
+function play(){ if (player.playing) return; if (deck.playing) stopDeck(false); if (player.i === player.scenes.length - 1 && player.t >= player.scenes[player.i].dur) { player.i = 0; player.t = 0; }
+  player.playing = true; player.last = performance.now(); $("#playBtn").textContent = "Pause";
+  if (player.t === 0) speak(player.scenes[player.i]); else { try { speechSynthesis.resume(); } catch (e) {} }
+  requestAnimationFrame(tick); }
+function stop(ended){ player.playing = false; $("#playBtn").textContent = ended ? "Replay" : "Play";
+  try { ended ? speechSynthesis.cancel() : speechSynthesis.pause(); } catch (e) {}
+  if (ended && player.recording) player.recording.stop(); }
+function restart(){ stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.i = 0; player.t = 0; render(); $("#playBtn").textContent = "Play"; }
+function loadVideo(c){ restart(); player.company = c; player.scenes = buildScenes(c); player.i = 0; player.t = 0; render();
+  const secs = Math.round(player.scenes.reduce((a, s) => a + s.dur, 0)); $("#vstatus").textContent = `About ${secs} seconds, with captions. Narration uses your device's voice.`; }
+$("#playBtn").addEventListener("click", () => player.playing ? stop(false) : play());
+$("#restartBtn").addEventListener("click", restart);
+$("#voiceOn").addEventListener("change", () => { if (!$("#voiceOn").checked) { try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true; } });
+
+/* Download: records the animation (with captions) in real time, then offers the file */
+let downloads = null;
+const canRecord = typeof MediaRecorder !== "undefined" && typeof cv.captureStream === "function";
+function pickType(){ const opts = [["video/mp4;codecs=avc1","mp4"],["video/mp4","mp4"],["video/webm;codecs=vp9","webm"],["video/webm","webm"]];
+  for (const [t, ext] of opts) { try { if (MediaRecorder.isTypeSupported(t)) return {t, ext}; } catch (e) {} } return null; }
+$("#dlBtn").addEventListener("click", () => {
+  if (player.recording) return; const type = pickType(); if (!type) { $("#vstatus").textContent = "This browser can't record video. Try Chrome or Safari on a computer."; return; }
+  restart(); const chunks = [], rec = new MediaRecorder(cv.captureStream(30), {mimeType: type.t, videoBitsPerSecond: 4e6});
+  player.recording = rec; $("#dlBtn").disabled = true; $("#vstatus").textContent = "Recording the video in real time… (captions included; voice can't be recorded)";
+  rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  rec.onstop = async () => { player.recording = null; $("#dlBtn").disabled = false;
+    const blob = new Blob(chunks, {type: type.t.split(";")[0]}), name = `${player.company.ticker}-${player.company.fy}-10K.${type.ext}`;
+    try { await downloads.save({filename: name, data: blob}); $("#vstatus").textContent = "Saved " + name + "."; }
+    catch (e) { $("#vstatus").textContent = e && e.code === "declined" ? "Download cancelled." : "The video couldn't be saved here."; } };
+  rec.start(500); play();
+});
+(async () => { try { downloads = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; }
+  $("#dlBtn").hidden = !(downloads && canRecord); })();
+
+/* ---------------- Slides with voice-over ---------------- */
+function sayify(s){
+  return String(s).replace(/<[^>]+>/g, "").replace(/\(≈?\$?([\d,.]+)([BM])\)/g, "$$$1$2")
+    .replace(/−/g, "minus ").replace(/≈/g, "about ").replace(/×/g, " times")
+    .replace(/NT\$([\d,.]+)B\b/g, "$1 billion New Taiwan dollars").replace(/NT\$([\d,.]+)/g, "$1 New Taiwan dollars").replace(/US\$([\d,.]+)B\b/g, "$1 billion US dollars")
+    .replace(/C\$([\d,.]+)B\b/g, "$1 billion Canadian dollars").replace(/C\$([\d,.]+)M\b/g, "$1 million Canadian dollars").replace(/C\$([\d.]+)/g, "$1 Canadian dollars")
+    .replace(/R\$([\d,.]+)B\b/g, "$1 billion Brazilian reais").replace(/R\$([\d,.]+)M\b/g, "$1 million Brazilian reais").replace(/R\$([\d.]+)/g, "$1 Brazilian reais")
+    .replace(/\bR([\d,.]+)B\b/g, "$1 billion rand").replace(/\bR([\d,.]+)M\b/g, "$1 million rand").replace(/\bR(\d[\d,.]*)/g, "$1 rand")
+    .replace(/₩([\d,.]+)B\b/g, "$1 billion won").replace(/₩([\d,.]+)/g, "$1 won")
+    .replace(/€([\d,.]+)B\b/g, "$1 billion euros").replace(/€([\d,.]+)M\b/g, "$1 million euros").replace(/€([\d.]+)/g, "$1 euros")
+    .replace(/\$([\d,.]+)B\b/g, "$1 billion dollars").replace(/\$([\d,.]+)M\b/g, "$1 million dollars").replace(/\$([\d.]+)/g, "$1 dollars")
+    .replace(/([\d.]+)B\b/g, "$1 billion").replace(/([\d,.]+)M\b/g, "$1 million")
+    .replace(/\bpp\b/g, "percentage points").replace(/\bYoY\b/g, "year over year").replace(/\bAWS\b/g, "A W S").replace(/\bGOV\b/g, "G O V")
+    .replace(/\bD&A\b/g, "depreciation and amortization").replace(/\bSBC\b/g, "stock-based compensation").replace(/\bQ([1-4])\b/g, "Q $1");
+}
+function buildSlides(c){
+  const f = v => money(c, v), gp = c.revenue - c.cogs, opexT = c.opex.reduce((a, o) => a + o[1], 0);
+  const sc = buildScenes(c), cashSec = (c.sections.find(s => s.title === "Cash flow & earnings") || {items: []}).items;
+  const hasCash = cashSec.length >= 3, spots = sc.slice(hasCash ? 5 : 4, -1), out = [];
+  const add = (kick, body, say, note) => out.push({kick, body, say, note: note || say});
+  add("", `<div class="sl-center"><p class="sl-tick">${c.ticker}</p><h3 class="sl-h">${esc(c.name)}</h3><p class="sl-sub">${c.form || "Form 10-K"} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div>`, sc[0].say);
+  add("At a glance", `<h3 class="sl-h">${esc(c.fy)} in four numbers</h3><div class="sl-kpis">${c.kpis.map(k => `<div class="sl-kpi"><span class="l">${esc(k.label)}</span><span class="v">${esc(k.value)}</span><span class="s">${stripPrior(k.sub) ? esc(stripPrior(k.sub)) + " · " : ""}<span class="${k.tone || "up"}">${esc(k.delta)}</span></span></div>`).join("")}</div>`,
+    "At a glance. " + c.kpis.map(k => sayify(`${k.label}: ${k.value}, ${k.delta}`)).join(". ") + ".",
+    c.kpis.map(k => `${k.label}: ${k.value} (${k.delta})`).join(" · "));
+  const m = Math.max(...c.sources.map(s => s[1]));
+  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="up">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
+    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track"><i style="width:${(v / m * 100).toFixed(1)}%"></i></div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
+  const parts = [[c.cogsLabel.replace("*", ""), c.cogs, "var(--node-neg)"]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? "var(--flow-neg)" : "color-mix(in srgb, var(--flow-neg) 60%, var(--surface))"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, "var(--node-pos)"]] : []);
+  const denomS = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
+  add("Where each dollar went", `<h3 class="sl-h">${c.opIncome > 0 ? `${pctOf(c, c.opIncome)} of revenue became operating income` : `Costs exceeded revenue: operating margin ${pctOf(c, c.opIncome)}`}</h3><div class="sl-stack">${parts.map(([n, v, col]) => `<i style="display:block;width:${(v / denomS * 100).toFixed(2)}%;background:${col}"></i>`).join("")}</div>
+    <div class="sl-legend">${parts.map(([n, v, col]) => `<div><i style="background:${col}"></i><p><span>${esc(n)}</span><b>${f(v)} · ${pctOf(c, v)}</b></p></div>`).join("")}</div>`, sc[2].say, sc[2].cap);
+  const rows = (items) => `<div class="tablewrap"><table><thead><tr><th></th><th>${c.fyPrior}</th><th>${c.fy}</th><th>Change</th></tr></thead><tbody>${items.map(([l, cur, prior, kind]) => { const y = yoy(cur, prior); return `<tr><td>${esc(l)}</td><td class="${prior < 0 ? "down" : ""}">${money(c, prior, kind)}</td><td>${money(c, cur, kind)}</td><td class="${y === null || y >= 0 ? "up" : "down"}">${y === null ? ((prior < 0 || cur < 0) ? fromLoss(c, prior, cur) : "n/m") : yoyStr(cur, prior)}</td></tr>`; }).join("")}</tbody></table></div>`;
+  add("Profitability", `<h3 class="sl-h">${c.netIncome < 0 ? "Net loss" : "Net income"} ${f(c.netIncome)}</h3>${rows([[c.gpLabel.replace("*", ""), gp, c.gpPrior], ["Operating income", c.opIncome, c.opIncomePrior], [c.netLabel, c.netIncome, c.netIncomePrior]])}`, sc[3].say, sc[3].cap);
+  if (c.segments) {
+    const segs = segItems(c), lines = segs.map(s => { const {mc, d} = segMargins(s), y2 = yoy(s.oi, s.oiPrior);
+      return `${s.name}: revenue ${money(c, s.rev)} (${yoyStr(s.rev, s.revPrior)}), operating income ${money(c, s.oi)} (${y2 === null ? fromLoss(c, s.oiPrior, s.oi) : yoyStr(s.oi, s.oiPrior)}), margin ${mc.toFixed(1)}% (${ppStr(d)}).`; });
+    add("Segment results", `<h3 class="sl-h">Operating income and margin by segment</h3><div class="tablewrap"><table><thead><tr><th>Segment</th><th>Revenue</th><th>YoY</th><th>Op. income</th><th>YoY</th><th>Margin</th><th>Change</th></tr></thead><tbody>${segs.map(s => { const {mc, d} = segMargins(s), y2 = yoy(s.oi, s.oiPrior);
+      return `<tr><td>${esc(s.name)}</td><td>${money(c, s.rev)}</td><td class="up">${yoyStr(s.rev, s.revPrior)}</td><td>${money(c, s.oi)}</td><td class="${y2 === null || y2 >= 0 ? "up" : "down"}">${y2 === null ? fromLoss(c, s.oiPrior, s.oi) : yoyStr(s.oi, s.oiPrior)}</td><td>${segPct(mc)}</td><td class="${d >= 0 ? "up" : "down"}">${ppStr(d)}</td></tr>`; }).join("")}</tbody></table></div><p class="sl-sub" style="font-size:20px">${esc(c.segments.note)}</p>`,
+      "Segment results. " + sayify(lines.join(" ")), lines.join(" "));
+  }
+  if (hasCash) add("Cash flow", `<h3 class="sl-h">Free cash flow ${f(cashSec[2].cur)}</h3>${rows(cashSec.map(i => [i.label, i.cur, i.prior, i.money]))}`, sc[4].say, sc[4].cap);
+  c.video.spotlights.forEach((sl, k) => add(sl.kicker, `<p class="sl-big">${esc(sl.big)}</p><p class="sl-sub" style="color:var(--accent);font-weight:600">${esc(sl.sub)}</p><div class="sl-lines">${sl.lines.map(l => `<p>${esc(l)}</p>`).join("")}</div>`, (spots[k] || sl).say, sl.cap));
+  add("What stood out", `<ul class="sl-list">${c.report.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What stood out. " + c.report.highlights.map(sayify).join(" "), c.report.highlights.join(" "));
+  add("What to watch", `<ul class="sl-list">${c.report.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What to watch. " + c.report.watch.map(sayify).join(" "), c.report.watch.join(" "));
+  add("Source", `<div class="sl-center"><h3 class="sl-h">${esc(c.name)} ${c.form || "Form 10-K"}</h3><p class="sl-sub">${esc(c.period)} · filed ${esc(c.filed)}</p><p class="sl-sub num">CIK ${c.cik}${c.accession ? ` · accession ${c.accession}` : ""}</p></div>`, sc[sc.length - 1].say, sc[sc.length - 1].cap);
+  return out;
+}
+const deck = {slides: [], i: 0, playing: false, token: 0, timer: 0, company: null};
+function fitSlide(){ const w = $("#stage").clientWidth; if (w) $("#slideInner").style.transform = `scale(${w / 1280})`; }
+try { new ResizeObserver(fitSlide).observe($("#stage")); } catch (e) { window.addEventListener("resize", fitSlide); }
+function showSlide(i){
+  deck.i = Math.max(0, Math.min(deck.slides.length - 1, i)); const s = deck.slides[deck.i], c = deck.company;
+  $("#slideInner").innerHTML = `${s.kick ? `<p class="sl-kick">${esc(s.kick)}</p>` : ""}${s.body}<div class="sl-foot"><span>${c.ticker} · ${c.fy} ${(c.form || "Form 10-K").replace("Form ", "")}</span><span>${deck.i + 1} / ${deck.slides.length}</span></div>`;
+  $("#scount").textContent = `Slide ${deck.i + 1} of ${deck.slides.length}`; $("#snote").textContent = s.note;
+  $("#sprog").style.width = ((deck.i + 1) / deck.slides.length * 100).toFixed(1) + "%";
+  $("#prevSlide").disabled = deck.i === 0; $("#nextSlide").disabled = deck.i === deck.slides.length - 1; fitSlide();
+}
+function speakSlide(){
+  const tok = ++deck.token, s = deck.slides[deck.i]; clearTimeout(deck.timer);
+  const advance = () => { if (!deck.playing || tok !== deck.token) return; if (deck.i < deck.slides.length - 1) { showSlide(deck.i + 1); speakSlide(); } else stopDeck(true); };
+  if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(s.say); u.rate = 1.02; u.onend = () => setTimeout(advance, 600); u.onerror = ev => { if (ev.error !== "interrupted" && ev.error !== "canceled") setTimeout(advance, 600); }; speechSynthesis.speak(u); return; } catch (e) {} }
+  $("#sstatus").textContent = "Voice isn't available on this device, so slides advance on a timer."; deck.timer = setTimeout(advance, Math.max(5, s.say.split(" ").length / 2.6) * 1000);
+}
+function startDeck(){ if (player.playing) stop(false); deck.playing = true; $("#voSlide").textContent = "Stop voice-over"; speakSlide(); }
+function stopDeck(ended){ deck.playing = false; deck.token++; clearTimeout(deck.timer); try { speechSynthesis.cancel(); } catch (e) {} $("#voSlide").textContent = ended ? "Replay voice-over" : "Play voice-over"; if (ended) deck.restart = true; }
+function loadSlides(c){ if (deck.playing) stopDeck(false); deck.company = c; deck.slides = buildSlides(c); deck.restart = false; showSlide(0); $("#voSlide").textContent = "Play voice-over"; }
+$("#voSlide").addEventListener("click", () => { if (deck.playing) { stopDeck(false); return; } if (deck.restart) { deck.restart = false; showSlide(0); } startDeck(); });
+const goSlide = d => { showSlide(deck.i + d); if (deck.playing) speakSlide(); };
+$("#prevSlide").addEventListener("click", () => goSlide(-1));
+$("#nextSlide").addEventListener("click", () => goSlide(1));
+$("#stage").addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } });
+
+/* ---------------- Shelf, routing ---------------- */
+const VIEWS = ["infographic", "slides", "video", "report"];
+let state = {ticker: "AMZN", view: "infographic"};
+function renderSpines(){
+  const sel = $("#pick");
+  if (!sel.options.length) {
+    sel.innerHTML = Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
+      .map(c => `<option value="${c.ticker}">${c.ticker} \u2014 ${esc(c.name)} (${c.fy})</option>`).join("");
+  }
+  sel.value = state.ticker;
+}
+function setView(v){
+  state.view = v;
+  VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; $("#tab-" + x).setAttribute("aria-selected", x === v); });
+  if (v !== "video" && player.playing && !player.recording) stop(false);
+  if (v !== "slides" && deck.playing) stopDeck(false);
+  if (v === "slides") fitSlide();
+}
+let openSeq = 0;
+async function openCompany(t, view){
+  if (!LIBRARY[t]) return;
+  const seq = ++openSeq;
+  if (!FULL.has(t)) {
+    $("#fname").textContent = `Loading ${t}…`;
+    try { await loadCompany(t); } catch (e) { if (seq === openSeq) { $("#fname").textContent = `Couldn't load ${t}. Try again.`; } return; }
+    if (seq !== openSeq) return;
+  }
+  const c = LIBRARY[t];
+  state.ticker = t; $("#missing").hidden = true; $("#filing").hidden = false;
+  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(c.fy)}</em>`;
+  $("#fmeta").innerHTML = `<span><b>${c.form || "Form 10-K"}</b> · ${esc(c.fy)}</span><span>${esc(c.period)}</span><span>Filed ${esc(c.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
+  renderReport(c); renderInfographic(c); loadSlides(c); loadVideo(c); renderSpines(); setView(view || state.view);
+}
+function writeHash(){ const h = state.ticker.toLowerCase() + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
+function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const [t, v] = h.split("-"); return {t: (t || "").toUpperCase(), v: VIEWS.includes(v) ? v : "infographic"}; }
+$("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view); writeHash(); }));
+/* Search: tickers and company names already in the library */
+const ALIASES = {GOOGL: "GOOG", "BRK.B": null};
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const STOP = new Set(["inc","corp","corporation","company","co","the","group","holdings","plc","incorporated","technologies","technology","n","v"]);
+function searchLibrary(q){
+  const raw = q.trim(); if (!raw) return [];
+  const tk = raw.split(/\s+[\u2014-]\s+/)[0].toUpperCase().replace(/[^A-Z.]/g, "");
+  if (LIBRARY[tk]) return [LIBRARY[tk]];
+  if (ALIASES[tk] && LIBRARY[ALIASES[tk]]) return [LIBRARY[ALIASES[tk]]];
+  const nq = norm(raw); if (!nq) return [];
+  const NAME_ALIASES = {"google":"GOOG","facebook":"META","instagram":"META","jp morgan":"JPM","chase":"JPM","j j":"JNJ","johnson and johnson":"JNJ","p g":"PG","procter and gamble":"PG","exxon mobil":"XOM","sam s club":"WMT","aws":"AMZN","chatgpt":null};
+  if (NAME_ALIASES[nq] && LIBRARY[NAME_ALIASES[nq]]) return [LIBRARY[NAME_ALIASES[nq]]];
+  const all = Object.values(LIBRARY);
+  const exact = all.filter(c => norm(c.name) === nq || norm(c.short) === nq);
+  if (exact.length) return exact;
+  const words = nq.split(" ").filter(w => !STOP.has(w));
+  if (!words.length) return [];
+  const hay = c => " " + norm(c.name + " " + c.short) + " ";
+  const starts = all.filter(c => words.every(w => hay(c).includes(" " + w)));
+  return starts.sort((a, b) => a.ticker.localeCompare(b.ticker));
+}
+function fillDatalist(){
+  $("#libList").innerHTML = Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
+    .map(c => `<option value="${c.ticker} \u2014 ${esc(c.name)}"></option>`).join("");
+}
+$("#searchForm").addEventListener("submit", e => { e.preventDefault();
+  const q = $("#ticker").value.trim(); if (!q) return;
+  const hits = searchLibrary(q);
+  if (hits.length === 1) { openCompany(hits[0].ticker); writeHash(); $("#ticker").value = ""; return; }
+  $("#matchRow").innerHTML = "";
+  if (hits.length > 1) {
+    $("#missingText").textContent = `More than one company matches \u201c${q}\u201d. Pick one:`;
+    hits.slice(0, 8).forEach(c => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost";
+      b.textContent = `${c.ticker} \u2014 ${c.short}`; b.addEventListener("click", () => { openCompany(c.ticker); writeHash(); $("#ticker").value = ""; }); $("#matchRow").appendChild(b); });
+    $("#matchRow").hidden = false;
+  } else {
+    $("#missingText").textContent = `\u201c${q}\u201d is not available in the library.`;
+    $("#matchRow").hidden = true;
+  }
+  $("#missing").hidden = false; });
+window.addEventListener("hashchange", () => { const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v); });
+(async () => {
+  try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
+  fillDatalist();
+  const start = readHash(); await openCompany(start && LIBRARY[start.t] ? start.t : "AMZN", start ? start.v : "infographic");
+})();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
+</script>
+
+</body></html>
