@@ -166,18 +166,22 @@ tr.key td{font-weight:700}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .controls .btn{height:44px}
 .fs-box{display:flex;flex-direction:column;gap:12px}
-.fs-btn{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
+.fs-btn{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;border-radius:10px;
+  background:rgba(14,26,43,.6);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:.85;transition:opacity .15s,background .15s}
+.fs-btn:hover,.fs-btn:focus-visible{opacity:1;background:rgba(14,26,43,.85)}
+.fs-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fs-btn svg{width:22px;height:22px}
+.fs-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .fs-btn .fs-out,.fs-box.is-fs .fs-btn .fs-in{display:none}
 .fs-box.is-fs .fs-btn .fs-out{display:inline}
 .fs-box.is-fs{position:fixed;inset:0;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
   padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
-.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 92px) * 16 / 9));flex:none}
+.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 80px) * 16 / 9));flex:none}
 .fs-box.is-fs>.controls{justify-content:center}
-.fs-btn svg{flex:none}
+
 .fs-box.is-fs .status{display:none}
 .fs-box.is-fs .stage{border-radius:10px}
 html.fs-lock,html.fs-lock body{overflow:hidden}
-@media (max-width:640px){.fs-btn span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.fs-btn{padding:0 12px}}
 @media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 88px) * 16 / 9))}}
 .toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
 .toggle input{width:18px;height:18px;accent-color:var(--accent)}
@@ -289,14 +293,13 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="fs-box" id="fsSlides">
-        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div></div>
+        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><button class="fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
         <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
         <div class="controls">
           <button class="btn ghost" type="button" id="prevSlide" aria-label="Previous slide">Previous</button>
           <button class="btn" type="button" id="voSlide">Play voice-over</button>
           <button class="btn ghost" type="button" id="nextSlide" aria-label="Next slide">Next</button>
           <span class="status num" id="scount"></span>
-          <button class="btn ghost fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span>Full screen</span></button>
         </div>
         </div>
         <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
@@ -306,14 +309,13 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="fs-box" id="fsVideo">
-        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas></div>
+        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         <div class="controls">
           <button class="btn" type="button" id="playBtn">Play</button>
           <button class="btn ghost" type="button" id="restartBtn">Restart</button>
           <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Voice narration</label>
           <button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button>
-          <button class="btn ghost fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span>Full screen</span></button>
         </div>
         </div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
@@ -1066,7 +1068,7 @@ function syncFs(){
   document.querySelectorAll(".fs-box").forEach(b => {
     const is = b === on; b.classList.toggle("is-fs", is);
     const btn = b.querySelector(".fs-btn"); const lab = is ? "Exit full screen" : "Full screen";
-    btn.setAttribute("aria-label", lab); btn.querySelector("span").textContent = lab;
+    btn.setAttribute("aria-label", lab); btn.title = lab; btn.querySelector(".fs-lab").textContent = lab;
   });
   document.documentElement.classList.toggle("fs-lock", !!fakeFs);
   fitSlide();
