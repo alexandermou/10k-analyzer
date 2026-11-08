@@ -252,14 +252,20 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.ov-box{background:var(--surface);border-radius:14px;padding:16px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
-.ov-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
+.ov-acts{display:flex;gap:8px;flex:none}
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+#ovTitle{margin:0;font-weight:600;font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-ic{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.ov-ic.primary{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+.ov-ic:active{transform:scale(.95)}
+.ov-ic:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ov.img-fs .ov-head{display:none}
 #ovImg{touch-action:manipulation;cursor:zoom-in;-webkit-user-select:none;user-select:none}
 .ov.img-fs{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#05080d;z-index:1001}
 .ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
-.ov.img-fs .barhead,.ov.img-fs #ovStatus{display:none}
+.ov.img-fs #ovStatus{display:none}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
-.ov-box .barhead{flex-wrap:wrap;align-items:center}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 /* Slides (authored at 1280x720, scaled to fit) */
@@ -392,8 +398,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 </div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box">
-    <div class="barhead"><p id="ovTitle" style="font-weight:600">Infographic image</p>
-      <div class="ov-acts"><button class="btn" type="button" id="ovSave">Save image</button><button class="btn ghost" type="button" id="ovClose">Close</button></div></div>
+    <div class="ov-head"><p id="ovTitle">Infographic image</p>
+      <div class="ov-acts"><button class="ov-ic primary" type="button" id="ovSave" aria-label="Save image" title="Save image"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
     <img id="ovImg" alt="Infographic image">
     <p class="status" id="ovStatus">Double-tap the picture for full screen. You can also press and hold it (or right-click it on a computer) to save or share it.</p>
   </div>
