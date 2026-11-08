@@ -541,7 +541,7 @@ function sankey(c){
   let pacc = ptY + H(c.netFlow);
   if (!lossBelow) {
     if (c.tax > 0) { finals.push({n: "Income tax", v: c.tax, from: [PX + NW, pacc]}); pacc += H(c.tax); }
-    c.belowTax.forEach(([n, v, lab]) => { finals.push({n, v, lab, from: [PX + NW, pacc]}); pacc += H(v); });
+    c.belowTax.forEach(([n, v, lab]) => { if (v > 0) { finals.push({n, v, lab, from: [PX + NW, pacc]}); pacc += H(v); } });
   }
   if (lossBelow) finals.push({n: c.nonOpLabel, v: c.opIncome, pv: -c.nonOp, lab: "(" + f(-c.nonOp) + ")", from: [OX + NW, oiY], summary: true});
   else if (c.nonOp < 0) finals.push({n: c.nonOpLabel, v: -c.nonOp, from: [OX + NW, oiY + ptH]});
@@ -564,8 +564,10 @@ function sankey(c){
     if (it.summary) {
       const rows = [["Pre-tax loss", "(" + f(-pretax) + ")"]];
       if (c.tax) rows.push([c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax)]);
-      c.belowTax.forEach(([n, v]) => rows.push([n, "(" + f(v) + ")"]));
-      rows.forEach(([n, v]) => { out.push(`<text x="${LX}" y="${cur + 12}" font-size="12" class="t-m" font-weight="600">${esc(n)} <tspan class="t-n" font-weight="700">${v}</tspan></text>`); cur += 20; });
+      // a negative below-tax item is a credit (e.g. losses allocated to noncontrolling interests); show the all-owners subtotal first
+      if (c.belowTax.some(x => x[1] < 0)) rows.push(["Net loss, all owners", "(" + f(-(pretax - c.tax)) + ")"]);
+      c.belowTax.forEach(([n, v]) => rows.push([n, v < 0 ? "+" + f(-v) : "(" + f(v) + ")"]));
+      rows.forEach(([n, v]) => { out.push(`<text x="${LX}" y="${cur + 12}" font-size="12" class="t-m" font-weight="600">${esc(n)} <tspan class="${v[0] === "+" ? "t-p" : "t-n"}" font-weight="700">${v}</tspan></text>`); cur += 20; });
       out.push(txt(LX, cur + 14, esc(c.netLabel), 13, "t-m", 600));
       out.push(txt(LX, cur + 36, f(c.netIncome), 21, c.netIncome < 0 ? "t-n" : "t-p", 700));
       cur += 60;
@@ -633,7 +635,7 @@ function sankeyLoss(c){
   out.push(ribbon(GX + NW, gpY, gpY + gpH, OX, oacc, oacc + gpH, "fp")); oacc += gpH;
   extras.forEach(e => { out.push(ribbon(GX + NW, e.y, e.y + e.h, OX, oacc, oacc + e.h, e.credit ? "fp" : "fn")); oacc += e.h; });
   // operating expense lines
-  let cur = 160 + 24 * (c.belowTax || []).length, facc = opexY;
+  let cur = 160 + 24 * ((c.belowTax || []).length + ((c.belowTax || []).some(x => x[1] < 0) ? 1 : 0)), facc = opexY;
   c.opex.forEach(([n, v]) => {
     const h = Math.max(H(v), 1.5), cy = cur + h / 2;
     out.push(ribbon(OX + NW, facc, facc + H(v), FX, cur, cur + H(v), "fn"));
@@ -664,7 +666,8 @@ function sankeyLoss(c){
   row(54, esc(c.nonOpLabel), (c.nonOp >= 0 ? "+" : "") + f(c.nonOp), c.nonOp >= 0 ? "t-p" : "t-n");
   let ry = 78;
   if (c.tax) { row(ry, c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax), c.tax > 0 ? "t-n" : "t-p"); ry += 24; }
-  (c.belowTax || []).forEach(([n, v]) => { row(ry, esc(n), "(" + f(v) + ")", "t-n"); ry += 24; });
+  if ((c.belowTax || []).some(x => x[1] < 0)) { row(ry, "Net loss, all owners", "(" + f(-(c.opIncome + c.nonOp - c.tax)) + ")", "t-n"); ry += 24; }
+  (c.belowTax || []).forEach(([n, v]) => { row(ry, esc(n), v < 0 ? "+" + f(-v) : "(" + f(v) + ")", v < 0 ? "t-p" : "t-n"); ry += 24; });
   out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
   row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
   out.push(txt(LX, ry + 30, pctOf(c, c.netIncome) + " of revenue", 11.5, "t-m", 500));
