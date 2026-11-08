@@ -793,6 +793,25 @@ function renderInfographic(c){
 }
 
 /* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
+/* Bakes the site's fonts (IBM Plex, Latin subset) into the image as data, so a phone draws the picture with
+   the same fonts the page was measured with; otherwise wider fallback fonts make numbers overlap their tags. */
+let fontCSSPromise = null;
+function getFontEmbedCSS(){
+  if (fontCSSPromise) return fontCSSPromise;
+  fontCSSPromise = (async () => {
+    const link = document.querySelector('link[href*="fonts.googleapis.com/css"]'); if (!link) return "";
+    const css = await (await fetch(link.href)).text();
+    const blocks = css.split(/(?=\/\*[^*]*\*\/\s*@font-face)/).filter(b => /\/\*\s*latin\s*\*\//.test(b));
+    const toData = async url => { const blob = await (await fetch(url)).blob();
+      return await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); }); };
+    const out = await Promise.all(blocks.map(async b => {
+      const m = b.match(/url\((['"]?)([^)'"]+)\1\)/); if (!m) return "";
+      try { return b.replace(m[0], `url(${await toData(m[2])})`); } catch (e) { return ""; }
+    }));
+    return out.join("\n");
+  })().catch(() => { fontCSSPromise = null; return ""; });
+  return fontCSSPromise;
+}
 function loadImgLib(){
   // html-to-image 1.11.13 (MIT), bundled with the site under vendor/
   if (window.htmlToImage) return Promise.resolve();
@@ -827,7 +846,8 @@ async function makeInfographicBlob(c){
       const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    const opts = {pixelRatio: 2, backgroundColor: "#F3F5F8", cacheBust: false};
+    const fontEmbedCSS = await getFontEmbedCSS();
+    const opts = {pixelRatio: 2, backgroundColor: "#F3F5F8", cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})};
     await window.htmlToImage.toBlob(n, opts).catch(() => null);   // first pass warms fonts and images (Safari)
     const blob = await window.htmlToImage.toBlob(n, opts);
     if (!blob) throw new Error("blob");
@@ -1240,7 +1260,8 @@ async function nvRenderSlide(){
     const bg = getComputedStyle($("#stage")).backgroundColor || "#fff";
     n.style.background = bg; host.appendChild(n); document.body.appendChild(host);
     try {
-      const c = await window.htmlToImage.toCanvas(n, {width: 1280, height: 720, pixelRatio: 1, backgroundColor: bg, cacheBust: false});
+      const fontEmbedCSS = await getFontEmbedCSS();
+      const c = await window.htmlToImage.toCanvas(n, {width: 1280, height: 720, pixelRatio: 1, backgroundColor: bg, cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})});
       if (job !== NV.slideJob) return; NV.slideBmp = c; nvPaintSlide(); [80, 250].forEach(t => setTimeout(nvPaintSlide, t));
     } finally { host.remove(); }
   } catch (e) {}
