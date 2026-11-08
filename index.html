@@ -1208,8 +1208,20 @@ function noteFlip(){
   if (dropped && Date.now() - dropped.t < 1500 && !realFsEl()) { fakeFs = wantFs = dropped.box; dropped = null; syncFs(); }
 }
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, onFsChange));
+/* Phones can refuse full screen while the device voice is speaking, so playback pauses for the switch
+   and picks up again once the screen has changed: the video from where it was, slides from the current slide. */
+function pauseForFs(){
+  if (player.playing) { stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true;
+    return () => { if (!player.playing) { play(); speak(player.scenes[player.i]); } }; }
+  if (deck.playing) { stopDeck(false); return () => { if (!deck.playing) startDeck(); }; }
+  return null;
+}
 [["fsSlidesBtn", "fsSlides"], ["fsVideoBtn", "fsVideo"]].forEach(([b, x]) =>
-  $("#" + b).addEventListener("click", () => fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x))));
+  $("#" + b).addEventListener("click", () => {
+    const resume = pauseForFs();
+    fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x));
+    if (resume) setTimeout(resume, 700);
+  }));
 document.addEventListener("keydown", e => { if (e.key === "Escape" && fakeFs) exitFs(); });
 /* iPhone Safari can keep the old screen size for a pinned full-screen box after the phone is rotated,
    so the box is sized from the measured window instead, re-measured on every resize or rotation. */
