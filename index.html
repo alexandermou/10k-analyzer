@@ -194,15 +194,15 @@ tr.key td{font-weight:700}
 .fs-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .fs-btn .fs-out,.fs-box.is-fs .fs-btn .fs-in{display:none}
 .fs-box.is-fs .fs-btn .fs-out{display:inline}
-.fs-box.is-fs{position:fixed;inset:0;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
+.fs-box.is-fs{position:fixed;top:0;left:0;right:auto;bottom:auto;width:var(--fs-w,100vw);height:var(--fs-h,100dvh);box-sizing:border-box;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
   padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
-.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 80px) * 16 / 9));flex:none}
+.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 80px) * 16 / 9));flex:none}
 .fs-box.is-fs>.controls{justify-content:center}
 
 .fs-box.is-fs .status{display:none}
 .fs-box.is-fs .stage{border-radius:10px}
 html.fs-lock,html.fs-lock body{overflow:hidden}
-@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((100dvh - 88px) * 16 / 9))}}
+@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 88px) * 16 / 9))}}
 .toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
 .toggle input{width:18px;height:18px;accent-color:var(--accent)}
 .status{font-size:13px;color:var(--muted)}
@@ -1165,7 +1165,8 @@ function setView(v){
 /* Full screen for slides and video. Uses the browser's real full screen where it exists; on iPhone,
    which only allows that for <video>, the box is pinned over the whole page instead. Either way the
    player keeps its 16:9 shape and grows to fill the screen, so turning a phone sideways enlarges it. */
-let fakeFs = null;
+let fakeFs = null, wantFs = null, ourExit = false, lastFlip = 0, dropped = null;
+let wasLand = innerWidth > innerHeight;
 const realFsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
 const fsActive = () => realFsEl() || fakeFs;
 function syncFs(){
@@ -1176,9 +1177,10 @@ function syncFs(){
     btn.setAttribute("aria-label", lab); btn.title = lab; btn.querySelector(".fs-lab").textContent = lab;
   });
   document.documentElement.classList.toggle("fs-lock", !!fakeFs);
-  fitSlide();
+  if (typeof measureFs === "function") measureFs(); else fitSlide();
 }
 function enterFs(box){
+  wantFs = box; ourExit = false;
   const req = box.requestFullscreen || box.webkitRequestFullscreen;
   const fake = () => { fakeFs = box; syncFs(); };
   if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
@@ -1187,15 +1189,44 @@ function enterFs(box){
   if (box.id === "fsSlides") setTimeout(() => $("#stage").focus({preventScroll: true}), 50);
 }
 function exitFs(){
+  wantFs = null; ourExit = true; dropped = null;
   if (fakeFs) { fakeFs = null; syncFs(); return; }
   const ex = document.exitFullscreen || document.webkitExitFullscreen;
   if (realFsEl() && ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
 }
-["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, syncFs));
+/* If a rotation knocks the player out of real full screen (some phones do this), keep it full screen by covering the page. */
+function onFsChange(){
+  if (!realFsEl() && wantFs && !ourExit && !fakeFs) {
+    if (Date.now() - lastFlip < 1500) fakeFs = wantFs; else dropped = {box: wantFs, t: Date.now()};
+    if (!fakeFs) wantFs = null;
+  }
+  if (realFsEl()) ourExit = false;
+  syncFs();
+}
+function noteFlip(){
+  const land = innerWidth > innerHeight; if (land === wasLand) return; wasLand = land; lastFlip = Date.now();
+  if (dropped && Date.now() - dropped.t < 1500 && !realFsEl()) { fakeFs = wantFs = dropped.box; dropped = null; syncFs(); }
+}
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, onFsChange));
 [["fsSlidesBtn", "fsSlides"], ["fsVideoBtn", "fsVideo"]].forEach(([b, x]) =>
   $("#" + b).addEventListener("click", () => fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x))));
 document.addEventListener("keydown", e => { if (e.key === "Escape" && fakeFs) exitFs(); });
-window.addEventListener("orientationchange", () => setTimeout(fitSlide, 250));
+/* iPhone Safari can keep the old screen size for a pinned full-screen box after the phone is rotated,
+   so the box is sized from the measured window instead, re-measured on every resize or rotation. */
+function measureFs(){
+  noteFlip();
+  const vv = window.visualViewport, w = Math.round(vv ? vv.width : innerWidth), h = Math.round(vv ? vv.height : innerHeight);
+  const r = document.documentElement.style; r.setProperty("--fs-w", w + "px"); r.setProperty("--fs-h", h + "px");
+  const box = fsActive();
+  if (box && fakeFs) { window.scrollTo(0, 0); box.classList.remove("is-fs"); void box.offsetWidth; box.classList.add("is-fs"); }
+  fitSlide();
+}
+const remeasure = () => { measureFs(); [120, 350, 700].forEach(t => setTimeout(measureFs, t)); };
+window.addEventListener("resize", measureFs);
+window.addEventListener("orientationchange", remeasure);
+try { screen.orientation.addEventListener("change", remeasure); } catch (e) {}
+try { visualViewport.addEventListener("resize", measureFs); } catch (e) {}
+measureFs();
 let openSeq = 0;
 async function openCompany(t, view){
   if (!LIBRARY[t]) return;
