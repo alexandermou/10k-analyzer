@@ -427,11 +427,20 @@ const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">"
 function money(c, v, kind){
   if (v === null || v === undefined) return "—";
   const cur = c.cur || "$";
-  if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toFixed(2);
-  const a = Math.abs(v);
-  const d = c.dec || 0;
-  const s = c.unit === "B" ? (a > 0 && a < 0.95 ? cur + Math.round(a * 1000).toLocaleString("en-US") + "M" : cur + a.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1}) + "B") : cur + a.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}) + "M";
+  if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0).join("");
   return v < 0 ? "(" + s + ")" : s;
+}
+/* Amounts always start with a non-zero digit: $1.2T, $12.9B, $322M (or $322.4M for companies shown to one decimal),
+   $84.3M, $950K. Takes millions; returns [number text, unit letter]. */
+function scaled(m, dec){
+  const fmt = (x, d) => x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+  if (m >= 999950) return [fmt(m / 1e6, 1), "T"];
+  if (m >= (dec ? 999.95 : 999.5)) return [fmt(m / 1000, 1), "B"];
+  if (m >= 99.95) return [fmt(m, dec), "M"];
+  if (m >= 0.9995) return [fmt(m, 1), "M"];
+  if (m === 0) return ["0", ""];
+  return [fmt(Math.round(m * 1000), 0), "K"];
 }
 function spoken(c, v){
   if (c.cur === "NT$") return spokenUSD(c, v).replace(/dollars$/, "New Taiwan dollars");
@@ -443,10 +452,8 @@ function spoken(c, v){
   return spokenUSD(c, v);
 }
 function spokenUSD(c, v){
-  const a = Math.abs(v);
-  if (c.unit === "B") return a.toFixed(1).replace(/\.0$/,"") + " billion dollars";
-  if (a >= 1000) return (a/1000).toFixed(2).replace(/0$/,"") + " billion dollars";
-  return (c.dec ? a.toFixed(c.dec).replace(/\.0$/, "") : Math.round(a)) + " million dollars";
+  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0);
+  return n.replace(/\.0$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
 }
 const yr = s => s.replace("FY20", "FY");
 const pctOf = (c, v) => (c.revenue > 0 && Math.abs(v / c.revenue) <= 10) ? (v / c.revenue * 100).toFixed(1) + "%" : "n/m";
@@ -472,7 +479,7 @@ function renderReport(c){
     </div>
     <div class="side">
       <div class="card">
-        <p class="lbl">Key figures · ${c.unit === "B" ? "USD billions" : "USD millions"}</p>
+        <p class="lbl">Key figures</p>
         <div class="tablewrap"><table>
           <thead><tr><th>Line item</th><th>${c.fy}</th><th>${c.fyPrior}</th><th>YoY</th></tr></thead>
           <tbody>${rows}</tbody>
@@ -1079,8 +1086,8 @@ function speakable(t){
   const num = (i, d) => { i = i.replace(/,/g, ""); d = (d || "").replace(/0+$/, ""); return d ? `${i} point ${d.split("").join(" ")}` : i; };
   return String(t)
     .replace(/\s*\((?:plus |up |\+)?Infinity[^)]*\)/g, "").replace(/,?\s*(?:plus |up |\+)?Infinity[^.,;]*/g, "").replace(/,\s*undefined\b/g, "").replace(/\bundefined\b/g, "")
-    .replace(/(\d[\d,.]*) dollars([mbk])\b/gi, (m, n, u) => `${n} ${({m: "million", b: "billion", k: "thousand"})[u.toLowerCase()]} dollars`)
-    .replace(/\$(\d[\d,.]*)\s?([BMK])\b/g, (m, n, u) => `${n} ${({M: "million", B: "billion", K: "thousand"})[u]} dollars`).replace(/\$(\d[\d,.]*)/g, "$1 dollars")
+    .replace(/(\d[\d,.]*) dollars([tmbk])\b/gi, (m, n, u) => `${n} ${({t: "trillion", m: "million", b: "billion", k: "thousand"})[u.toLowerCase()]} dollars`)
+    .replace(/\$(\d[\d,.]*)\s?([TBMK])\b/g, (m, n, u) => `${n} ${({T: "trillion", M: "million", B: "billion", K: "thousand"})[u]} dollars`).replace(/\$(\d[\d,.]*)/g, "$1 dollars")
     .replace(/grew revenue n\/m to/g, "reported revenue of").replace(/\bn\/m\b/g, "not meaningful")
     .replace(/grew revenue ([\u2212-]|minus )/g, "saw revenue fall ")
     .replace(/([+−-])?(\d[\d,]*)(?:\.(\d+))?\s?%/g, (m, sg, i, d) => (sg === "+" ? "up " : sg ? "down " : "") + num(i, d) + " percent")
@@ -1137,6 +1144,8 @@ let downloads = null;
 function sayify(s){
   return String(s).replace(/<[^>]+>/g, "").replace(/\(≈?\$?([\d,.]+)([BM])\)/g, "$$$1$2")
     .replace(/−/g, "minus ").replace(/≈/g, "about ").replace(/×/g, " times")
+    .replace(/(NT\$|US\$|C\$|R\$|\$|₩|€|\bR)(\d[\d,.]*)([TK])\b/g, (m, c, n, u) => `${n} ${u === "T" ? "trillion" : "thousand"} ` +
+      ({"NT$": "New Taiwan dollars", "US$": "US dollars", "C$": "Canadian dollars", "R$": "Brazilian reais", "$": "dollars", "₩": "won", "€": "euros", "R": "rand"})[c])
     .replace(/NT\$([\d,.]+)B\b/g, "$1 billion New Taiwan dollars").replace(/NT\$([\d,.]+)/g, "$1 New Taiwan dollars").replace(/US\$([\d,.]+)B\b/g, "$1 billion US dollars")
     .replace(/C\$([\d,.]+)B\b/g, "$1 billion Canadian dollars").replace(/C\$([\d,.]+)M\b/g, "$1 million Canadian dollars").replace(/C\$([\d.]+)/g, "$1 Canadian dollars")
     .replace(/R\$([\d,.]+)B\b/g, "$1 billion Brazilian reais").replace(/R\$([\d,.]+)M\b/g, "$1 million Brazilian reais").replace(/R\$([\d.]+)/g, "$1 Brazilian reais")
@@ -1144,7 +1153,7 @@ function sayify(s){
     .replace(/₩([\d,.]+)B\b/g, "$1 billion won").replace(/₩([\d,.]+)/g, "$1 won")
     .replace(/€([\d,.]+)B\b/g, "$1 billion euros").replace(/€([\d,.]+)M\b/g, "$1 million euros").replace(/€([\d.]+)/g, "$1 euros")
     .replace(/\$([\d,.]+)B\b/g, "$1 billion dollars").replace(/\$([\d,.]+)M\b/g, "$1 million dollars").replace(/\$([\d.]+)/g, "$1 dollars")
-    .replace(/([\d.]+)B\b/g, "$1 billion").replace(/([\d,.]+)M\b/g, "$1 million")
+    .replace(/([\d.]+)T\b/g, "$1 trillion").replace(/([\d.]+)B\b/g, "$1 billion").replace(/([\d,.]+)M\b/g, "$1 million").replace(/(\d[\d,]*)K\b/g, "$1 thousand")
     .replace(/\bpp\b/g, "percentage points").replace(/\bYoY\b/g, "year over year").replace(/\bAWS\b/g, "A W S").replace(/\bGOV\b/g, "G O V")
     .replace(/\bD&A\b/g, "depreciation and amortization").replace(/\bSBC\b/g, "stock-based compensation").replace(/\bQ([1-4])\b/g, "Q $1");
 }
