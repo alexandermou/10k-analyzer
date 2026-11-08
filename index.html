@@ -72,6 +72,19 @@ button,input{font:inherit}
 .meta b{color:var(--ink);font-weight:600}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.fb-card{max-width:720px;padding:22px 22px 20px}
+.fb-card form,.fb-thanks{display:flex;flex-direction:column;gap:10px}
+.fb-thanks[hidden],.fb-card form[hidden]{display:none}
+.fb-h{font-size:20px;margin:0;letter-spacing:-.01em}
+.fb-sub{margin:0;color:var(--muted)}
+.fb-lbl{font-weight:600;margin-top:6px}
+#fbMsg{width:100%;min-height:150px;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
+#fbMsg:focus{outline:2px solid var(--accent);outline-offset:1px}
+.fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fb-row .btn{height:44px}
+.fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+@media (max-width:640px){.tabs{width:100%}.tab{flex:1 1 auto;padding:0 6px;font-size:14px;min-width:0}}
+.fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .media-bar{display:flex;align-items:center;gap:12px;margin-bottom:-4px}
 .media-bar[hidden]{display:none}
@@ -287,10 +300,28 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
         <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
         <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
         <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
+        <button class="tab" role="tab" id="tab-feedback" data-view="feedback" aria-selected="false">Feedback</button>
       </div>
     </div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
+    <div id="view-feedback" role="tabpanel" aria-labelledby="tab-feedback" hidden>
+      <div class="card fb-card">
+        <form id="fbForm" novalidate>
+          <h2 class="fb-h">Send feedback</h2>
+          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
+          <label class="fb-lbl" for="fbMsg">Your message</label>
+          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
+          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
+          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
+        </form>
+        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
+          <h2 class="fb-h">Thank you!</h2>
+          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
+          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
+        </div>
+      </div>
+    </div>
     <div class="media-bar" id="mediaBar" hidden>
       <div class="seg" role="group" aria-label="Media type">
         <button type="button" class="seg-btn" id="seg-slides" data-media="slides" aria-pressed="true">Slides</button>
@@ -1094,7 +1125,7 @@ $("#nextSlide").addEventListener("click", () => goSlide(1));
 $("#stage").addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } });
 
 /* ---------------- Shelf, routing ---------------- */
-const VIEWS = ["infographic", "slides", "video", "report"];
+const VIEWS = ["infographic", "slides", "video", "report", "feedback"];
 let state = {ticker: "AMZN", view: "infographic", media: "slides"};
 function renderSpines(){
   const sel = $("#pick");
@@ -1109,7 +1140,7 @@ function setView(v){
   const media = v === "slides" || v === "video";
   if (media) state.media = v;
   VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
-  ["infographic", "media", "report"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  ["infographic", "media", "report", "feedback"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
   $("#mediaBar").hidden = !media;
   ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
   if (v !== "video" && player.playing && !player.recording) stop(false);
@@ -1167,6 +1198,29 @@ async function openCompany(t, view){
   $("#fmeta").innerHTML = `<span><b>${c.form || "Form 10-K"}</b> · ${esc(c.fy)}</span><span>${esc(c.period)}</span><span>Filed ${esc(c.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
   renderReport(c); renderInfographic(c); loadSlides(c); loadVideo(c); renderSpines(); setView(view || state.view);
 }
+/* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
+const FB_TO = ["alexandermou2000", "gmail.com"].join("@");   // kept out of the page text; swap for FormSubmit's alias once activated
+$("#fbForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("#fbMsg").value.trim(), st = $("#fbStatus"), btn = $("#fbSend");
+  if (!msg) { st.textContent = "Please write a message first."; $("#fbMsg").focus(); return; }
+  if ($("#fbHoney").value) { showFbThanks(); return; }   // a bot filled the hidden field
+  btn.disabled = true; st.textContent = "Sending…";
+  try {
+    const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
+      method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
+      body: JSON.stringify({message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
+        _subject: "10-K Analyzer feedback", _template: "table", _captcha: "false"})
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    showFbThanks();
+  } catch (err) {
+    st.textContent = "Your feedback couldn't be sent from here. Please try again in a moment" +
+      (location.hostname.endsWith("github.io") ? "." : ", or use the site at alexandermou.github.io/10k-analyzer.");
+  } finally { btn.disabled = false; }
+});
+function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
+$("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $("#fbForm").hidden = false; $("#fbMsg").focus(); });
 function writeHash(){ const h = state.ticker.toLowerCase() + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
 function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const [t, v] = h.split("-"); return {t: (t || "").toUpperCase(), v: VIEWS.includes(v) ? v : "infographic"}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
