@@ -214,6 +214,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:16px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
+.ov-acts{display:flex;gap:8px;flex-wrap:wrap}
+.ov-box .barhead{flex-wrap:wrap;align-items:center}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 /* Slides (authored at 1280x720, scaled to fit) */
@@ -325,8 +327,10 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 </div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box">
-    <div class="barhead"><p id="ovTitle" style="font-weight:600">Press and hold the image to save it. On a computer, right-click it and choose Save Image.</p><button class="btn ghost" type="button" id="ovClose">Close</button></div>
+    <div class="barhead"><p id="ovTitle" style="font-weight:600">Infographic image</p>
+      <div class="ov-acts"><button class="btn" type="button" id="ovSave">Save image</button><button class="btn ghost" type="button" id="ovClose">Close</button></div></div>
     <img id="ovImg" alt="Infographic image">
+    <p class="status" id="ovStatus">You can also press and hold the image (or right-click it on a computer) to save or share it.</p>
   </div>
 </div>
 
@@ -768,17 +772,32 @@ async function makeInfographicBlob(c){
     if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
   }
 }
-let lastImgUrl = null;
+let lastImgUrl = null, lastImg = null;
+/* Saves the image shown in the preview: the host's save dialog when there is one, otherwise the
+   phone's share sheet (which offers Save Image), otherwise an ordinary browser download. */
+async function saveShownImage(){
+  if (!lastImg) return;
+  const {blob, name} = lastImg, st = $("#ovStatus");
+  if (downloads) {
+    try { await downloads.save({filename: name, data: blob}); st.textContent = "Saved " + name + "."; return; }
+    catch (e) { if (e && e.code === "declined") { st.textContent = "Save cancelled."; return; } }
+  }
+  try {
+    const file = new File([blob], name, {type: "image/png"});
+    if (navigator.canShare && navigator.canShare({files: [file]}) && matchMedia("(pointer: coarse)").matches) {
+      await navigator.share({files: [file], title: name}); return;
+    }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  st.textContent = "Downloaded " + name + ".";
+}
 async function downloadInfographic(){
   const c = LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
   const name = `${c.ticker}-${c.fy}-10K-infographic.png`;
   btn.disabled = true; st.textContent = "Drawing the image…";
   try {
     const blob = await makeInfographicBlob(c);
-    if (downloads) {
-      try { await downloads.save({filename: name, data: blob}); st.textContent = "Saved " + name + "."; return; }
-      catch (e) { if (e && e.code === "declined") { st.textContent = "Download cancelled."; return; } }
-    }
+    lastImg = {blob, name};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
     lastImgUrl = URL.createObjectURL(blob);
     st.textContent = ""; showImage(lastImgUrl);
@@ -824,8 +843,12 @@ function drawSvgToCanvas(svg, W, H){
   return cvs;
 }
 function showImage(url){
-  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovClose").focus();
+  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false;
+  $("#ovStatus").textContent = "You can also press and hold the image (or right-click it on a computer) to save or share it.";
+  $("#ovSave").focus();
 }
+$("#ovSave").addEventListener("click", saveShownImage);
+$("#imgOverlay").addEventListener("keydown", e => { if (e.key === "Escape") $("#ovClose").click(); });
 $("#ovClose").addEventListener("click", () => { const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
 
 /* ---------------- Video ---------------- */
