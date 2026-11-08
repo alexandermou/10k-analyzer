@@ -215,6 +215,11 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:16px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
 .ov-acts{display:flex;gap:8px;flex-wrap:wrap}
+#ovImg{touch-action:manipulation;cursor:zoom-in;-webkit-user-select:none;user-select:none}
+.ov.img-fs{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#05080d;z-index:1001}
+.ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
+.ov.img-fs .barhead,.ov.img-fs #ovStatus{display:none}
+.ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box .barhead{flex-wrap:wrap;align-items:center}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
@@ -330,7 +335,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div class="barhead"><p id="ovTitle" style="font-weight:600">Infographic image</p>
       <div class="ov-acts"><button class="btn" type="button" id="ovSave">Save image</button><button class="btn ghost" type="button" id="ovClose">Close</button></div></div>
     <img id="ovImg" alt="Infographic image">
-    <p class="status" id="ovStatus">You can also press and hold the image (or right-click it on a computer) to save or share it.</p>
+    <p class="status" id="ovStatus">Double-tap the picture for full screen. You can also press and hold it (or right-click it on a computer) to save or share it.</p>
   </div>
 </div>
 
@@ -844,12 +849,44 @@ function drawSvgToCanvas(svg, W, H){
 }
 function showImage(url){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false;
-  $("#ovStatus").textContent = "You can also press and hold the image (or right-click it on a computer) to save or share it.";
+  $("#ovStatus").textContent = "Double-tap the picture for full screen. You can also press and hold it (or right-click it on a computer) to save or share it.";
   $("#ovSave").focus();
 }
 $("#ovSave").addEventListener("click", saveShownImage);
-$("#imgOverlay").addEventListener("keydown", e => { if (e.key === "Escape") $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
+/* Double-tap (or double-click) the preview picture to fill the screen with it; do it again to go back.
+   Uses the browser's real full screen where allowed, otherwise just covers the page. */
+const ovFsReal = () => (document.fullscreenElement || document.webkitFullscreenElement) === $("#imgOverlay");
+function setImgFs(on){
+  const ov = $("#imgOverlay");
+  ov.classList.toggle("img-fs", on); ov.scrollTop = 0;
+  if (on) {
+    const req = ov.requestFullscreen || ov.webkitRequestFullscreen;
+    if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+  } else if (ovFsReal()) {
+    const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+  }
+}
+const toggleImgFs = () => setImgFs(!$("#imgOverlay").classList.contains("img-fs"));
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
+  if (!ovFsReal() && $("#imgOverlay").classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement)) {
+    // left real full screen with the system gesture or Esc: drop the full-screen look too, unless we never had real full screen
+    if (document.fullscreenEnabled || document.webkitFullscreenEnabled) $("#imgOverlay").classList.remove("img-fs");
+  }
+}));
+let lastTap = {t: 0, x: 0, y: 0}, lastToggle = 0;
+$("#ovImg").addEventListener("pointerup", e => {
+  if (e.pointerType === "mouse") return;
+  const now = Date.now();
+  if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+    e.preventDefault(); lastTap.t = 0; lastToggle = now; toggleImgFs();
+  } else lastTap = {t: now, x: e.clientX, y: e.clientY};
+});
+$("#ovImg").addEventListener("dblclick", e => { e.preventDefault(); if (Date.now() - lastToggle > 500) toggleImgFs(); });  // skip the dblclick a phone adds after our own double-tap
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape" || $("#imgOverlay").hidden) return;
+  if ($("#imgOverlay").classList.contains("img-fs")) setImgFs(false); else $("#ovClose").click();
+});
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
