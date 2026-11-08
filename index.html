@@ -78,6 +78,13 @@ button,input{font:inherit}
 .fb-h{font-size:20px;margin:0;letter-spacing:-.01em}
 .fb-sub{margin:0;color:var(--muted)}
 .fb-lbl{font-weight:600;margin-top:6px}
+.fb-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.fb-two{grid-template-columns:1fr}}
+.fb-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fb-opt{font-weight:400;color:var(--muted)}
+.fb-hint{margin:-4px 0 0;font-size:13px;color:var(--muted)}
+#fbName,#fbEmail{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+#fbName:focus,#fbEmail:focus{outline:2px solid var(--accent);outline-offset:1px}
 #fbMsg{width:100%;min-height:150px;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
 #fbMsg:focus{outline:2px solid var(--accent);outline-offset:1px}
 .fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -310,6 +317,13 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
         <form id="fbForm" novalidate>
           <h2 class="fb-h">Send feedback</h2>
           <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
+          <div class="fb-two">
+            <div class="fb-field"><label class="fb-lbl" for="fbName">Name <span class="fb-opt">(optional)</span></label>
+              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
+            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email <span class="fb-opt">(optional)</span></label>
+              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
+          </div>
+          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
           <label class="fb-lbl" for="fbMsg">Your message</label>
           <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
           <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
@@ -1203,13 +1217,15 @@ const FB_TO = ["alexandermou2000", "gmail.com"].join("@");   // kept out of the 
 $("#fbForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("#fbMsg").value.trim(), st = $("#fbStatus"), btn = $("#fbSend");
+  const name = $("#fbName").value.trim(), email = $("#fbEmail").value.trim();
   if (!msg) { st.textContent = "Please write a message first."; $("#fbMsg").focus(); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = "That email doesn't look right. Check it, or leave it blank."; $("#fbEmail").focus(); return; }
   if ($("#fbHoney").value) { showFbThanks(); return; }   // a bot filled the hidden field
   btn.disabled = true; st.textContent = "Sending…";
   try {
     const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
       method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
-      body: JSON.stringify({message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
+      body: JSON.stringify({name: name || "(not given)", email: email || "(not given)", ...(email ? {_replyto: email} : {}), message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
         _subject: "10-K Analyzer feedback", _template: "table", _captcha: "false"})
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
@@ -1219,7 +1235,7 @@ $("#fbForm").addEventListener("submit", async e => {
       (location.hostname.endsWith("github.io") ? "." : ", or use the site at alexandermou.github.io/10k-analyzer.");
   } finally { btn.disabled = false; }
 });
-function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
+function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbName").value = ""; $("#fbEmail").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
 $("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $("#fbForm").hidden = false; $("#fbMsg").focus(); });
 function writeHash(){ const h = state.ticker.toLowerCase() + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
 function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const [t, v] = h.split("-"); return {t: (t || "").toUpperCase(), v: VIEWS.includes(v) ? v : "infographic"}; }
