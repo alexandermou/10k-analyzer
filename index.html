@@ -385,7 +385,6 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
           </div></div><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         </div>
-        <div><button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button></div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
       </div>
     </div>
@@ -1020,7 +1019,7 @@ function groupBars(ctx, c, groups, p){
     const y = yoy(cur, prior); T(ctx, y === null ? ((prior < 0 || cur < 0) ? fromLoss(c, prior, cur) : "n/m") : yoyStr(cur, prior), gx + 120, base + 96, 20, (y === null ? cur >= prior : y >= 0) ? V.green : V.red, FB, 700, "center"); });
   ctx.fillStyle = V.blue2; ctx.fillRect(80, base, 1120, 2);
 }
-const player = {scenes: [], i: 0, t: 0, playing: false, last: 0, spoken: true, recording: null, company: null};
+const player = {scenes: [], i: 0, t: 0, playing: false, last: 0, spoken: true, company: null};
 const cv = $("#cv"), ctx = cv.getContext("2d");
 function drawCaption(text){
   ctx.font = `500 26px ${FB}`; const lines = wrapLines(ctx, text, 1100).slice(0, 2);
@@ -1041,7 +1040,7 @@ function setPP(sel, playing, ended){
 }
 function speak(sc){
   player.spoken = true;
-  if (!("speechSynthesis" in window) || player.recording) return;
+  if (!("speechSynthesis" in window)) return;
   try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(sc.say); u.rate = 1.02; player.spoken = false;
     u.onend = u.onerror = () => { player.spoken = true; }; speechSynthesis.speak(u); } catch (e) { player.spoken = true; }
 }
@@ -1060,8 +1059,7 @@ function play(){ if (player.playing) return; if (deck.playing) stopDeck(false); 
   if (player.t === 0) speak(player.scenes[player.i]); else { try { speechSynthesis.resume(); } catch (e) {} }
   requestAnimationFrame(tick); }
 function stop(ended){ player.playing = false; setPP("#playBtn", false, ended);
-  try { ended ? speechSynthesis.cancel() : speechSynthesis.pause(); } catch (e) {}
-  if (ended && player.recording) player.recording.stop(); }
+  try { ended ? speechSynthesis.cancel() : speechSynthesis.pause(); } catch (e) {} }
 function restart(){ stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.i = 0; player.t = 0; render(); setPP("#playBtn", false); }
 function loadVideo(c){ restart(); player.company = c; player.scenes = buildScenes(c); player.i = 0; player.t = 0; render();
   const secs = Math.round(player.scenes.reduce((a, s) => a + s.dur, 0)); $("#vstatus").textContent = `About ${secs} seconds, with captions and voice narration. Narration uses your device's voice.`; }
@@ -1080,24 +1078,9 @@ $("#stage").addEventListener("click", e => { if (deck.playing && !e.target.close
 $("#prevScene").addEventListener("click", () => goScene(-1));
 $("#nextScene").addEventListener("click", () => goScene(1));
 
-/* Download: records the animation (with captions) in real time, then offers the file */
+/* The host's save dialog, used by the infographic's Save image button when the page runs inside Claude */
 let downloads = null;
-const canRecord = typeof MediaRecorder !== "undefined" && typeof cv.captureStream === "function";
-function pickType(){ const opts = [["video/mp4;codecs=avc1","mp4"],["video/mp4","mp4"],["video/webm;codecs=vp9","webm"],["video/webm","webm"]];
-  for (const [t, ext] of opts) { try { if (MediaRecorder.isTypeSupported(t)) return {t, ext}; } catch (e) {} } return null; }
-$("#dlBtn").addEventListener("click", () => {
-  if (player.recording) return; const type = pickType(); if (!type) { $("#vstatus").textContent = "This browser can't record video. Try Chrome or Safari on a computer."; return; }
-  restart(); const chunks = [], rec = new MediaRecorder(cv.captureStream(30), {mimeType: type.t, videoBitsPerSecond: 4e6});
-  player.recording = rec; $("#dlBtn").disabled = true; $("#vstatus").textContent = "Recording the video in real time… (captions included; voice can't be recorded)";
-  rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-  rec.onstop = async () => { player.recording = null; $("#dlBtn").disabled = false;
-    const blob = new Blob(chunks, {type: type.t.split(";")[0]}), name = `${player.company.ticker}-${player.company.fy}-10K.${type.ext}`;
-    try { await downloads.save({filename: name, data: blob}); $("#vstatus").textContent = "Saved " + name + "."; }
-    catch (e) { $("#vstatus").textContent = e && e.code === "declined" ? "Download cancelled." : "The video couldn't be saved here."; } };
-  rec.start(500); play();
-});
-(async () => { try { downloads = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; }
-  $("#dlBtn").hidden = !(downloads && canRecord); })();
+(async () => { try { downloads = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; } })();
 
 /* ---------------- Slides with voice-over ---------------- */
 function sayify(s){
@@ -1190,7 +1173,7 @@ function setView(v){
   ["infographic", "media", "report", "feedback"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
   $("#mediaBar").hidden = !media;
   ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
-  if (v !== "video" && player.playing && !player.recording) stop(false);
+  if (v !== "video" && player.playing) stop(false);
   if (v !== "slides" && deck.playing) stopDeck(false);
   if (v === "slides") fitSlide();
   if (fsActive() && !$("#view-" + v).contains(fsActive())) exitFs();
