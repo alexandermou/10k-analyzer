@@ -1037,6 +1037,7 @@ function setPP(sel, playing, ended){
   const b = $(sel); if (!b) return; const lab = playing ? "Pause" : ended ? "Play again" : "Play";
   b.classList.toggle("is-playing", !!playing); b.setAttribute("aria-label", lab); b.title = lab;
   const box = b.closest(".fs-box"); if (box) box.classList.toggle("playing", !!playing);
+  if (typeof nvFollow === "function") nvFollow(sel === "#playBtn" ? "video" : "slides", !!playing);
 }
 function speak(sc){
   player.spoken = true;
@@ -1137,7 +1138,7 @@ function showSlide(i){
   $("#slideInner").innerHTML = `${s.kick ? `<p class="sl-kick">${esc(s.kick)}</p>` : ""}${s.body}<div class="sl-foot"><span>${c.ticker} · ${c.fy} ${(c.form || "Form 10-K").replace("Form ", "")}</span><span>${deck.i + 1} / ${deck.slides.length}</span></div>`;
   $("#scount").textContent = `${deck.i + 1} / ${deck.slides.length}`; $("#scount").setAttribute("aria-label", `Slide ${deck.i + 1} of ${deck.slides.length}`); $("#snote").textContent = s.note;
   $("#sprog").style.width = ((deck.i + 1) / deck.slides.length * 100).toFixed(1) + "%";
-  $("#prevSlide").disabled = deck.i === 0; $("#nextSlide").disabled = deck.i === deck.slides.length - 1; fitSlide();
+  $("#prevSlide").disabled = deck.i === 0; $("#nextSlide").disabled = deck.i === deck.slides.length - 1; fitSlide(); nvSlideChanged();
 }
 function speakSlide(){
   const tok = ++deck.token, s = deck.slides[deck.i]; clearTimeout(deck.timer);
@@ -1176,14 +1177,85 @@ function setView(v){
   if (v !== "video" && player.playing) stop(false);
   if (v !== "slides" && deck.playing) stopDeck(false);
   if (v === "slides") fitSlide();
+  if (media && typeof nvPrepare === "function") nvPrepare(v);
   if (fsActive() && !$("#view-" + v).contains(fsActive())) exitFs();
 }
 /* Full screen for slides and video. Uses the browser's real full screen where it exists; on iPhone,
    which only allows that for <video>, the box is pinned over the whole page instead. Either way the
    player keeps its 16:9 shape and grows to fill the screen, so turning a phone sideways enlarges it. */
+/* ---------------- iPhone / iPad full screen through the device's own video player ----------------
+   iOS only lets real <video> elements go full screen, and that full screen survives turning the phone.
+   So on iOS the slide or animation is streamed into a hidden <video>, which is what goes full screen.
+   The page's narration keeps playing; the player's own play/pause buttons control the slides or video. */
+var NV = null;
+function nvInit(){
+  const IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!(IOS || window.__forceNativeFs)) return;
+  if (!("webkitEnterFullscreen" in HTMLVideoElement.prototype) || typeof HTMLCanvasElement.prototype.captureStream !== "function") return;
+  const el = document.createElement("video");
+  el.muted = true; el.playsInline = true; el.setAttribute("playsinline", ""); el.setAttribute("muted", ""); el.setAttribute("aria-hidden", "true");
+  el.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
+  document.body.appendChild(el);
+  const slideCv = document.createElement("canvas"); slideCv.width = 1280; slideCv.height = 720;
+  NV = {el, slideCv, kind: null, streams: {}, active: false, quietUntil: 0, slideBmp: null, slideJob: 0};
+  const isFs = () => el.webkitDisplayingFullscreen || document.fullscreenElement === el || document.webkitFullscreenElement === el;
+  const begin = () => { NV.active = true; NV.quietUntil = Date.now() + 600; };
+  const end = () => { NV.active = false; NV.quietUntil = Date.now() + 600; setTimeout(() => { el.play().catch(() => {}); }, 300); };
+  el.addEventListener("webkitbeginfullscreen", begin); el.addEventListener("webkitendfullscreen", end);
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (isFs()) begin(); else if (NV.active) end(); }));
+  // the player's own play/pause buttons drive the slides or video
+  el.addEventListener("pause", () => { if (!NV.active || Date.now() < NV.quietUntil || !isFs()) return;
+    if (NV.kind === "video" && player.playing) stop(false); if (NV.kind === "slides" && deck.playing) stopDeck(false); });
+  el.addEventListener("play", () => { if (!NV.active || Date.now() < NV.quietUntil) return;
+    if (NV.kind === "video" && !player.playing) play(); if (NV.kind === "slides" && !deck.playing) startDeck(); });
+}
+function nvStream(kind){
+  if (!NV.streams[kind]) NV.streams[kind] = (kind === "video" ? cv : NV.slideCv).captureStream(30);
+  return NV.streams[kind];
+}
+function nvPaintSlide(){ if (!NV || !NV.slideBmp) return; const g = NV.slideCv.getContext("2d"); g.drawImage(NV.slideBmp, 0, 0, 1280, 720); }
+async function nvRenderSlide(){
+  if (!NV) return; const job = ++NV.slideJob;
+  try {
+    await loadImgLib();
+    const src = $("#slideInner"), host = document.createElement("div");
+    host.style.cssText = "position:fixed;left:-20000px;top:0;width:1280px;height:720px;pointer-events:none";
+    const n = src.cloneNode(true); n.removeAttribute("id"); n.style.transform = "none"; n.style.position = "relative";
+    const bg = getComputedStyle($("#stage")).backgroundColor || "#fff";
+    n.style.background = bg; host.appendChild(n); document.body.appendChild(host);
+    try {
+      const c = await window.htmlToImage.toCanvas(n, {width: 1280, height: 720, pixelRatio: 1, backgroundColor: bg, cacheBust: false});
+      if (job !== NV.slideJob) return; NV.slideBmp = c; nvPaintSlide(); [80, 250].forEach(t => setTimeout(nvPaintSlide, t));
+    } finally { host.remove(); }
+  } catch (e) {}
+}
+// Called whenever the Media view, slide or company changes: keeps the hidden player showing the right picture.
+function nvPrepare(kind){
+  if (!NV || !kind) return;
+  if (NV.kind !== kind) { NV.kind = kind; NV.el.srcObject = nvStream(kind); }
+  NV.el.play().catch(() => {});
+  if (kind === "slides") nvRenderSlide(); else { render(); setTimeout(render, 120); }
+}
+function nvSlideChanged(){ if (NV && NV.kind === "slides" && state.view === "slides") nvRenderSlide(); }
+function nvEnter(kind){
+  if (!NV) return false;
+  if (NV.kind !== kind) nvPrepare(kind);
+  const el = NV.el; if (el.readyState < 1) return false;
+  try {
+    NV.quietUntil = Date.now() + 800; el.play().catch(() => {}); el.webkitEnterFullscreen();
+    // match the device player's play/pause button to the page: if the slides or video are paused, so is the player
+    const playing = kind === "video" ? player.playing : deck.playing;
+    if (!playing) setTimeout(() => { NV.quietUntil = Date.now() + 400; el.pause(); }, 120);
+    return true;
+  } catch (e) { return false; }
+}
+function nvFollow(kind, playing){
+  if (!NV || !NV.active || NV.kind !== kind) return;
+  NV.quietUntil = Date.now() + 500; if (playing) NV.el.play().catch(() => {}); else NV.el.pause();
+}
 let fakeFs = null, wantFs = null, ourExit = false, lastFlip = 0;
 let wasLand = innerWidth > innerHeight;
-const realFsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+const realFsEl = () => { const e = document.fullscreenElement || document.webkitFullscreenElement || null; return NV && e === NV.el ? null : e; };
 const fsActive = () => realFsEl() || fakeFs;
 function syncFs(){
   const on = fsActive();
@@ -1210,22 +1282,14 @@ function exitFs(){
   const ex = document.exitFullscreen || document.webkitExitFullscreen;
   if (realFsEl() && ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
 }
-/* If a rotation knocks the player out of real full screen (some phones do this), keep it full screen by covering the page. */
 /* Leaving real full screen any other way (Esc, a system gesture) simply returns to the page. */
 function onFsChange(){
   if (!realFsEl() && !fakeFs) wantFs = null;
   if (realFsEl()) ourExit = false;
   syncFs();
 }
-/* Turning the phone while in full screen leaves full screen and shows the square button again,
-   with the player brought into view, so one tap fills the screen in the new orientation. */
-function noteFlip(){
-  const land = innerWidth > innerHeight; if (land === wasLand) return; wasLand = land; lastFlip = Date.now();
-  const box = fsActive(); if (!box) return;
-  exitFs();
-  const show = () => { const r = box.getBoundingClientRect(); window.scrollTo(0, Math.max(0, scrollY + r.top - 8)); };
-  [350, 800].forEach(t => setTimeout(show, t));
-}
+/* Full screen stays on when the phone is turned; only the exit button (or Esc) leaves it. */
+function noteFlip(){ const land = innerWidth > innerHeight; if (land !== wasLand) { wasLand = land; lastFlip = Date.now(); } }
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, onFsChange));
 /* Phones can refuse full screen while the device voice is speaking, so playback pauses for the switch
    and picks up again once the screen has changed: the video from where it was, slides from the current slide. */
@@ -1237,6 +1301,7 @@ function pauseForFs(){
 }
 [["fsSlidesBtn", "fsSlides"], ["fsVideoBtn", "fsVideo"]].forEach(([b, x]) =>
   $("#" + b).addEventListener("click", () => {
+    if (!fsActive() && nvEnter(x === "fsVideo" ? "video" : "slides")) return;   // iPhone/iPad: the device's own player
     const resume = pauseForFs();
     fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x));
     if (resume) setTimeout(resume, 700);
@@ -1258,6 +1323,7 @@ window.addEventListener("orientationchange", remeasure);
 try { screen.orientation.addEventListener("change", remeasure); } catch (e) {}
 try { visualViewport.addEventListener("resize", measureFs); } catch (e) {}
 measureFs();
+try { nvInit(); } catch (e) { NV = null; }
 let openSeq = 0;
 async function openCompany(t, view){
   if (!LIBRARY[t]) return;
