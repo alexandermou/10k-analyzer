@@ -425,11 +425,12 @@ function loadCompany(t){
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 function money(c, v, kind){
+  if (v === null || v === undefined) return "—";
   const cur = c.cur || "$";
   if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toFixed(2);
   const a = Math.abs(v);
   const d = c.dec || 0;
-  const s = c.unit === "B" ? cur + a.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1}) + "B" : cur + a.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}) + "M";
+  const s = c.unit === "B" ? (a > 0 && a < 0.95 ? cur + Math.round(a * 1000).toLocaleString("en-US") + "M" : cur + a.toLocaleString("en-US", {minimumFractionDigits: 1, maximumFractionDigits: 1}) + "B") : cur + a.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d}) + "M";
   return v < 0 ? "(" + s + ")" : s;
 }
 function spoken(c, v){
@@ -537,6 +538,9 @@ function sankey(c){
   const noY = oiY + Math.max(oiH + 14, 34);
   if (c.nonOp > 0) out.push(ribbon(OX + NW, noY, noY + H(c.nonOp), PX, ptY + oiH, ptY + ptH, "fp"));
   // finals
+  // add-backs after pre-tax income (tax benefits, discontinued operations, noncontrolling interests' share of losses):
+  // they have no ribbon of their own, so they are listed under the net income figure
+  const credits = lossBelow ? [] : [...(c.tax < 0 ? [["Tax benefit", -c.tax]] : []), ...c.belowTax.filter(x => x[1] < 0).map(([n, v]) => [n, -v])];
   const finals = lossBelow ? [] : [{n: c.netLabel, v: c.netFlow, show: c.netIncome, from: [PX + NW, ptY], net: true}];
   let pacc = ptY + H(c.netFlow);
   if (!lossBelow) {
@@ -556,16 +560,17 @@ function sankey(c){
     if (it.net) {
       out.push(txt(LX, cy - 4, esc(it.n), 13, "t-m", 600));
       out.push(`<text x="${LX}" y="${cy + 18}" font-size="21" class="t-p" font-weight="700">${f(it.show)} <tspan font-size="13" font-weight="600" class="t-m">· ${pctOf(c, it.show)}</tspan></text>`);
+      credits.forEach(([n, v], k) => out.push(`<text x="${LX}" y="${cy + 40 + 19 * k}" font-size="12" class="t-m" font-weight="600">${esc(n)} <tspan class="t-p" font-weight="700">+${f(v)}</tspan></text>`));
     } else {
-      out.push(txt(LX, cy - 3, esc(it.n), 12, "t-m", 600));
+      out.push(txt(LX, cy - 3, esc(it.n), it.n.length > 34 ? 10.5 : 12, "t-m", 600));
       out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="700">${it.lab || "(" + f(it.v) + ")"} <tspan font-size="12" font-weight="500" class="t-m">· ${pctOf(c, it.pv ?? it.v)}</tspan></text>`);
     }
-    cur = y0 + Math.max(h, 26) + (it.net ? 26 : 16);
+    cur = y0 + Math.max(h, 26) + (it.net ? 26 + 19 * credits.length : 16);
     if (it.summary) {
       const rows = [["Pre-tax loss", "(" + f(-pretax) + ")"]];
       if (c.tax) rows.push([c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax)]);
       // a negative below-tax item is a credit (e.g. losses allocated to noncontrolling interests); show the all-owners subtotal first
-      if (c.belowTax.some(x => x[1] < 0)) rows.push(["Net loss, all owners", "(" + f(-(pretax - c.tax)) + ")"]);
+      if (c.belowTax.some(x => x[1] < 0 && /noncontrolling/i.test(x[0]))) rows.push(["Net loss, all owners", "(" + f(-(pretax - c.tax)) + ")"]);
       c.belowTax.forEach(([n, v]) => rows.push([n, v < 0 ? "+" + f(-v) : "(" + f(v) + ")"]));
       rows.forEach(([n, v]) => { out.push(`<text x="${LX}" y="${cur + 12}" font-size="12" class="t-m" font-weight="600">${esc(n)} <tspan class="${v[0] === "+" ? "t-p" : "t-n"}" font-weight="700">${v}</tspan></text>`); cur += 20; });
       out.push(txt(LX, cur + 14, esc(c.netLabel), 13, "t-m", 600));
@@ -635,7 +640,7 @@ function sankeyLoss(c){
   out.push(ribbon(GX + NW, gpY, gpY + gpH, OX, oacc, oacc + gpH, "fp")); oacc += gpH;
   extras.forEach(e => { out.push(ribbon(GX + NW, e.y, e.y + e.h, OX, oacc, oacc + e.h, e.credit ? "fp" : "fn")); oacc += e.h; });
   // operating expense lines
-  let cur = 160 + 24 * ((c.belowTax || []).length + ((c.belowTax || []).some(x => x[1] < 0) ? 1 : 0)), facc = opexY;
+  let cur = 160 + 24 * ((c.belowTax || []).length + ((c.belowTax || []).some(x => x[1] < 0 && /noncontrolling/i.test(x[0])) ? 1 : 0)), facc = opexY;
   c.opex.forEach(([n, v]) => {
     const h = Math.max(H(v), 1.5), cy = cur + h / 2;
     out.push(ribbon(OX + NW, facc, facc + H(v), FX, cur, cur + H(v), "fn"));
@@ -661,12 +666,12 @@ function sankeyLoss(c){
   if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
   node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
   // below the operating line
-  const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : 12, "t-m", 600)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
+  const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : label.length > 24 ? 10.5 : 12, "t-m", 600)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
   row(30, "Operating loss", "(" + f(loss) + ")", "t-n");
   row(54, esc(c.nonOpLabel), (c.nonOp >= 0 ? "+" : "") + f(c.nonOp), c.nonOp >= 0 ? "t-p" : "t-n");
   let ry = 78;
   if (c.tax) { row(ry, c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax), c.tax > 0 ? "t-n" : "t-p"); ry += 24; }
-  if ((c.belowTax || []).some(x => x[1] < 0)) { row(ry, "Net loss, all owners", "(" + f(-(c.opIncome + c.nonOp - c.tax)) + ")", "t-n"); ry += 24; }
+  if ((c.belowTax || []).some(x => x[1] < 0 && /noncontrolling/i.test(x[0]))) { row(ry, "Net loss, all owners", "(" + f(-(c.opIncome + c.nonOp - c.tax)) + ")", "t-n"); ry += 24; }
   (c.belowTax || []).forEach(([n, v]) => { row(ry, esc(n), v < 0 ? "+" + f(-v) : "(" + f(v) + ")", v < 0 ? "t-p" : "t-n"); ry += 24; });
   out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
   row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
