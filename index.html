@@ -185,6 +185,19 @@ tr.key td{font-weight:700}
 .screen canvas{display:block;width:100%;height:100%}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .controls .btn{height:44px}
+.mc{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.mc-btns{display:flex;gap:16px;align-items:center}
+.mc-side{justify-self:end}
+.ic-btn{width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
+.ic-btn:active{transform:scale(.94)}
+.ic-btn:disabled{opacity:.35;cursor:default;transform:none}
+.ic-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ic-btn svg{width:22px;height:22px}
+.ic-btn.main{width:60px;height:60px;border:0;background:var(--navy);color:var(--bg)}
+.ic-btn.main svg{width:26px;height:26px}
+.ic-btn .ic-pause,.ic-btn.is-playing .ic-play{display:none}
+.ic-btn.is-playing .ic-pause{display:inline}
+@media (max-height:500px){.fs-box.is-fs .ic-btn{width:40px;height:40px}.fs-box.is-fs .ic-btn.main{width:48px;height:48px}}
 .fs-box{display:flex;flex-direction:column;gap:12px}
 .fs-btn{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;border-radius:10px;
   background:rgba(14,26,43,.6);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:.85;transition:opacity .15s,background .15s}
@@ -347,15 +360,18 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
         <div class="fs-box" id="fsSlides">
         <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><button class="fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
         <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
-        <div class="controls">
-          <button class="btn ghost" type="button" id="prevSlide" aria-label="Previous slide">Previous</button>
-          <button class="btn" type="button" id="voSlide">Play voice-over</button>
-          <button class="btn ghost" type="button" id="nextSlide" aria-label="Next slide">Next</button>
-          <span class="status num" id="scount"></span>
+        <div class="controls mc">
+          <span></span>
+          <div class="mc-btns">
+            <button class="ic-btn" type="button" id="prevSlide" aria-label="Previous slide" title="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="ic-btn main" type="button" id="voSlide" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
+            <button class="ic-btn" type="button" id="nextSlide" aria-label="Next slide" title="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <span class="status num mc-side" id="scount"></span>
         </div>
         </div>
         <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
-        <p class="status" id="sstatus">Voice-over reads each slide aloud and moves on by itself. It uses your device's voice.</p>
+        <p class="status" id="sstatus">Press play to hear each slide read aloud; it moves on by itself. Narration uses your device's voice.</p>
       </div>
     </div>
     <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
@@ -363,11 +379,14 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
         <div class="fs-box" id="fsVideo">
         <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
-        <div class="controls">
-          <button class="btn" type="button" id="playBtn">Play</button>
-          <button class="btn ghost" type="button" id="restartBtn">Restart</button>
-          <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Voice narration</label>
-          <button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button>
+        <div class="controls mc">
+          <span></span>
+          <div class="mc-btns">
+            <button class="ic-btn" type="button" id="prevScene" aria-label="Previous part" title="Previous part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="ic-btn main" type="button" id="playBtn" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
+            <button class="ic-btn" type="button" id="nextScene" aria-label="Next part" title="Next part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <span class="mc-side"><button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button></span>
         </div>
         </div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
@@ -1016,10 +1035,15 @@ function render(){
   sc.draw(ctx, player.t / 1.4, player.t); drawCaption(sc.cap);
   const total = player.scenes.reduce((a, s) => a + s.dur, 0), done = player.scenes.slice(0, player.i).reduce((a, s) => a + s.dur, 0) + Math.min(player.t, sc.dur);
   $("#prog").style.width = (done / total * 100).toFixed(1) + "%";
+  if (typeof updSceneBtns === "function") updSceneBtns();
+}
+function setPP(sel, playing, ended){
+  const b = $(sel); if (!b) return; const lab = playing ? "Pause" : ended ? "Play again" : "Play";
+  b.classList.toggle("is-playing", !!playing); b.setAttribute("aria-label", lab); b.title = lab;
 }
 function speak(sc){
   player.spoken = true;
-  if (!$("#voiceOn").checked || !("speechSynthesis" in window) || player.recording) return;
+  if (!("speechSynthesis" in window) || player.recording) return;
   try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(sc.say); u.rate = 1.02; player.spoken = false;
     u.onend = u.onerror = () => { player.spoken = true; }; speechSynthesis.speak(u); } catch (e) { player.spoken = true; }
 }
@@ -1034,18 +1058,26 @@ function tick(now){
   render(); requestAnimationFrame(tick);
 }
 function play(){ if (player.playing) return; if (deck.playing) stopDeck(false); if (player.i === player.scenes.length - 1 && player.t >= player.scenes[player.i].dur) { player.i = 0; player.t = 0; }
-  player.playing = true; player.last = performance.now(); $("#playBtn").textContent = "Pause";
+  player.playing = true; player.last = performance.now(); setPP("#playBtn", true);
   if (player.t === 0) speak(player.scenes[player.i]); else { try { speechSynthesis.resume(); } catch (e) {} }
   requestAnimationFrame(tick); }
-function stop(ended){ player.playing = false; $("#playBtn").textContent = ended ? "Replay" : "Play";
+function stop(ended){ player.playing = false; setPP("#playBtn", false, ended);
   try { ended ? speechSynthesis.cancel() : speechSynthesis.pause(); } catch (e) {}
   if (ended && player.recording) player.recording.stop(); }
-function restart(){ stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.i = 0; player.t = 0; render(); $("#playBtn").textContent = "Play"; }
+function restart(){ stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.i = 0; player.t = 0; render(); setPP("#playBtn", false); }
 function loadVideo(c){ restart(); player.company = c; player.scenes = buildScenes(c); player.i = 0; player.t = 0; render();
-  const secs = Math.round(player.scenes.reduce((a, s) => a + s.dur, 0)); $("#vstatus").textContent = `About ${secs} seconds, with captions. Narration uses your device's voice.`; }
+  const secs = Math.round(player.scenes.reduce((a, s) => a + s.dur, 0)); $("#vstatus").textContent = `About ${secs} seconds, with captions and voice narration. Narration uses your device's voice.`; }
 $("#playBtn").addEventListener("click", () => player.playing ? stop(false) : play());
-$("#restartBtn").addEventListener("click", restart);
-$("#voiceOn").addEventListener("change", () => { if (!$("#voiceOn").checked) { try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true; } });
+/* Back and forward jump between the video's parts; back within the first two seconds of a part goes to the one before. */
+function goScene(d){
+  if (!player.scenes.length) return;
+  const i = d < 0 && player.t > 2 ? player.i : Math.max(0, Math.min(player.scenes.length - 1, player.i + d));
+  player.i = i; player.t = 0; render(); updSceneBtns();
+  if (player.playing) speak(player.scenes[i]); else { try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true; setPP("#playBtn", false); }
+}
+function updSceneBtns(){ $("#prevScene").disabled = player.i === 0 && player.t < .05; $("#nextScene").disabled = player.i >= player.scenes.length - 1; }
+$("#prevScene").addEventListener("click", () => goScene(-1));
+$("#nextScene").addEventListener("click", () => goScene(1));
 
 /* Download: records the animation (with captions) in real time, then offers the file */
 let downloads = null;
@@ -1119,7 +1151,7 @@ try { new ResizeObserver(fitSlide).observe($("#stage")); } catch (e) { window.ad
 function showSlide(i){
   deck.i = Math.max(0, Math.min(deck.slides.length - 1, i)); const s = deck.slides[deck.i], c = deck.company;
   $("#slideInner").innerHTML = `${s.kick ? `<p class="sl-kick">${esc(s.kick)}</p>` : ""}${s.body}<div class="sl-foot"><span>${c.ticker} · ${c.fy} ${(c.form || "Form 10-K").replace("Form ", "")}</span><span>${deck.i + 1} / ${deck.slides.length}</span></div>`;
-  $("#scount").textContent = `Slide ${deck.i + 1} of ${deck.slides.length}`; $("#snote").textContent = s.note;
+  $("#scount").textContent = `${deck.i + 1} / ${deck.slides.length}`; $("#scount").setAttribute("aria-label", `Slide ${deck.i + 1} of ${deck.slides.length}`); $("#snote").textContent = s.note;
   $("#sprog").style.width = ((deck.i + 1) / deck.slides.length * 100).toFixed(1) + "%";
   $("#prevSlide").disabled = deck.i === 0; $("#nextSlide").disabled = deck.i === deck.slides.length - 1; fitSlide();
 }
@@ -1129,9 +1161,9 @@ function speakSlide(){
   if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(s.say); u.rate = 1.02; u.onend = () => setTimeout(advance, 600); u.onerror = ev => { if (ev.error !== "interrupted" && ev.error !== "canceled") setTimeout(advance, 600); }; speechSynthesis.speak(u); return; } catch (e) {} }
   $("#sstatus").textContent = "Voice isn't available on this device, so slides advance on a timer."; deck.timer = setTimeout(advance, Math.max(5, s.say.split(" ").length / 2.6) * 1000);
 }
-function startDeck(){ if (player.playing) stop(false); deck.playing = true; $("#voSlide").textContent = "Stop voice-over"; speakSlide(); }
-function stopDeck(ended){ deck.playing = false; deck.token++; clearTimeout(deck.timer); try { speechSynthesis.cancel(); } catch (e) {} $("#voSlide").textContent = ended ? "Replay voice-over" : "Play voice-over"; if (ended) deck.restart = true; }
-function loadSlides(c){ if (deck.playing) stopDeck(false); deck.company = c; deck.slides = buildSlides(c); deck.restart = false; showSlide(0); $("#voSlide").textContent = "Play voice-over"; }
+function startDeck(){ if (player.playing) stop(false); deck.playing = true; setPP("#voSlide", true); speakSlide(); }
+function stopDeck(ended){ deck.playing = false; deck.token++; clearTimeout(deck.timer); try { speechSynthesis.cancel(); } catch (e) {} setPP("#voSlide", false, ended); if (ended) deck.restart = true; }
+function loadSlides(c){ if (deck.playing) stopDeck(false); deck.company = c; deck.slides = buildSlides(c); deck.restart = false; showSlide(0); setPP("#voSlide", false); }
 $("#voSlide").addEventListener("click", () => { if (deck.playing) { stopDeck(false); return; } if (deck.restart) { deck.restart = false; showSlide(0); } startDeck(); });
 const goSlide = d => { showSlide(deck.i + d); if (deck.playing) speakSlide(); };
 $("#prevSlide").addEventListener("click", () => goSlide(-1));
