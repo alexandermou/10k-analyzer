@@ -185,15 +185,20 @@ tr.key td{font-weight:700}
 .screen canvas{display:block;width:100%;height:100%}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .controls .btn{height:44px}
-.mc{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
-.mc-btns{display:flex;gap:16px;align-items:center}
-.mc-side{justify-self:end}
-.ic-btn{width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
+.mc-ov{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;justify-content:center;padding:28px 12px 14px;
+  background:linear-gradient(to bottom,rgba(10,15,22,0),rgba(10,15,22,.38));transition:opacity .25s;pointer-events:none}
+.mc-btns{display:flex;gap:16px;align-items:center;pointer-events:auto}
+.fs-btn{transition:opacity .25s}
+.fs-box.playing .mc-ov,.fs-box.playing .fs-btn{opacity:0;pointer-events:none}
+.fs-box.playing .mc-ov .mc-btns{pointer-events:none}
+.fs-box.playing .stage,.fs-box.playing .screen{cursor:pointer}
+@media (max-width:640px){.mc-ov{padding:20px 8px 10px}.mc-btns{gap:12px}.ic-btn{width:40px;height:40px}.ic-btn svg{width:19px;height:19px}.ic-btn.main{width:52px;height:52px}.ic-btn.main svg{width:23px;height:23px}}
+.ic-btn{width:48px;height:48px;padding:0;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.94);box-shadow:0 1px 6px rgba(0,0,0,.18);color:#15202B;display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
 .ic-btn:active{transform:scale(.94)}
-.ic-btn:disabled{opacity:.35;cursor:default;transform:none}
+.ic-btn:disabled{opacity:.45;cursor:default;transform:none}
 .ic-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ic-btn svg{width:22px;height:22px}
-.ic-btn.main{width:60px;height:60px;border:0;background:var(--navy);color:var(--bg)}
+.ic-btn.main{width:60px;height:60px;border:2px solid rgba(255,255,255,.9);background:#1D3557;color:#fff}
 .ic-btn.main svg{width:26px;height:26px}
 .ic-btn .ic-pause,.ic-btn.is-playing .ic-play{display:none}
 .ic-btn.is-playing .ic-pause{display:inline}
@@ -209,13 +214,13 @@ tr.key td{font-weight:700}
 .fs-box.is-fs .fs-btn .fs-out{display:inline}
 .fs-box.is-fs{position:fixed;top:0;left:0;right:auto;bottom:auto;width:var(--fs-w,100vw);height:var(--fs-h,100dvh);box-sizing:border-box;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
   padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
-.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 80px) * 16 / 9));flex:none}
+.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 36px) * 16 / 9));flex:none}
 .fs-box.is-fs>.controls{justify-content:center}
 
 .fs-box.is-fs .status{display:none}
 .fs-box.is-fs .stage{border-radius:10px}
 html.fs-lock,html.fs-lock body{overflow:hidden}
-@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 88px) * 16 / 9))}}
+@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 30px) * 16 / 9))}}
 .toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
 .toggle input{width:18px;height:18px;accent-color:var(--accent)}
 .status{font-size:13px;color:var(--muted)}
@@ -358,17 +363,12 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="fs-box" id="fsSlides">
-        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><button class="fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
-        <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
-        <div class="controls mc">
-          <span></span>
-          <div class="mc-btns">
+        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><div class="mc-ov"><div class="mc-btns">
             <button class="ic-btn" type="button" id="prevSlide" aria-label="Previous slide" title="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="ic-btn main" type="button" id="voSlide" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
             <button class="ic-btn" type="button" id="nextSlide" aria-label="Next slide" title="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-          </div>
-          <span class="status num mc-side" id="scount"></span>
-        </div>
+          </div></div><span class="fs-lab" id="scount" aria-live="polite"></span><button class="fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
+        <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
         </div>
         <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
         <p class="status" id="sstatus">Press play to hear each slide read aloud; it moves on by itself. Narration uses your device's voice.</p>
@@ -377,18 +377,14 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
         <div class="fs-box" id="fsVideo">
-        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
-        <div class="progress" aria-hidden="true"><div id="prog"></div></div>
-        <div class="controls mc">
-          <span></span>
-          <div class="mc-btns">
+        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><div class="mc-ov"><div class="mc-btns">
             <button class="ic-btn" type="button" id="prevScene" aria-label="Previous part" title="Previous part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="ic-btn main" type="button" id="playBtn" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
             <button class="ic-btn" type="button" id="nextScene" aria-label="Next part" title="Next part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
-          </div>
-          <span class="mc-side"><button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button></span>
+          </div></div><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
+        <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         </div>
-        </div>
+        <div><button class="btn ghost" type="button" id="dlBtn" hidden>Download video</button></div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
       </div>
     </div>
@@ -1040,6 +1036,7 @@ function render(){
 function setPP(sel, playing, ended){
   const b = $(sel); if (!b) return; const lab = playing ? "Pause" : ended ? "Play again" : "Play";
   b.classList.toggle("is-playing", !!playing); b.setAttribute("aria-label", lab); b.title = lab;
+  const box = b.closest(".fs-box"); if (box) box.classList.toggle("playing", !!playing);
 }
 function speak(sc){
   player.spoken = true;
@@ -1076,6 +1073,9 @@ function goScene(d){
   if (player.playing) speak(player.scenes[i]); else { try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true; setPP("#playBtn", false); }
 }
 function updSceneBtns(){ $("#prevScene").disabled = player.i === 0 && player.t < .05; $("#nextScene").disabled = player.i >= player.scenes.length - 1; }
+/* While playing, the buttons hide; a tap anywhere on the picture pauses and brings them back. */
+$(".screen").addEventListener("click", e => { if (player.playing && !e.target.closest(".mc-btns, .fs-btn")) stop(false); });
+$("#stage").addEventListener("click", e => { if (deck.playing && !e.target.closest(".mc-btns, .fs-btn")) stopDeck(false); });
 $("#prevScene").addEventListener("click", () => goScene(-1));
 $("#nextScene").addEventListener("click", () => goScene(1));
 
@@ -1168,7 +1168,7 @@ $("#voSlide").addEventListener("click", () => { if (deck.playing) { stopDeck(fal
 const goSlide = d => { showSlide(deck.i + d); if (deck.playing) speakSlide(); };
 $("#prevSlide").addEventListener("click", () => goSlide(-1));
 $("#nextSlide").addEventListener("click", () => goSlide(1));
-$("#stage").addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } });
+$("#stage").addEventListener("keydown", e => { if (e.target.closest("button")) return; if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } if (e.key === " ") { e.preventDefault(); $("#voSlide").click(); } });
 
 /* ---------------- Shelf, routing ---------------- */
 const VIEWS = ["infographic", "slides", "video", "report", "feedback"];
