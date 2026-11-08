@@ -213,10 +213,6 @@ tr.key td{font-weight:700}
 .fs-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .fs-btn .fs-out,.fs-box.is-fs .fs-btn .fs-in{display:none}
 .fs-box.is-fs .fs-btn .fs-out{display:inline}
-.fs-hint{display:none}
-.fs-box.is-fs.retap .fs-hint{display:block;position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:4;padding:7px 14px;border-radius:999px;
-  background:rgba(10,15,22,.78);color:#fff;font-size:13px;font-weight:600;white-space:nowrap;pointer-events:none;transition:opacity .4s}
-.fs-box.is-fs.retap.retap-quiet .fs-hint{opacity:0}
 .fs-box.is-fs{position:fixed;top:0;left:0;right:auto;bottom:auto;width:var(--fs-w,100vw);height:var(--fs-h,100dvh);box-sizing:border-box;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
   padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
 .fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 36px) * 16 / 9));flex:none}
@@ -367,7 +363,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     </div>
     <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
-        <div class="fs-box" id="fsSlides"><span class="fs-hint" aria-hidden="true">Tap to fill the screen</span>
+        <div class="fs-box" id="fsSlides">
         <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><div class="mc-ov"><div class="mc-btns">
             <button class="ic-btn" type="button" id="prevSlide" aria-label="Previous slide" title="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="ic-btn main" type="button" id="voSlide" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
@@ -381,7 +377,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     </div>
     <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
       <div class="player">
-        <div class="fs-box" id="fsVideo"><span class="fs-hint" aria-hidden="true">Tap to fill the screen</span>
+        <div class="fs-box" id="fsVideo">
         <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><div class="mc-ov"><div class="mc-btns">
             <button class="ic-btn" type="button" id="prevScene" aria-label="Previous part" title="Previous part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="ic-btn main" type="button" id="playBtn" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
@@ -1202,7 +1198,7 @@ function setView(v){
 /* Full screen for slides and video. Uses the browser's real full screen where it exists; on iPhone,
    which only allows that for <video>, the box is pinned over the whole page instead. Either way the
    player keeps its 16:9 shape and grows to fill the screen, so turning a phone sideways enlarges it. */
-let fakeFs = null, wantFs = null, ourExit = false, lastFlip = 0, dropped = null;
+let fakeFs = null, wantFs = null, ourExit = false, lastFlip = 0;
 let wasLand = innerWidth > innerHeight;
 const realFsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
 const fsActive = () => realFsEl() || fakeFs;
@@ -1226,41 +1222,26 @@ function enterFs(box){
   if (box.id === "fsSlides") setTimeout(() => $("#stage").focus({preventScroll: true}), 50);
 }
 function exitFs(){
-  wantFs = null; ourExit = true; dropped = null;
-  document.querySelectorAll(".fs-box").forEach(b => b.classList.remove("retap", "retap-quiet"));
+  wantFs = null; ourExit = true;
   if (fakeFs) { fakeFs = null; syncFs(); return; }
   const ex = document.exitFullscreen || document.webkitExitFullscreen;
   if (realFsEl() && ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
 }
 /* If a rotation knocks the player out of real full screen (some phones do this), keep it full screen by covering the page. */
-/* On phones and tablets, leaving real full screen without using our button (a rotation can do it in some apps)
-   keeps the player covering the page; one tap then brings back real full screen. On a computer, Esc leaves normally. */
-const touchy = () => { try { return matchMedia("(pointer: coarse)").matches; } catch (e) { return false; } };
-const realFsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-let retapTimer = 0;
+/* Leaving real full screen any other way (Esc, a system gesture) simply returns to the page. */
 function onFsChange(){
-  if (!realFsEl() && wantFs && !ourExit && !fakeFs) {
-    if (touchy() || Date.now() - lastFlip < 3000) { fakeFs = wantFs; offerRetap(fakeFs); }
-    else { dropped = {box: wantFs, t: Date.now()}; wantFs = null; }
-  }
-  if (realFsEl()) { ourExit = false; if (fakeFs) { fakeFs.classList.remove("retap"); fakeFs = null; } }
+  if (!realFsEl() && !fakeFs) wantFs = null;
+  if (realFsEl()) ourExit = false;
   syncFs();
 }
-function offerRetap(box){
-  if (!realFsOk()) return;
-  box.classList.add("retap"); clearTimeout(retapTimer);
-  retapTimer = setTimeout(() => box.classList.add("retap-quiet"), 4000);
-}
-document.querySelectorAll(".fs-box").forEach(box => box.addEventListener("click", e => {
-  if (fakeFs !== box || !box.classList.contains("retap") || e.target.closest(".fs-btn")) return;
-  e.stopPropagation(); e.preventDefault();
-  box.classList.remove("retap", "retap-quiet");
-  const req = box.requestFullscreen || box.webkitRequestFullscreen;
-  try { const r = req.call(box); if (r && r.catch) r.catch(() => {}); } catch (err) {}
-}, true));
+/* Turning the phone while in full screen leaves full screen and shows the square button again,
+   with the player brought into view, so one tap fills the screen in the new orientation. */
 function noteFlip(){
   const land = innerWidth > innerHeight; if (land === wasLand) return; wasLand = land; lastFlip = Date.now();
-  if (dropped && Date.now() - dropped.t < 3000 && !realFsEl()) { fakeFs = wantFs = dropped.box; dropped = null; offerRetap(fakeFs); syncFs(); }
+  const box = fsActive(); if (!box) return;
+  exitFs();
+  const show = () => { const r = box.getBoundingClientRect(); window.scrollTo(0, Math.max(0, scrollY + r.top - 8)); };
+  [350, 800].forEach(t => setTimeout(show, t));
 }
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, onFsChange));
 /* Phones can refuse full screen while the device voice is speaking, so playback pauses for the switch
