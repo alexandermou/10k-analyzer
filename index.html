@@ -192,17 +192,18 @@ tr.key td{font-weight:700}
 .fs-box.playing .mc-ov,.fs-box.playing .fs-btn{opacity:0;pointer-events:none}
 .fs-box.playing .mc-ov .mc-btns{pointer-events:none}
 .fs-box.playing .stage,.fs-box.playing .screen{cursor:pointer}
-@media (max-width:640px){.mc-ov{padding:20px 8px 10px}.mc-btns{gap:12px}.ic-btn{width:40px;height:40px}.ic-btn svg{width:19px;height:19px}.ic-btn.main{width:52px;height:52px}.ic-btn.main svg{width:23px;height:23px}}
-.ic-btn{width:48px;height:48px;padding:0;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.94);box-shadow:0 1px 6px rgba(0,0,0,.18);color:#15202B;display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
+.screen .mc-ov{bottom:16%;padding:8px 12px;background:none}
+@media (max-width:640px){.mc-ov{padding:16px 8px 8px}.screen .mc-ov{padding:4px 8px}.mc-btns{gap:10px}.ic-btn{width:34px;height:34px}.ic-btn svg{width:16px;height:16px}.ic-btn.main{width:44px;height:44px}.ic-btn.main svg{width:19px;height:19px}}
+.ic-btn{width:40px;height:40px;padding:0;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.94);box-shadow:0 1px 6px rgba(0,0,0,.18);color:#15202B;display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
 .ic-btn:active{transform:scale(.94)}
 .ic-btn:disabled{opacity:.45;cursor:default;transform:none}
 .ic-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.ic-btn svg{width:22px;height:22px}
-.ic-btn.main{width:60px;height:60px;border:2px solid rgba(255,255,255,.9);background:#1D3557;color:#fff}
-.ic-btn.main svg{width:26px;height:26px}
+.ic-btn svg{width:19px;height:19px}
+.ic-btn.main{width:50px;height:50px;border:2px solid rgba(255,255,255,.9);background:#1D3557;color:#fff}
+.ic-btn.main svg{width:22px;height:22px}
 .ic-btn .ic-pause,.ic-btn.is-playing .ic-play{display:none}
 .ic-btn.is-playing .ic-pause{display:inline}
-@media (max-height:500px){.fs-box.is-fs .ic-btn{width:40px;height:40px}.fs-box.is-fs .ic-btn.main{width:48px;height:48px}}
+@media (max-height:500px){.fs-box.is-fs .ic-btn{width:36px;height:36px}.fs-box.is-fs .ic-btn.main{width:46px;height:46px}}
 .fs-box{display:flex;flex-direction:column;gap:12px}
 .fs-btn{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;border-radius:10px;
   background:rgba(14,26,43,.6);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:.85;transition:opacity .15s,background .15s}
