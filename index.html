@@ -1401,7 +1401,7 @@ async function openCompany(t, view){
   renderReport(c); renderInfographic(c); loadSlides(c); loadVideo(c); renderSpines(); setView(view || state.view);
 }
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
-const FB_TO = ["alexandermou2000", "gmail.com"].join("@");   // kept out of the page text; swap for FormSubmit's alias once activated
+const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
 $("#fbForm").addEventListener("submit", async e => {
   e.preventDefault();
   const msg = $("#fbMsg").value.trim(), st = $("#fbStatus"), btn = $("#fbSend");
