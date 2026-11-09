@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      # publish only the website: maintenance scripts (tools/) and repo files stay off the public site
+      # publish only the website: repo files stay off the public site
       - name: Stage site files
         run: rsync -a --exclude '.git' --exclude '.github' --exclude 'tools' --exclude 'README.md' ./ _site/
       - uses: actions/upload-pages-artifact@v3
