@@ -449,6 +449,8 @@ function spoken(c, v){
   if (c.cur === "R$") return spokenUSD(c, v).replace(/dollars$/, "Brazilian reais");
   if (c.cur === "R") return spokenUSD(c, v).replace(/dollars$/, "rand");
   if (c.cur === "₩") return spokenUSD(c, v).replace(/dollars$/, "won");
+  if (c.cur === "¥") return spokenUSD(c, v).replace(/dollars$/, "yen");
+  if (c.cur === "Mex$") return spokenUSD(c, v).replace(/dollars$/, "Mexican pesos");
   return spokenUSD(c, v);
 }
 function spokenUSD(c, v){
