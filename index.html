@@ -442,17 +442,12 @@ function scaled(m, dec){
   if (m === 0) return ["0", ""];
   return [fmt(Math.round(m * 1000), 0), "K"];
 }
-function spoken(c, v){
-  if (c.cur === "NT$") return spokenUSD(c, v).replace(/dollars$/, "New Taiwan dollars");
-  if (c.cur === "€") return spokenUSD(c, v).replace(/dollars$/, "euros");
-  if (c.cur === "C$") return spokenUSD(c, v).replace(/dollars$/, "Canadian dollars");
-  if (c.cur === "R$") return spokenUSD(c, v).replace(/dollars$/, "Brazilian reais");
-  if (c.cur === "R") return spokenUSD(c, v).replace(/dollars$/, "rand");
-  if (c.cur === "₩") return spokenUSD(c, v).replace(/dollars$/, "won");
-  if (c.cur === "¥") return spokenUSD(c, v).replace(/dollars$/, "yen");
-  if (c.cur === "Mex$") return spokenUSD(c, v).replace(/dollars$/, "Mexican pesos");
-  return spokenUSD(c, v);
-}
+/* Reporting currencies other than the US dollar: the word the narration uses for each symbol */
+const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian dollars", "R$": "Brazilian reais", "R": "rand", "₩": "won", "¥": "yen",
+  "Mex$": "Mexican pesos", "CN¥": "yuan", "£": "pounds", "₹": "rupees", "HK$": "Hong Kong dollars", "A$": "Australian dollars", "S$": "Singapore dollars",
+  "DKK ": "Danish kroner", "SEK ": "Swedish kronor", "NOK ": "Norwegian kroner", "CHF ": "Swiss francs", "S/": "Peruvian soles", "₪": "shekels"};
+const curWord = c => CURWORD[c.cur] || "dollars";
+function spoken(c, v){ return spokenUSD(c, v).replace(/dollars$/, curWord(c)); }
 function spokenUSD(c, v){
   const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0);
   return n.replace(/\.0$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
@@ -1040,9 +1035,9 @@ function buildScenes(c){
       parts.forEach(([n, v, col], i) => { const cx = x0 + (i % 3) * 384, cy = 360 + Math.floor(i / 3) * 70; rr(ctx, cx, cy - 18, 20, 20, 4, col);
         T(ctx, n, cx + 32, cy - 2, 20, V.muted, FB, 600); T(ctx, f(v) + " · " + pctOf(c, v), cx + 32, cy + 26, 22, V.white, FM, 600); }); }});
   const prof = [[c.gpLabel.replace("*",""), gp, c.gpPrior], ["Operating income", c.opIncome, c.opIncomePrior], [c.netLabel, c.netIncome, c.netIncomePrior]];
-  const lossNI = c.netIncome < 0;
-  scenes.push({cap: lossNI ? `${c.netIncomePrior < 0 ? `Net loss narrowed to ${f(-c.netIncome)} from ${f(-c.netIncomePrior)}` : `${c.short} swung to a net loss of ${f(-c.netIncome)} from net income of ${f(c.netIncomePrior)}`}${eps ? `; loss per share was $${Math.abs(eps.cur).toFixed(2)}` : ""}.` : `Net income was ${f(c.netIncome)}, up from ${f(c.netIncomePrior)}${eps ? `; diluted EPS was $${eps.cur.toFixed(2)}` : ""}.`,
-    say: lossNI ? `${c.netIncomePrior < 0 ? `The net loss narrowed to ${sp(-c.netIncome)}, from ${sp(-c.netIncomePrior)} a year earlier` : `${c.short} swung to a net loss of ${sp(-c.netIncome)}, from net income of ${sp(c.netIncomePrior)} a year earlier`}${eps ? `, or ${Math.abs(eps.cur).toFixed(2)} dollars per share` : ""}.` : `Net income came in at ${sp(c.netIncome)}, up from ${sp(c.netIncomePrior)} a year earlier${eps ? `, and diluted earnings per share were ${eps.cur.toFixed(2)} dollars` : ""}.`,
+  const lossNI = c.netIncome < 0, niDir = c.netIncomePrior < 0 ? "compared with" : c.netIncome > c.netIncomePrior ? "up from" : c.netIncome < c.netIncomePrior ? "down from" : "unchanged from";
+  scenes.push({cap: lossNI ? `${c.netIncomePrior < 0 ? `Net loss narrowed to ${f(-c.netIncome)} from ${f(-c.netIncomePrior)}` : `${c.short} swung to a net loss of ${f(-c.netIncome)} from net income of ${f(c.netIncomePrior)}`}${eps ? `; loss per share was ${money(c, Math.abs(eps.cur), "eps")}` : ""}.` : `Net income was ${f(c.netIncome)}, ${niDir} ${c.netIncomePrior < 0 ? "a net loss of " + f(-c.netIncomePrior) : f(c.netIncomePrior)}${eps ? `; diluted EPS was ${money(c, eps.cur, "eps")}` : ""}.`,
+    say: lossNI ? `${c.netIncomePrior < 0 ? `The net loss narrowed to ${sp(-c.netIncome)}, from ${sp(-c.netIncomePrior)} a year earlier` : `${c.short} swung to a net loss of ${sp(-c.netIncome)}, from net income of ${sp(c.netIncomePrior)} a year earlier`}${eps ? `, or ${Math.abs(eps.cur).toFixed(2)} ${curWord(c)} per share` : ""}.` : `Net income came in at ${sp(c.netIncome)}, ${niDir} ${c.netIncomePrior < 0 ? "a net loss of " + sp(-c.netIncomePrior) : sp(c.netIncomePrior)} a year earlier${eps ? `, and diluted earnings per share were ${eps.cur.toFixed(2)} ${curWord(c)}` : ""}.`,
     draw(ctx, p){ frame(ctx, c, "Profitability"); groupBars(ctx, c, prof, p); }});
   if (ocf && fcf) scenes.push({cap: `Operating cash flow was ${f(ocf.cur)}. After ${f(capex.cur)} of capital spending, free cash flow was ${f(fcf.cur)} (${yoyStr(fcf.cur, fcf.prior)}).`,
     say: `Operating cash flow was ${sp(ocf.cur)}. After capital spending of ${sp(capex.cur)}, free cash flow was ${sp(fcf.cur)}.`,
@@ -1094,7 +1089,7 @@ function setPP(sel, playing, ended){
    "2.0 percentage points" -> "2 percentage points", "193.7 billion" -> "193 point 7 billion". */
 function speakable(t){
   const num = (i, d) => { i = i.replace(/,/g, ""); d = (d || "").replace(/0+$/, ""); return d ? `${i} point ${d.split("").join(" ")}` : i; };
-  return String(t)
+  return curSay(t)
     .replace(/\s*\((?:plus |up |\+)?Infinity[^)]*\)/g, "").replace(/,?\s*(?:plus |up |\+)?Infinity[^.,;]*/g, "").replace(/,\s*undefined\b/g, "").replace(/\bundefined\b/g, "")
     .replace(/(\d[\d,.]*) dollars([tmbk])\b/gi, (m, n, u) => `${n} ${({t: "trillion", m: "million", b: "billion", k: "thousand"})[u.toLowerCase()]} dollars`)
     .replace(/\$(\d[\d,.]*)\s?([TBMK])\b/g, (m, n, u) => `${n} ${({T: "trillion", M: "million", B: "billion", K: "thousand"})[u]} dollars`).replace(/\$(\d[\d,.]*)/g, "$1 dollars")
@@ -1151,10 +1146,17 @@ let downloads = null;
 (async () => { try { downloads = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; } })();
 
 /* ---------------- Slides with voice-over ---------------- */
+/* Amounts in currencies other than the US dollar, as words: "CN¥1.2T" -> "1.2 trillion yuan", "DKK 59.0B" -> "59.0 billion Danish kroner" */
+function curSay(t){
+  const unit = u => u ? " " + ({T: "trillion", B: "billion", M: "million", K: "thousand"})[u] : "";
+  return String(t)
+    .replace(/(^|[^A-Za-z])(CN¥|HK\$|NT\$|C\$|R\$|£|₹|₪|€|₩|S\/|DKK |SEK |NOK |CHF )([\d,.]*\d)([TBMK])?(?![A-Za-z])/g, (m, pre, c, n, u) => `${pre}${n}${unit(u)} ${CURWORD[c]}`)
+    .replace(/(Mex\$|¥)([\d,.]*\d)([TBMK])?(?![A-Za-z])/g, (m, c, n, u) => `${n}${unit(u)} ${CURWORD[c]}`);
+}
 function sayify(s){
   return String(s).replace(/<[^>]+>/g, "").replace(/\(≈?\$?([\d,.]+)([BM])\)/g, "$$$1$2")
     .replace(/−/g, "minus ").replace(/≈/g, "about ").replace(/×/g, " times")
-    .replace(/(Mex\$|¥)([\d,.]+)([TBMK])?(?![A-Za-z])/g, (m, c, n, u) => `${n}${u ? " " + ({T: "trillion", B: "billion", M: "million", K: "thousand"})[u] : ""} ${c === "¥" ? "yen" : "Mexican pesos"}`)
+    .replace(/^[\s\S]*$/, curSay)
     .replace(/(NT\$|US\$|C\$|R\$|\$|₩|€|\bR)(\d[\d,.]*)([TK])\b/g, (m, c, n, u) => `${n} ${u === "T" ? "trillion" : "thousand"} ` +
       ({"NT$": "New Taiwan dollars", "US$": "US dollars", "C$": "Canadian dollars", "R$": "Brazilian reais", "$": "dollars", "₩": "won", "€": "euros", "R": "rand"})[c])
     .replace(/NT\$([\d,.]+)B\b/g, "$1 billion New Taiwan dollars").replace(/NT\$([\d,.]+)/g, "$1 New Taiwan dollars").replace(/US\$([\d,.]+)B\b/g, "$1 billion US dollars")
@@ -1442,7 +1444,7 @@ $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeH
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
-const ALIASES = {GOOGL: "GOOG", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE", CENTA: "CENT", "CWEN.A": "CWEN", CWENA: "CWEN", UA: "UAA", INDV: "SUPN", ASGN: "EFOR", ATGE: "CVSA", AXL: "DCH", EXPI: "AGNT", FDP: "DMC", IAC: "PPLI", MSGS: "MSGK", SJW: "HTO", BHLB: "BBT", NYMT: "ADAM", CEIX: "CNR", ARCH: "CNR", LANC: "MZTI", NXT: "NXT", NXTR: "NXT", TPX: "SGI", NYCB: "FLG", PNM: "TXNM", MODG: "CALY", VIAD: "PRSU", TMST: "MTUS", BELFA: "BELFB", BATRA: "BATRK", LILA: "LILAK", GLIBA: "GLIBK", METCB: "METC", "BH.A": "BH", TXCP: "TCBI", RUSHB: "RUSHA", HOS: "HLX", "GEF.B": "GEF", "AGM.A": "AGM", AGMA: "AGM", ATROB: "ATRO", BATRB: "BATRK", "CRD.B": "CRD.A", CRDA: "CRD.A", CRDB: "CRD.A", DGICB: "DGICA", GLIBB: "GLIBK", "GTN.A": "GTN", GTNA: "GTN", "HVT.A": "HVT", HVTA: "HVT", IHRTB: "IHRT", KELYB: "KELYA", LILAB: "LILAK", MOVAA: "MOV", SENEB: "SENEA", HOVVB: "HOV", "MOG.B": "MOG.A", MOGA: "MOG.A", MOGB: "MOG.A", GEFB: "GEF", BHA: "BH", LC: "HAPN", MPLN: "CTEV", BBBY: "NXH", CMPO: "GPGI", MGPI: "CASK", TOI: "STLN", DOMO: "HUCK", MEG: "ONT", PX: "RPC", GCI: "TDAY", BIGC: "CMRC", SCVL: "SHOE", COMM: "VISN", ATUS: "OPTU", OMI: "ACH", AHH: "AHRT", GMRE: "XRN", BLDE: "SRTA", RMBL: "RDNW", MESA: "RJET", BITF: "KEEL", AMBC: "OSG", FREY: "TE", GLT: "MAGN", AMRK: "GOLD", CDXC: "NAGE", HMST: "MCHB", ABL: "ABX", PTSI: "PAMT", GLYC: "CBIO", AVTE: "JBIO", AADI: "WHWK", GLTO: "DMRA", SRM: "TRON", NVFY: "XMAX", THAR: "CNTN", MFH: "CD", NEHC: "NUAI", NR: "NPKI", OBNK: "OBK"};
+const ALIASES = {GOOGL: "GOOG", VSCO: "VSXY", RBC: "RY", TOYOF: "TM", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE", CENTA: "CENT", "CWEN.A": "CWEN", CWENA: "CWEN", UA: "UAA", INDV: "SUPN", ASGN: "EFOR", ATGE: "CVSA", AXL: "DCH", EXPI: "AGNT", FDP: "DMC", IAC: "PPLI", MSGS: "MSGK", SJW: "HTO", BHLB: "BBT", NYMT: "ADAM", CEIX: "CNR", ARCH: "CNR", LANC: "MZTI", NXT: "NXT", NXTR: "NXT", TPX: "SGI", NYCB: "FLG", PNM: "TXNM", MODG: "CALY", VIAD: "PRSU", TMST: "MTUS", BELFA: "BELFB", BATRA: "BATRK", LILA: "LILAK", GLIBA: "GLIBK", METCB: "METC", "BH.A": "BH", TXCP: "TCBI", RUSHB: "RUSHA", HOS: "HLX", "GEF.B": "GEF", "AGM.A": "AGM", AGMA: "AGM", ATROB: "ATRO", BATRB: "BATRK", "CRD.B": "CRD.A", CRDA: "CRD.A", CRDB: "CRD.A", DGICB: "DGICA", GLIBB: "GLIBK", "GTN.A": "GTN", GTNA: "GTN", "HVT.A": "HVT", HVTA: "HVT", IHRTB: "IHRT", KELYB: "KELYA", LILAB: "LILAK", MOVAA: "MOV", SENEB: "SENEA", HOVVB: "HOV", "MOG.B": "MOG.A", MOGA: "MOG.A", MOGB: "MOG.A", GEFB: "GEF", BHA: "BH", LC: "HAPN", MPLN: "CTEV", BBBY: "NXH", CMPO: "GPGI", MGPI: "CASK", TOI: "STLN", DOMO: "HUCK", MEG: "ONT", PX: "RPC", GCI: "TDAY", BIGC: "CMRC", SCVL: "SHOE", COMM: "VISN", ATUS: "OPTU", OMI: "ACH", AHH: "AHRT", GMRE: "XRN", BLDE: "SRTA", RMBL: "RDNW", MESA: "RJET", BITF: "KEEL", AMBC: "OSG", FREY: "TE", GLT: "MAGN", AMRK: "GOLD", CDXC: "NAGE", HMST: "MCHB", ABL: "ABX", PTSI: "PAMT", GLYC: "CBIO", AVTE: "JBIO", AADI: "WHWK", GLTO: "DMRA", SRM: "TRON", NVFY: "XMAX", THAR: "CNTN", MFH: "CD", NEHC: "NUAI", NR: "NPKI", OBNK: "OBK"};
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const STOP = new Set(["inc","corp","corporation","company","co","the","group","holdings","plc","incorporated","technologies","technology","n","v"]);
 function searchLibrary(q){
