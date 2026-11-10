@@ -1442,7 +1442,7 @@ $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeH
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
-const ALIASES = {GOOGL: "GOOG", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY"};
+const ALIASES = {GOOGL: "GOOG", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE"};
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const STOP = new Set(["inc","corp","corporation","company","co","the","group","holdings","plc","incorporated","technologies","technology","n","v"]);
 function searchLibrary(q){
