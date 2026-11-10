@@ -1154,6 +1154,7 @@ let downloads = null;
 function sayify(s){
   return String(s).replace(/<[^>]+>/g, "").replace(/\(≈?\$?([\d,.]+)([BM])\)/g, "$$$1$2")
     .replace(/−/g, "minus ").replace(/≈/g, "about ").replace(/×/g, " times")
+    .replace(/(Mex\$|¥)([\d,.]+)([TBMK])?(?![A-Za-z])/g, (m, c, n, u) => `${n}${u ? " " + ({T: "trillion", B: "billion", M: "million", K: "thousand"})[u] : ""} ${c === "¥" ? "yen" : "Mexican pesos"}`)
     .replace(/(NT\$|US\$|C\$|R\$|\$|₩|€|\bR)(\d[\d,.]*)([TK])\b/g, (m, c, n, u) => `${n} ${u === "T" ? "trillion" : "thousand"} ` +
       ({"NT$": "New Taiwan dollars", "US$": "US dollars", "C$": "Canadian dollars", "R$": "Brazilian reais", "$": "dollars", "₩": "won", "€": "euros", "R": "rand"})[c])
     .replace(/NT\$([\d,.]+)B\b/g, "$1 billion New Taiwan dollars").replace(/NT\$([\d,.]+)/g, "$1 New Taiwan dollars").replace(/US\$([\d,.]+)B\b/g, "$1 billion US dollars")
