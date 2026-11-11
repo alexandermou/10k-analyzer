@@ -102,7 +102,7 @@ button,input{font:inherit}
 .period[aria-selected="true"] small{color:var(--accent)}
 .period:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (max-width:640px){.periods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.period{padding:6px 8px;min-width:0}.period b{font-size:14px;white-space:nowrap}.period small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.p-long{display:none}}
-.is-qtr .bars{grid-template-columns:62px minmax(0,1fr) auto}.is-qtr .bars span{white-space:nowrap}
+.is-qtr .bars{grid-template-columns:66px minmax(0,1fr) auto}.is-qtr .bars span{white-space:nowrap}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .media-bar{display:flex;align-items:center;gap:12px;margin-bottom:-4px}
 .media-bar[hidden]{display:none}
@@ -454,7 +454,7 @@ function loadQuarters(t){
   return qPending[t];
 }
 const pid = q => q.toLowerCase().replace(/\s+/g, "-");   // "Q2 2026" -> "q2-2026"
-const formShort = f => /10-Q/.test(f || "") ? "10-Q" : /8-K|earnings/i.test(f || "") ? "Earnings release" : (f || "10-Q");
+const formShort = f => /10-Q/.test(f || "") ? "10-Q" : /10-K/.test(f || "") ? "10-K (Q4)" : /8-K|earnings/i.test(f || "") ? "Earnings release" : (f || "10-Q");
 
 /* ---------------- Helpers ---------------- */
 const $ = s => document.querySelector(s);
@@ -763,7 +763,7 @@ function barCardQ(c, it){
   const label = mixed && NEUTRAL[it.label] ? NEUTRAL[it.label] : it.label;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
-  const row = (lab, v, cls) => `<span>${esc(lab)}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
+  const row = (lab, v, cls) => `<span>${esc(yr(lab))}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
   return `<div class="card">
     <div class="barhead"><p>${esc(label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
     <div class="bars">${rows3.map(r => row(...r)).join("")}</div>
@@ -1533,7 +1533,7 @@ function renderPeriods(c){
   const forms = QUARTERS[c.ticker] ? Object.fromEntries(QUARTERS[c.ticker].map(q => [q.fy, q.form])) : {};
   const btn = (id, top, sub) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub)}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}</small></button>`;
   el.innerHTML = btn("", c.fy, (c.form || "Form 10-K").replace(/^Form /, "")) +
-    qs.map(q => btn(pid(q), q, forms[q] ? formShort(forms[q]) : "Quarter")).join("");
+    qs.map(q => btn(pid(q), yr(q), forms[q] ? formShort(forms[q]) : "Quarter")).join("");
   el.hidden = false;
   el.querySelectorAll(".period").forEach(b => b.addEventListener("click", async () => {
     if (b.dataset.period === state.period) return;
@@ -1570,7 +1570,7 @@ $("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $(
 /* #crwv, #crwv-report, #crwv-q2-2026, #crwv-q2-2026-feedback */
 function writeHash(){ const h = state.ticker.toLowerCase() + (state.period ? "-" + state.period : "") + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
 function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const parts = h.split("-"); const t = parts.shift() || "";
-  let p = ""; if (/^q[1-4]$/.test(parts[0] || "") && /^\d{4}$/.test(parts[1] || "")) p = parts.splice(0, 2).join("-");
+  let p = ""; if (/^q[1-4]$/.test(parts[0] || "") && /^(fy)?\d{4}$/.test(parts[1] || "")) p = parts.splice(0, 2).join("-");
   const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
