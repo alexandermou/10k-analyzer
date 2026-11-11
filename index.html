@@ -79,6 +79,25 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 @media (max-width:640px){.views{margin-left:0;width:100%}.vbtn{flex:1 1 0;justify-content:center;padding:0 6px;font-size:14px;gap:5px}}
 .nr .when{font-size:11px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
+.wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.wl-table{width:100%;border-collapse:collapse;font-size:14px}
+.wl-table th{text-align:left;padding:0;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap}
+.wl-table th button{width:100%;text-align:inherit;padding:10px 14px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.wl-table th[aria-sort="ascending"] button,.wl-table th[aria-sort="descending"] button{color:var(--ink)}
+.wl-table th.num,.wl-table td.num{text-align:right}
+.wl-table td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap;text-align:left;font-family:var(--f-body);font-weight:400}
+.wl-table td.num b{font-weight:600}.wl-table td:last-child,.wl-table th:last-child{width:40px;text-align:right}
+.wl-table tr:last-child td{border-bottom:0}
+.wl-table tbody tr:hover{background:var(--sunk)}
+.wl-co{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink)}
+.wl-co .tk{font-family:var(--f-mono);font-weight:600;font-size:15px;color:var(--accent)}.wl-co .nm{color:var(--muted)}
+.wl-co:hover .nm{text-decoration:underline}
+.wl-table .when{font-size:11px;font-weight:600;color:var(--muted)}.wl-table .est{color:var(--muted);margin-right:2px}
+.wl-table .est-tag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:5px;background:var(--n-bg);color:var(--n-fg)}
+.wl-table .muted{color:var(--muted)}.wl-table .s-short{display:none}.wl-table b.soon{color:var(--accent)}
+.wl-rm{width:30px;height:30px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;cursor:pointer}
+.wl-rm:hover{color:var(--neg);border-color:var(--neg)}
+@media (max-width:640px){.wl-table{font-size:12px}.wl-table td,.wl-table th button{padding:9px 4px}.wl-table td:first-child,.wl-table th:first-child button{padding-left:10px}.wl-co .nm,.wl-table .when,.wl-table .est-tag,.wl-table .wd,.wl-table .s-long{display:none}.wl-table .s-short{display:inline}.wl-co .tk{font-size:13.5px}.wl-table td:last-child,.wl-table th:last-child{width:28px;padding:0 4px}}
 .nr-sec{font-size:14px;font-weight:700;color:var(--muted);margin:14px 0 8px}.nr-day h3+.nr-sec{margin-top:4px}
 /* Watchlist (kept in a cookie in this browser) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -1660,7 +1679,7 @@ async function showNew(){
 }
 async function showUpcoming(){
   const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
-  const items = d.items.filter(x => x.date === day && LIBRARY[x.ticker]);
+  const items = d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
   const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected");
   $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   v.bind($("#upBody"));
@@ -1698,14 +1717,32 @@ function wlChanged(){
   if (state.page === "new") showNew();
   if (state.page === "upcoming") showUpcoming();
 }
+/* Watchlist: one row per company with its next report and earnings release date, soonest first */
+let wlSort = {key: "date", dir: 1};
+const daysUntil = iso => -dayDiff(iso);
+const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
 async function showWatchlist(){
-  const list = wlGet(), d = await loadLatest(), last = Object.fromEntries(d.items.map(x => [x.ticker, x]));
+  const list = wlGet(), up = await loadUpcoming(), next = {};
+  for (const x of up.items) if (!next[x.ticker] || x.date < next[x.ticker].date) next[x.ticker] = x;
+  const rows = list.map(t => ({t, c: LIBRARY[t] || {short: t, name: t}, x: next[t]}));
+  const val = r => wlSort.key === "ticker" ? r.t : wlSort.key === "report" ? (r.x ? r.x.report : "~") : (r.x ? r.x.date : "9999");   // "date" and "in" sort alike
+  rows.sort((a, b) => { const va = val(a), vb = val(b); if ((va === "9999" || va === "~") !== (vb === "9999" || vb === "~")) return va === "9999" || va === "~" ? 1 : -1;
+    return (va < vb ? -1 : va > vb ? 1 : a.t.localeCompare(b.t)) * wlSort.dir; });
+  const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
+  const when = {BMO: "before open", AMC: "after close"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
-    `<div class="nr-grid">${list.slice().sort().map(t => { const c = LIBRARY[t] || {short: t, name: t}, x = last[t];
-      const inner = x ? nrButton(x, new Set([t])) : `<a class="nr fav" href="#${t.toLowerCase()}" title="${esc(c.name)}"><span class="star">★</span><span class="tk">${esc(t)}</span><span class="what">${esc(c.short)}</span></a>`;
-      return `<span class="wl-item">${inner}<button type="button" class="wl-x" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></span>`; }).join("")}</div>
-    <p class="sub">Each button opens the company's latest report.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
-  $("#wlBody").querySelectorAll(".wl-x").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
+    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", `<span class="s-long">Next report</span><span class="s-short">Report</span>`)}${th("date", `<span class="s-long">Earnings release</span><span class="s-short">Release</span>`)}${th("in", "In", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
+      rows.map(({t, c, x}) => { const href = "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
+        const n = x ? daysUntil(x.date) : null;
+        return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
+          <td>${x ? esc(x.report) : `<span class="muted">—</span>`}</td>
+          <td>${x ? `${x.estimated ? `<span class="est" title="Estimated: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated ? ` <span class="tag est-tag">est.</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
+          <td class="num">${n === null ? "" : `<b class="${n <= 1 ? "soon" : ""}"><span class="s-long">${inDays(n)}</span><span class="s-short">${n === 0 ? "Today" : n === 1 ? "Tmrw" : n > 0 ? n + "d" : inDays(n)}</span></b>`}</td>
+          <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
+    }</tbody></table></div>
+    <p class="sub">Dates from Nasdaq's earnings calendar; “~ … est.” is an estimate (last year's date for the same quarter + 52 weeks) until the company announces it. BMO = before the market opens, AMC = after it closes.${up.tickers ? ` Trial: dates for ${up.tickers.length} companies only.` : ""}${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+  $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
+  $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
   const clr = $("#wlClear"); if (clr) clr.addEventListener("click", () => { if (confirm("Remove all companies from your watchlist?")) wlSet([]); });
   showPage("watchlist", "Watchlist");
 }
@@ -1718,7 +1755,7 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
 const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
 loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
-loadUpcoming().then(d => { const day = stepBiz(todayISO(), 1); badge("#upCount", d.items.filter(x => x.date === day).length, "upcoming"); });
+loadUpcoming().then(d => { const day = stepBiz(todayISO(), 1); badge("#upCount", d.items.filter(x => x.date === day && !x.estimated).length, "upcoming"); });
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address

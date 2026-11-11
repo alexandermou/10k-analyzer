@@ -23,7 +23,8 @@
 "period": "q3-fy2026",
 "expected": true,
 "time": "AMC",
-"fiscalQuarterEnding": "Oct/2026"
+"fiscalQuarterEnding": "Oct/2026",
+"report": "10-K FY2026"
 },
 {
 "ticker": "CSCO",
@@ -35,7 +36,8 @@
 "period": "q4-fy2026",
 "expected": true,
 "time": "AMC",
-"fiscalQuarterEnding": "Oct/2026"
+"fiscalQuarterEnding": "Oct/2026",
+"report": "10-Q Q1 FY2027"
 },
 {
 "ticker": "TWST",
@@ -47,7 +49,8 @@
 "period": "q3-fy2026",
 "expected": true,
 "time": "BMO",
-"fiscalQuarterEnding": "Sep/2026"
+"fiscalQuarterEnding": "Sep/2026",
+"report": "10-K FY2026"
 },
 {
 "ticker": "YETI",
@@ -59,7 +62,8 @@
 "period": "q2-2026",
 "expected": true,
 "time": "BMO",
-"fiscalQuarterEnding": "Sep/2026"
+"fiscalQuarterEnding": "Sep/2026",
+"report": "10-Q Q3 2026"
 },
 {
 "ticker": "NVDA",
@@ -71,7 +75,59 @@
 "period": "q2-fy2027",
 "expected": true,
 "time": "AMC",
-"fiscalQuarterEnding": "Oct/2026"
+"fiscalQuarterEnding": "Oct/2026",
+"report": "10-Q Q3 FY2027"
+},
+{
+"ticker": "ADBE",
+"name": "Adobe Inc.",
+"short": "Adobe",
+"date": "2026-12-09",
+"form": "Earnings release",
+"label": "Q4 FY2026",
+"period": "q3-fy2026",
+"expected": true,
+"fiscalQuarterEnding": "Nov/2026",
+"report": "10-K FY2026"
+},
+{
+"ticker": "MSFT",
+"name": "Microsoft Corporation",
+"short": "Microsoft",
+"date": "2027-01-27",
+"form": "Earnings release",
+"label": "Q2 FY2027",
+"report": "10-Q Q2 FY2027",
+"period": "q1-fy2027",
+"expected": true,
+"estimated": true,
+"basis": "2026-01-28"
+},
+{
+"ticker": "AAPL",
+"name": "Apple Inc.",
+"short": "Apple",
+"date": "2027-01-28",
+"form": "Earnings release",
+"label": "Q1 FY2027",
+"report": "10-Q Q1 FY2027",
+"period": "q4-fy2026",
+"expected": true,
+"estimated": true,
+"basis": "2026-01-29"
+},
+{
+"ticker": "CRWV",
+"name": "CoreWeave, Inc.",
+"short": "CoreWeave",
+"date": "2027-02-25",
+"form": "Earnings release",
+"label": "Q4 2026",
+"report": "10-K FY2026",
+"period": "q3-2026",
+"expected": true,
+"estimated": true,
+"basis": "2026-02-26"
 }
 ]
 }
