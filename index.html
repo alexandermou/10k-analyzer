@@ -749,11 +749,15 @@ function barCard(c, it){
 function barCardQ(c, it){
   const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]].concat(c.prevQ2 && it.prevQ2 !== undefined ? [[c.prevQ2.fy, it.prevQ2, " qprev2"]] : []);
   const m = Math.max(...rows3.map(r => Math.abs(r[1]))) || 1;
+  /* When the quarters shown include both a profit and a loss, name the line neutrally, e.g. "Operating income (loss)" */
+  const mixed = rows3.some(r => r[1] > 0) && rows3.some(r => r[1] < 0);
+  const NEUTRAL = {"Operating loss": "Operating income (loss)", "Operating income": "Operating income (loss)", "Net loss": "Net income (loss)", "Net income": "Net income (loss)", "Loss per share": "Earnings (loss) per share", "Earnings per share": "Earnings (loss) per share"};
+  const label = mixed && NEUTRAL[it.label] ? NEUTRAL[it.label] : it.label;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
   const row = (lab, v, cls) => `<span>${esc(lab)}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
   return `<div class="card">
-    <div class="barhead"><p>${esc(it.label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
+    <div class="barhead"><p>${esc(label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
     <div class="bars">${rows3.map(r => row(...r)).join("")}</div>
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
   </div>`;
