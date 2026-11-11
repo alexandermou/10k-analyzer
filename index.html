@@ -1763,9 +1763,9 @@ window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCa
   if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   const start = readHash();
-  let last = null; try { last = localStorage.getItem("10k-last-ticker"); } catch (e) {}
-  const first = start && LIBRARY[start.t] ? start.t : (last && LIBRARY[last] ? last : "AMZN");
-  await openCompany(first, start ? start.v : "infographic", start && start.t === first ? start.p : "");
+  if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
+  /* Default view: the watchlist when it has companies, otherwise New reports */
+  if (wlGet().length) await showWatchlist(); else await showNew();
 })();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
