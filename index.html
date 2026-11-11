@@ -79,6 +79,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 @media (max-width:640px){.views{margin-left:0;width:100%}.vbtn{flex:1 1 0;justify-content:center;padding:0 6px;font-size:14px;gap:5px}}
 .nr .when{font-size:11px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
+.nr-sec{font-size:14px;font-weight:700;color:var(--muted);margin:14px 0 8px}.nr-day h3+.nr-sec{margin-top:4px}
 /* Watchlist (kept in a cookie in this browser) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .wlbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--navy);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
@@ -1641,27 +1642,26 @@ function nrButton(x, wl){
   const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}${x.expected ? " expected" : ""}, ${dayName(x.date)}${when ? ", " + when : ""}${x.test ? " (test entry)" : ""}`;
   return `<a class="nr${fav ? " fav" : ""}" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}">${fav ? `<span class="star" aria-hidden="true">★</span>` : ""}<span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a>`;
 }
-let npFilter = "all";
-/* One day of report buttons, with the All / Watchlist-only switch */
-function dayList(items, wl, head, emptyText, rerender){
-  const nW = items.filter(x => wl.has(x.ticker)).length;
-  const pick = (npFilter === "watch" ? items.filter(x => wl.has(x.ticker)) : items).slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
-  const html = `<div class="np-filter" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="${npFilter === "all"}">All companies</button><button type="button" data-f="watch" aria-pressed="${npFilter === "watch"}">★ Watchlist only${nW ? ` (${nW})` : ""}</button></div>` +
-    (npFilter === "watch" && !wl.size ? `<p class="sub">Your watchlist is empty. Add companies on the <a href="#watchlist">Watchlist</a> page, or click the ☆ next to a company's name.</p>` :
-    `<div class="nr-day"><h3>${head}</h3>${pick.length ? `<div class="nr-grid">${pick.map(x => nrButton(x, wl)).join("")}</div>` : `<p class="sub">${emptyText}${npFilter === "watch" ? " from your watchlist" : ""}.</p>`}</div>`);
-  return {html, bind: el => el.querySelectorAll(".np-filter button").forEach(btn => btn.addEventListener("click", () => { npFilter = btn.dataset.f; rerender(); }))};
+/* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
+function dayList(items, wl, head, emptyText){
+  const sorted = items.slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
+  const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
+  const html = `<div class="nr-day"><h3>${head}</h3>` + (!sorted.length ? `<p class="sub">${emptyText}.</p>` :
+    mine.length ? `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}${rest.length ? `<h4 class="nr-sec">Other companies</h4>${grid(rest)}` : ""}` : grid(rest)) + `</div>`;
+  return {html, bind: () => {}};
 }
 async function showNew(){
   const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
   const items = nd ? d.items.filter(x => x.date === nd.day) : [];
-  const v = dayList(items, wl, nd ? `${nd.label} <small>· ${esc(dayName(nd.day))}</small>` : "No filings yet", "No new reports", showNew);
+  const v = dayList(items, wl, nd ? `${nd.label} <small>· ${esc(dayName(nd.day))}</small>` : "No filings yet", "No new reports");
   $("#npBody").innerHTML = v.html; v.bind($("#npBody"));
   showPage("new", "New reports");
 }
 async function showUpcoming(){
   const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
   const items = d.items.filter(x => x.date === day && LIBRARY[x.ticker]);
-  const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected", showUpcoming);
+  const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected");
   $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   v.bind($("#upBody"));
   showPage("upcoming", "Upcoming reports");
