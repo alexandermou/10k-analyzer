@@ -72,8 +72,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 /* Watchlist (kept in a cookie in this browser) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .wlbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--navy);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
-.watch{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer;align-self:flex-start}
-.watch[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.star-btn{display:inline-flex;align-items:center;justify-content:center;width:1.1em;height:1.1em;margin-left:.15em;vertical-align:-.08em;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.85em;line-height:1;cursor:pointer;padding:0}
+.star-btn:hover{color:var(--accent);background:var(--accent-soft)}.star-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.star-btn[aria-pressed="true"]{color:var(--accent)}
 .nr.fav{border-color:var(--accent)}.nr .star{color:var(--accent);font-size:12px}
 .np-filter{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;width:max-content}
 .np-filter button{height:32px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer}
@@ -383,7 +384,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
-    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here or with the ☆ Watch button on a company page.</p></div>
+    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here, or search for a company and click the ☆ next to its name.</p></div>
     <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
     <div id="wlBody"></div>
   </section>
@@ -392,7 +393,6 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
       <div style="display:flex;flex-direction:column;gap:8px">
         <h2 id="fname"></h2>
         <div class="meta" id="fmeta"></div>
-        <button type="button" class="watch" id="watchBtn" aria-pressed="false">☆ Watch</button>
       </div>
       <div class="tabs" role="tablist" aria-label="Views">
         <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
@@ -1555,9 +1555,10 @@ async function openCompany(t, view, period){
     else shown = Object.assign({quarter: true}, shown);
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
-  state.ticker = t; state.period = period; state.shown = shown; hideNew(); wlChanged();
+  state.ticker = t; state.period = period; state.shown = shown; hideNew();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
-  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span><button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  wlChanged();   // sets the star next to the name
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(shown.period)}</span><span>Filed ${esc(shown.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
   renderPeriods(c);
   $("#view-infographic").classList.toggle("is-qtr", !!period);
@@ -1607,7 +1608,7 @@ async function showNew(){
   const days = [...new Set(fresh.map(x => x.date))];
   const nW = d.items.filter(x => wl.has(x.ticker) && dayDiff(x.date) <= NEW_DAYS).length;
   $("#npBody").innerHTML = `<div class="np-filter" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="${npFilter === "all"}">All companies</button><button type="button" data-f="watch" aria-pressed="${npFilter === "watch"}">★ Watchlist only${nW ? ` (${nW})` : ""}</button></div>` +
-    (npFilter === "watch" && !wl.size ? `<p class="sub">Your watchlist is empty. Add companies on the <a href="#watchlist">Watchlist</a> page or with ☆ Watch on a company page.</p>` :
+    (npFilter === "watch" && !wl.size ? `<p class="sub">Your watchlist is empty. Add companies on the <a href="#watchlist">Watchlist</a> page, or click the ☆ next to a company's name.</p>` :
     (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
       <div class="nr-grid">${fresh.filter(x => x.date === day).sort((a, b) => a.ticker.localeCompare(b.ticker)).map(x => nrButton(x, wl)).join("")}</div></div>`).join("")
     : `<p class="sub">No new reports${npFilter === "watch" ? " from your watchlist" : ""} in the last ${NEW_DAYS} days.</p>`) +
@@ -1639,8 +1640,8 @@ const wlHas = t => wlGet().includes(t);
 function wlToggle(t){ const l = wlGet(); wlSet(l.includes(t) ? l.filter(x => x !== t) : l.concat(t)); }
 function wlChanged(){
   const n = wlGet().length, b = $("#wlCount"); b.textContent = n; b.hidden = !n;
-  const w = $("#watchBtn"), on = wlHas(state.ticker);
-  w.setAttribute("aria-pressed", on); w.textContent = on ? "★ Watching" : "☆ Watch"; w.title = on ? "Remove from your watchlist" : "Add to your watchlist";
+  const w = $("#starBtn"), on = wlHas(state.ticker);
+  if (w) { w.setAttribute("aria-pressed", on); w.textContent = on ? "★" : "☆"; w.title = on ? `Remove ${state.ticker} from your watchlist` : `Add ${state.ticker} to your watchlist`; w.setAttribute("aria-label", w.title); }
   if (state.page === "watchlist") showWatchlist();
   if (state.page === "new") showNew();
 }
@@ -1661,7 +1662,7 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   if (hits.length !== 1) { st.textContent = hits.length ? `More than one company matches “${q}”. Type the ticker.` : `“${q}” is not in the library.`; return; }
   const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
-$("#watchBtn").addEventListener("click", () => wlToggle(state.ticker));
+$("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
 loadLatest().then(d => { const n = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS).length; if (n) { const b = $("#newCount"); b.textContent = n; b.hidden = false; b.setAttribute("aria-label", n + " new"); } });
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
