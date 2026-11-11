@@ -1581,7 +1581,7 @@ function renderPeriods(c){
   /* Ordered by filing date, oldest first; a fourth quarter (from the 10-K) goes just before the 10-K filed the same day */
   const fd = c.filedDates || {};
   const short = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"}); };
-  const btn = (id, top, sub, date) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub + (date ? " · filed " + short(date) : ""))}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}${date ? `<span class="p-long p-date"> · ${esc(short(date))}</span>` : ""}</small></button>`;
+  const btn = (id, top, sub, date) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub + (date ? " · filed " + short(date) : ""))}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}${date ? `<span class="p-long p-date"> · ${esc(mdy(date))}</span>` : ""}</small></button>`;
   const entries = [{id: "", top: c.fy, sub: (c.form || "Form 10-K").replace(/^Form /, ""), date: fd["10-K"], k: 1}]
     .concat(qs.map(q => ({id: pid(q), top: yr(q), sub: forms[q] ? formShort(forms[q]) : "Quarter", date: fd[q], k: 0})));
   if (entries.every(x => x.date)) entries.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.k - b.k);
@@ -1600,6 +1600,7 @@ let LATEST = null;
 function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return LATEST; }
 const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
 const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric", year: "numeric"}); };
+const mdy = iso => { const [y, m, d] = iso.split("-"); return `${m}/${d}/${y.slice(2)}`; };   // 2026-05-08 -> 05/08/26
 const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
 function nrButton(x, wl){
   const fav = wl && wl.has(x.ticker);
