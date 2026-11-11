@@ -69,6 +69,23 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr .tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--pos-bg);color:var(--pos)}.nr .tag.er{background:var(--n-bg);color:var(--n-fg)}
 .nr-day h3{font-size:16px;margin-bottom:8px}.nr-day h3 small{font-size:13px}
 @media (max-width:640px){.newbtn{margin-left:0}}
+/* Watchlist (kept in a cookie in this browser) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.wlbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--navy);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
+.watch{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;cursor:pointer;align-self:flex-start}
+.watch[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.nr.fav{border-color:var(--accent)}.nr .star{color:var(--accent);font-size:12px}
+.np-filter{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;width:max-content}
+.np-filter button{height:32px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer}
+.np-filter button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.wl-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wl-add input{height:40px;flex:1 1 220px;max-width:420px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px}
+.wl-add .btn{height:40px}
+.wl-item{display:inline-flex;align-items:center}.wl-item .nr{border-radius:8px 0 0 8px}
+.wl-x{height:34px;width:30px;border:1px solid var(--line);border-left:0;border-radius:0 8px 8px 0;background:var(--surface);color:var(--muted);font-size:16px;cursor:pointer}
+.wl-x:hover{color:var(--neg);border-color:var(--neg)}
+.wl-item .nr.fav+.wl-x{border-color:var(--accent)}.wl-item .nr.fav+.wl-x:hover{border-color:var(--neg)}
+#wlBody{display:flex;flex-direction:column;gap:12px}
 .picker select{height:48px;flex:1 1 260px;min-width:0;max-width:520px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px;cursor:pointer}
 .spine{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
 .spine b{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:6px 8px;border-radius:6px}
@@ -354,7 +371,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
       <datalist id="libList"></datalist>
       <button class="btn" type="submit">Search</button>
     </form>
-    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select><a class="btn ghost newbtn" id="newBtn" href="#new">New reports <b id="newCount" hidden></b></a></div>
+    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select><a class="btn ghost newbtn" id="newBtn" href="#new">New reports <b id="newCount" hidden></b></a><a class="btn ghost wlbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
@@ -365,11 +382,17 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div class="np-head"><h2 id="npTitle">New reports</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) in the last 7 days. Each button opens the infographic of that report.</p></div>
     <div id="npBody"></div>
   </section>
+  <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
+    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here or with the ☆ Watch button on a company page.</p></div>
+    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
+    <div id="wlBody"></div>
+  </section>
   <section class="filing" id="filing">
     <div class="fhead">
       <div style="display:flex;flex-direction:column;gap:8px">
         <h2 id="fname"></h2>
         <div class="meta" id="fmeta"></div>
+        <button type="button" class="watch" id="watchBtn" aria-pressed="false">☆ Watch</button>
       </div>
       <div class="tabs" role="tablist" aria-label="Views">
         <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
@@ -1351,7 +1374,7 @@ function renderSpines(){
     sel.innerHTML = `<option value="" disabled>Choose a company…</option>` + Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
       .map(c => `<option value="${c.ticker}">${c.ticker} \u2014 ${esc(c.name)} (${c.fy})</option>`).join("");
   }
-  sel.value = state.page === "new" ? "" : state.ticker;
+  sel.value = state.page ? "" : state.ticker;
 }
 function setView(v){
   state.view = v;
@@ -1532,7 +1555,7 @@ async function openCompany(t, view, period){
     else shown = Object.assign({quarter: true}, shown);
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
-  state.ticker = t; state.period = period; state.shown = shown; hideNew();
+  state.ticker = t; state.period = period; state.shown = shown; hideNew(); wlChanged();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(shown.period)}</span><span>Filed ${esc(shown.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
@@ -1569,25 +1592,76 @@ function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "
 const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
 const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}); };
 const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
-function nrButton(x){
+function nrButton(x, wl){
+  const fav = wl && wl.has(x.ticker);
   const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
   const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
   const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}, ${dayName(x.date)}`;
-  return `<a class="nr" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span></a>`;
+  return `<a class="nr${fav ? " fav" : ""}" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}">${fav ? `<span class="star" aria-hidden="true">★</span>` : ""}<span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span></a>`;
 }
+let npFilter = "all";
 async function showNew(){
-  const d = await loadLatest();
-  const fresh = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS), older = d.items.filter(x => dayDiff(x.date) > NEW_DAYS);
+  const d = await loadLatest(), wl = new Set(wlGet());
+  const pick = npFilter === "watch" ? d.items.filter(x => wl.has(x.ticker)) : d.items;
+  const fresh = pick.filter(x => dayDiff(x.date) <= NEW_DAYS), older = pick.filter(x => dayDiff(x.date) > NEW_DAYS);
   const days = [...new Set(fresh.map(x => x.date))];
-  $("#npBody").innerHTML = (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
-      <div class="nr-grid">${fresh.filter(x => x.date === day).sort((a, b) => a.ticker.localeCompare(b.ticker)).map(x => nrButton(x)).join("")}</div></div>`).join("")
-    : `<p class="sub">No new reports in the last ${NEW_DAYS} days.</p>`) +
-    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x)).join("")}</div></div>` : "");
-  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
-  $("#filing").hidden = true; $("#missing").hidden = true; $("#newPage").hidden = false; state.page = "new"; renderSpines();
-  document.title = "New reports · 10-K Analyzer by Alexander";
+  const nW = d.items.filter(x => wl.has(x.ticker) && dayDiff(x.date) <= NEW_DAYS).length;
+  $("#npBody").innerHTML = `<div class="np-filter" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="${npFilter === "all"}">All companies</button><button type="button" data-f="watch" aria-pressed="${npFilter === "watch"}">★ Watchlist only${nW ? ` (${nW})` : ""}</button></div>` +
+    (npFilter === "watch" && !wl.size ? `<p class="sub">Your watchlist is empty. Add companies on the <a href="#watchlist">Watchlist</a> page or with ☆ Watch on a company page.</p>` :
+    (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
+      <div class="nr-grid">${fresh.filter(x => x.date === day).sort((a, b) => a.ticker.localeCompare(b.ticker)).map(x => nrButton(x, wl)).join("")}</div></div>`).join("")
+    : `<p class="sub">No new reports${npFilter === "watch" ? " from your watchlist" : ""} in the last ${NEW_DAYS} days.</p>`) +
+    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x, wl)).join("")}</div></div>` : ""));
+  $("#npBody").querySelectorAll(".np-filter button").forEach(btn => btn.addEventListener("click", () => { npFilter = btn.dataset.f; showNew(); }));
+  showPage("new", "New reports");
 }
-function hideNew(){ $("#newPage").hidden = true; state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+/* One of the list pages (new reports, watchlist) instead of a company */
+function showPage(name, title){
+  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  $("#filing").hidden = true; $("#missing").hidden = true;
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist";
+  state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
+}
+function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+
+/* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
+const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
+function wlGet(){
+  const m = document.cookie.match(/(?:^|;\s*)wl=([^;]*)/);
+  if (!m) return [];
+  try { return [...new Set(decodeURIComponent(m[1]).split(",").map(t => t.trim().toUpperCase()).filter(t => /^[A-Z0-9.\-]{1,10}$/.test(t)))]; } catch (e) { return []; }
+}
+function wlSet(list){
+  document.cookie = `wl=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+  wlChanged();
+}
+const wlHas = t => wlGet().includes(t);
+function wlToggle(t){ const l = wlGet(); wlSet(l.includes(t) ? l.filter(x => x !== t) : l.concat(t)); }
+function wlChanged(){
+  const n = wlGet().length, b = $("#wlCount"); b.textContent = n; b.hidden = !n;
+  const w = $("#watchBtn"), on = wlHas(state.ticker);
+  w.setAttribute("aria-pressed", on); w.textContent = on ? "★ Watching" : "☆ Watch"; w.title = on ? "Remove from your watchlist" : "Add to your watchlist";
+  if (state.page === "watchlist") showWatchlist();
+  if (state.page === "new") showNew();
+}
+async function showWatchlist(){
+  const list = wlGet(), d = await loadLatest(), last = Object.fromEntries(d.items.map(x => [x.ticker, x]));
+  $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
+    `<div class="nr-grid">${list.slice().sort().map(t => { const c = LIBRARY[t] || {short: t, name: t}, x = last[t];
+      const inner = x ? nrButton(x, new Set([t])) : `<a class="nr fav" href="#${t.toLowerCase()}" title="${esc(c.name)}"><span class="star">★</span><span class="tk">${esc(t)}</span><span class="what">${esc(c.short)}</span></a>`;
+      return `<span class="wl-item">${inner}<button type="button" class="wl-x" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></span>`; }).join("")}</div>
+    <p class="sub">Each button opens the company's latest report.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+  $("#wlBody").querySelectorAll(".wl-x").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
+  const clr = $("#wlClear"); if (clr) clr.addEventListener("click", () => { if (confirm("Remove all companies from your watchlist?")) wlSet([]); });
+  showPage("watchlist", "Watchlist");
+}
+$("#wlForm").addEventListener("submit", e => { e.preventDefault();
+  const q = $("#wlInput").value.trim(), st = $("#wlStatus"); if (!q) return;
+  const hits = searchLibrary(q);
+  if (hits.length !== 1) { st.textContent = hits.length ? `More than one company matches “${q}”. Type the ticker.` : `“${q}” is not in the library.`; return; }
+  const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
+  if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
+$("#watchBtn").addEventListener("click", () => wlToggle(state.ticker));
 loadLatest().then(d => { const n = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS).length; if (n) { const b = $("#newCount"); b.textContent = n; b.hidden = false; b.setAttribute("aria-label", n + " new"); } });
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
@@ -1663,11 +1737,13 @@ $("#searchForm").addEventListener("submit", e => { e.preventDefault();
     $("#matchRow").hidden = true;
   }
   $("#missing").hidden = false; });
-window.addEventListener("hashchange", () => { if (location.hash.toLowerCase() === "#new") { showNew(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (hh === "#new") { showNew(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
+  wlChanged();
   if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
+  if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   const start = readHash();
   let last = null; try { last = localStorage.getItem("10k-last-ticker"); } catch (e) {}
   const first = start && LIBRARY[start.t] ? start.t : (last && LIBRARY[last] ? last : "AMZN");
