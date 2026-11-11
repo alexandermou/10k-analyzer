@@ -1,0 +1,50 @@
+{
+"generated": "2026-11-10",
+"items": [
+{
+"ticker": "CRWV",
+"name": "CoreWeave, Inc.",
+"short": "CoreWeave",
+"date": "2026-11-10",
+"form": "Earnings release",
+"label": "Q3 2026",
+"period": "q3-2026"
+},
+{
+"ticker": "AAPL",
+"name": "Apple Inc.",
+"short": "Apple",
+"date": "2026-11-03",
+"form": "10-K",
+"label": "FY2026",
+"period": ""
+},
+{
+"ticker": "MSFT",
+"name": "Microsoft Corporation",
+"short": "Microsoft",
+"date": "2026-10-28",
+"form": "10-Q",
+"label": "Q1 FY2027",
+"period": "q1-fy2027"
+},
+{
+"ticker": "ADBE",
+"name": "Adobe Inc.",
+"short": "Adobe",
+"date": "2026-09-22",
+"form": "10-Q",
+"label": "Q3 FY2026",
+"period": "q3-fy2026"
+},
+{
+"ticker": "NVDA",
+"name": "NVIDIA Corporation",
+"short": "NVIDIA",
+"date": "2026-08-26",
+"form": "10-Q",
+"label": "Q2 FY2027",
+"period": "q2-fy2027"
+}
+]
+}

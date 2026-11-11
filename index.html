@@ -53,6 +53,22 @@ button,input{font:inherit}
 .btn:disabled{opacity:.5;cursor:default}
 .picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .picker label{font-weight:600;font-size:14px;color:var(--muted)}
+/* New reports: a page of buttons for companies with a recent 10-K, 10-Q or earnings release */
+a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.newbtn{margin-left:auto}.newbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center}
+.newpage{display:flex;flex-direction:column;gap:22px}.newpage[hidden]{display:none}
+.newpage .np-head{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.newpage .np-head h2{font-size:clamp(28px,5vw,40px);font-weight:700}
+.nr-day h3{font-size:20px;margin-bottom:10px}.nr-day h3 small{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:14px}
+#npBody{display:flex;flex-direction:column;gap:26px}
+.nr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.nr{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);text-decoration:none;cursor:pointer}
+.nr:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.06)}.nr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nr .tk{font-family:var(--f-mono);font-size:22px;font-weight:600;color:var(--accent)}
+.nr .nm{font-weight:600}.nr .what{font-size:13px;color:var(--muted)}
+.nr .chip{margin-top:6px}
+.nr.old{padding:12px 14px}.nr.old .tk{font-size:17px}
+@media (max-width:640px){.newbtn{margin-left:0}.nr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nr{padding:12px}.nr .tk{font-size:19px}}
 .picker select{height:48px;flex:1 1 260px;min-width:0;max-width:520px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px;cursor:pointer}
 .spine{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
 .spine b{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:6px 8px;border-radius:6px}
@@ -338,13 +354,17 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
       <datalist id="libList"></datalist>
       <button class="btn" type="submit">Search</button>
     </form>
-    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select></div>
+    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select><a class="btn ghost newbtn" id="newBtn" href="#new">New reports <b id="newCount" hidden></b></a></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
     </div>
   </section>
 
+  <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
+    <div class="np-head"><h2 id="npTitle">New reports</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release in the last 7 days. Each button opens the infographic of that report.</p></div>
+    <div id="npBody"></div>
+  </section>
   <section class="filing" id="filing">
     <div class="fhead">
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1328,10 +1348,10 @@ let state = {ticker: "AMZN", view: "infographic", media: "slides", period: ""}; 
 function renderSpines(){
   const sel = $("#pick");
   if (!sel.options.length) {
-    sel.innerHTML = Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
+    sel.innerHTML = `<option value="" disabled>Choose a company…</option>` + Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
       .map(c => `<option value="${c.ticker}">${c.ticker} \u2014 ${esc(c.name)} (${c.fy})</option>`).join("");
   }
-  sel.value = state.ticker;
+  sel.value = state.page === "new" ? "" : state.ticker;
 }
 function setView(v){
   state.view = v;
@@ -1512,7 +1532,7 @@ async function openCompany(t, view, period){
     else shown = Object.assign({quarter: true}, shown);
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
-  state.ticker = t; state.period = period; state.shown = shown;
+  state.ticker = t; state.period = period; state.shown = shown; hideNew();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(shown.period)}</span><span>Filed ${esc(shown.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
@@ -1542,6 +1562,35 @@ function renderPeriods(c){
   /* Fill in each quarter's form (10-Q or earnings release) once the quarters file is in */
   if (!QUARTERS[c.ticker]) loadQuarters(c.ticker).then(() => { if (state.ticker === c.ticker) renderPeriods(c); }).catch(() => {});
 }
+/* ---------------- New reports page (data/latest.json: each company's latest 10-K, 10-Q or earnings release) ---------------- */
+const NEW_DAYS = 7;
+let LATEST = null;
+function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return LATEST; }
+const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
+const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}); };
+const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
+function nrButton(x, old){
+  const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
+  const tone = x.form === "Earnings release" ? "flat" : "up";
+  return `<a class="nr${old ? " old" : ""}" href="${href}"><span class="tk">${esc(x.ticker)}</span><span class="nm">${esc(x.short)}</span>
+    <span class="what">${esc(x.form === "10-K" ? x.label : yr(x.label))} · ${old ? esc(dayName(x.date)) : esc(x.form === "10-K" ? "annual report" : x.form === "10-Q" ? "quarterly report" : "results announced")}</span>
+    <span class="chip ${tone}">${esc(x.form)}</span></a>`;
+}
+async function showNew(){
+  const d = await loadLatest();
+  const fresh = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS), older = d.items.filter(x => dayDiff(x.date) > NEW_DAYS);
+  const days = [...new Set(fresh.map(x => x.date))];
+  $("#npBody").innerHTML = (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
+      <div class="nr-grid">${fresh.filter(x => x.date === day).map(x => nrButton(x)).join("")}</div></div>`).join("")
+    : `<p class="sub">No new reports in the last ${NEW_DAYS} days.</p>`) +
+    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x, true)).join("")}</div></div>` : "");
+  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  $("#filing").hidden = true; $("#missing").hidden = true; $("#newPage").hidden = false; state.page = "new"; renderSpines();
+  document.title = "New reports · 10-K Analyzer by Alexander";
+}
+function hideNew(){ $("#newPage").hidden = true; state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+loadLatest().then(d => { const n = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS).length; if (n) { const b = $("#newCount"); b.textContent = n; b.hidden = false; b.setAttribute("aria-label", n + " new"); } });
+
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
 $("#fbForm").addEventListener("submit", async e => {
@@ -1572,7 +1621,7 @@ function writeHash(){ const h = state.ticker.toLowerCase() + (state.period ? "-"
 function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const parts = h.split("-"); const t = parts.shift() || "";
   let p = ""; if (/^q[1-4]$/.test(parts[0] || "") && /^(fy)?\d{4}$/.test(parts[1] || "")) p = parts.splice(0, 2).join("-");
   const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
-$("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
+$("#pick").addEventListener("change", e => { openCompany(e.target.value).then(writeHash); });
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
@@ -1603,22 +1652,23 @@ function fillDatalist(){
 $("#searchForm").addEventListener("submit", e => { e.preventDefault();
   const q = $("#ticker").value.trim(); if (!q) return;
   const hits = searchLibrary(q);
-  if (hits.length === 1) { openCompany(hits[0].ticker); writeHash(); $("#ticker").value = ""; return; }
+  if (hits.length === 1) { openCompany(hits[0].ticker).then(writeHash); $("#ticker").value = ""; return; }
   $("#matchRow").innerHTML = "";
   if (hits.length > 1) {
     $("#missingText").textContent = `More than one company matches \u201c${q}\u201d. Pick one:`;
     hits.slice(0, 8).forEach(c => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost";
-      b.textContent = `${c.ticker} \u2014 ${c.short}`; b.addEventListener("click", () => { openCompany(c.ticker); writeHash(); $("#ticker").value = ""; }); $("#matchRow").appendChild(b); });
+      b.textContent = `${c.ticker} \u2014 ${c.short}`; b.addEventListener("click", () => { openCompany(c.ticker).then(writeHash); $("#ticker").value = ""; }); $("#matchRow").appendChild(b); });
     $("#matchRow").hidden = false;
   } else {
     $("#missingText").textContent = `\u201c${q}\u201d is not available in the library.`;
     $("#matchRow").hidden = true;
   }
   $("#missing").hidden = false; });
-window.addEventListener("hashchange", () => { const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { if (location.hash.toLowerCase() === "#new") { showNew(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
+  if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
   const start = readHash();
   let last = null; try { last = localStorage.getItem("10k-last-ticker"); } catch (e) {}
   const first = start && LIBRARY[start.t] ? start.t : (last && LIBRARY[last] ? last : "AMZN");
