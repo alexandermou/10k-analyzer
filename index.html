@@ -60,15 +60,15 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .newpage .np-head{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:14px}
 .newpage .np-head h2{font-size:clamp(28px,5vw,40px);font-weight:700}
 .nr-day h3{font-size:20px;margin-bottom:10px}.nr-day h3 small{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:14px}
-#npBody{display:flex;flex-direction:column;gap:26px}
-.nr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
-.nr{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);text-decoration:none;cursor:pointer}
-.nr:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.06)}.nr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.nr .tk{font-family:var(--f-mono);font-size:22px;font-weight:600;color:var(--accent)}
-.nr .nm{font-weight:600}.nr .what{font-size:13px;color:var(--muted)}
-.nr .chip{margin-top:6px}
-.nr.old{padding:12px 14px}.nr.old .tk{font-size:17px}
-@media (max-width:640px){.newbtn{margin-left:0}.nr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nr{padding:12px}.nr .tk{font-size:19px}}
+#npBody{display:flex;flex-direction:column;gap:18px}
+.nr-grid{display:flex;flex-wrap:wrap;gap:6px}
+.nr{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:13px;white-space:nowrap}
+.nr:hover{border-color:var(--accent)}.nr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nr .tk{font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--accent)}
+.nr .what{color:var(--muted)}
+.nr .tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--pos-bg);color:var(--pos)}.nr .tag.er{background:var(--n-bg);color:var(--n-fg)}
+.nr-day h3{font-size:16px;margin-bottom:8px}.nr-day h3 small{font-size:13px}
+@media (max-width:640px){.newbtn{margin-left:0}}
 .picker select{height:48px;flex:1 1 260px;min-width:0;max-width:520px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px;cursor:pointer}
 .spine{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
 .spine b{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:6px 8px;border-radius:6px}
@@ -362,7 +362,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
   </section>
 
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
-    <div class="np-head"><h2 id="npTitle">New reports</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release in the last 7 days. Each button opens the infographic of that report.</p></div>
+    <div class="np-head"><h2 id="npTitle">New reports</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) in the last 7 days. Each button opens the infographic of that report.</p></div>
     <div id="npBody"></div>
   </section>
   <section class="filing" id="filing">
@@ -1569,21 +1569,20 @@ function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "
 const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
 const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}); };
 const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
-function nrButton(x, old){
+function nrButton(x){
   const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
-  const tone = x.form === "Earnings release" ? "flat" : "up";
-  return `<a class="nr${old ? " old" : ""}" href="${href}"><span class="tk">${esc(x.ticker)}</span><span class="nm">${esc(x.short)}</span>
-    <span class="what">${esc(x.form === "10-K" ? x.label : yr(x.label))} · ${old ? esc(dayName(x.date)) : esc(x.form === "10-K" ? "annual report" : x.form === "10-Q" ? "quarterly report" : "results announced")}</span>
-    <span class="chip ${tone}">${esc(x.form)}</span></a>`;
+  const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
+  const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}, ${dayName(x.date)}`;
+  return `<a class="nr" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span></a>`;
 }
 async function showNew(){
   const d = await loadLatest();
   const fresh = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS), older = d.items.filter(x => dayDiff(x.date) > NEW_DAYS);
   const days = [...new Set(fresh.map(x => x.date))];
   $("#npBody").innerHTML = (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
-      <div class="nr-grid">${fresh.filter(x => x.date === day).map(x => nrButton(x)).join("")}</div></div>`).join("")
+      <div class="nr-grid">${fresh.filter(x => x.date === day).sort((a, b) => a.ticker.localeCompare(b.ticker)).map(x => nrButton(x)).join("")}</div></div>`).join("")
     : `<p class="sub">No new reports in the last ${NEW_DAYS} days.</p>`) +
-    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x, true)).join("")}</div></div>` : "");
+    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x)).join("")}</div></div>` : "");
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   $("#filing").hidden = true; $("#missing").hidden = true; $("#newPage").hidden = false; state.page = "new"; renderSpines();
   document.title = "New reports · 10-K Analyzer by Alexander";
