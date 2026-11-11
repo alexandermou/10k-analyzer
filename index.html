@@ -753,9 +753,9 @@ function barCard(c, it){
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
   </div>`;
 }
-/* Quarter tabs: three contiguous quarters (this one and the two before it), with a YoY and a QoQ chip */
+/* Quarter tabs: this quarter and the previous one, with a YoY and a QoQ chip */
 function barCardQ(c, it){
-  const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]].concat(c.prevQ2 && it.prevQ2 !== undefined ? [[c.prevQ2.fy, it.prevQ2, " qprev2"]] : []);
+  const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]];   // this quarter and the previous one
   const m = Math.max(...rows3.map(r => Math.abs(r[1]))) || 1;
   /* When the quarters shown include both a profit and a loss, name the line neutrally, e.g. "Operating income (loss)" */
   const mixed = rows3.some(r => r[1] > 0) && rows3.some(r => r[1] < 0);
