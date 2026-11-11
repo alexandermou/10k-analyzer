@@ -1,17 +1,77 @@
 {
- "generated": "2026-11-11",
- "note": "Test data: CoreWeave only, until an earnings calendar is connected.",
- "items": [
-  {
-   "ticker": "CRWV",
-   "name": "CoreWeave, Inc.",
-   "short": "CoreWeave",
-   "date": "2026-11-12",
-   "form": "10-Q",
-   "label": "Q3 2026",
-   "period": "q3-2026",
-   "expected": true,
-   "test": true
-  }
- ]
+"generated": "2026-11-11",
+"source": "Nasdaq earnings calendar",
+"tickers": [
+"AAPL",
+"ADBE",
+"AMAT",
+"CRWV",
+"CSCO",
+"MSFT",
+"NVDA",
+"TWST",
+"YETI"
+],
+"items": [
+{
+"ticker": "AMAT",
+"name": "Applied Materials, Inc.",
+"short": "Applied Materials",
+"date": "2026-11-12",
+"form": "Earnings release",
+"label": "Q4 FY2026",
+"period": "q3-fy2026",
+"expected": true,
+"time": "AMC",
+"fiscalQuarterEnding": "Oct/2026"
+},
+{
+"ticker": "CSCO",
+"name": "Cisco Systems, Inc.",
+"short": "Cisco",
+"date": "2026-11-12",
+"form": "Earnings release",
+"label": "Q1 FY2027",
+"period": "q4-fy2026",
+"expected": true,
+"time": "AMC",
+"fiscalQuarterEnding": "Oct/2026"
+},
+{
+"ticker": "TWST",
+"name": "Twist Bioscience Corporation",
+"short": "Twist",
+"date": "2026-11-12",
+"form": "Earnings release",
+"label": "Q4 FY2026",
+"period": "q3-fy2026",
+"expected": true,
+"time": "BMO",
+"fiscalQuarterEnding": "Sep/2026"
+},
+{
+"ticker": "YETI",
+"name": "YETI Holdings, Inc.",
+"short": "YETI",
+"date": "2026-11-12",
+"form": "Earnings release",
+"label": "Q3 2026",
+"period": "q2-2026",
+"expected": true,
+"time": "BMO",
+"fiscalQuarterEnding": "Sep/2026"
+},
+{
+"ticker": "NVDA",
+"name": "NVIDIA Corporation",
+"short": "NVIDIA",
+"date": "2026-11-17",
+"form": "Earnings release",
+"label": "Q3 FY2027",
+"period": "q2-fy2027",
+"expected": true,
+"time": "AMC",
+"fiscalQuarterEnding": "Oct/2026"
+}
+]
 }

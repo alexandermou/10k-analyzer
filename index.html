@@ -391,7 +391,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
   </section>
 
   <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
-    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Companies expected to report on the next business day: earnings releases (ER), 10-Qs and 10-Ks. Each button opens the company's latest report.</p></div>
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Companies expected to release earnings (ER) on the next business day, from Nasdaq's earnings calendar. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
@@ -1662,7 +1662,8 @@ async function showUpcoming(){
   const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
   const items = d.items.filter(x => x.date === day && LIBRARY[x.ticker]);
   const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected", showUpcoming);
-  $("#upBody").innerHTML = v.html; v.bind($("#upBody"));
+  $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
+  v.bind($("#upBody"));
   showPage("upcoming", "Upcoming reports");
 }
 /* One of the list pages (new reports, watchlist) instead of a company */
