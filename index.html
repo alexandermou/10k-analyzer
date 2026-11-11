@@ -368,7 +368,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     </div>
     <form class="search" id="searchForm">
       <label for="ticker">Search the library</label>
-      <input id="ticker" name="ticker" list="libList" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
+      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
       <datalist id="libList"></datalist>
       <button class="btn" type="submit">Search</button>
     </form>
@@ -385,7 +385,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
     <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here, or search for a company and click the ☆ next to its name.</p></div>
-    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
+    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
     <div id="wlBody"></div>
   </section>
   <section class="filing" id="filing">
@@ -1738,6 +1738,14 @@ $("#searchForm").addEventListener("submit", e => { e.preventDefault();
     $("#matchRow").hidden = true;
   }
   $("#missing").hidden = false; });
+/* Enter always searches, even while the suggestion list is open; picking a suggestion searches right away */
+function enterSubmits(input, form){
+  const go = () => { if (input.value.trim()) (form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", {cancelable: true}))); };
+  input.addEventListener("keydown", e => { if ((e.key === "Enter" || e.keyCode === 13) && !e.isComposing) { e.preventDefault(); go(); } });
+  input.addEventListener("input", e => { if (e.inputType === "insertReplacementText" || (!e.inputType && / \u2014 /.test(input.value))) go(); });
+}
+enterSubmits($("#ticker"), $("#searchForm"));
+enterSubmits($("#wlInput"), $("#wlForm"));
 window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (hh === "#new") { showNew(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
