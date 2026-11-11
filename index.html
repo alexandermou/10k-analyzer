@@ -139,6 +139,14 @@ button,input{font:inherit}
 .fill.prior{background:var(--bar2)}
 .fill.neg{background:var(--node-neg)}
 .fill.prior.neg{background:var(--flow-neg)}
+.eps-wrap{overflow-x:auto}.eps-in{min-width:440px}
+.eps{position:relative;height:200px;margin:6px 0 4px}
+.eps svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ept{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--surface);border:3px solid var(--bar);box-sizing:border-box}
+.ept.prior{border-color:var(--bar2)}.ept.cur{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--accent);border-color:var(--accent)}
+.epl{position:absolute;transform:translateX(-50%);text-shadow:0 0 3px var(--surface),0 0 3px var(--surface),0 0 3px var(--surface);font-family:var(--f-mono);font-size:14px;font-weight:600;white-space:nowrap}
+.ezero{position:absolute;left:0;font-size:11px;color:var(--muted);transform:translateY(-120%)}
+.eaxis{display:grid;gap:12px;text-align:center}.eaxis b{display:block}.eaxis .sub{display:block;font-size:12px}
 .fill.qprev{background:var(--bar);opacity:.6}.fill.qprev.neg{background:var(--node-neg);opacity:.6}.fill.qprev2{background:var(--bar);opacity:.32}.fill.qprev2.neg{background:var(--node-neg);opacity:.32}
 .chips{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .seg-val .chip+.chip{margin-left:0}
@@ -787,6 +795,29 @@ function renderSection(c, sec){
   if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : ""}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
   if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
   if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
+  if (sec.type === "eps") {
+    /* Earnings per share by quarter: a line over the same quarters as the revenue chart, with a zero line */
+    const its = sec.items, n = its.length, vs = its.map(q => q.v);
+    const hi = Math.max(0, ...vs), lo = Math.min(0, ...vs), span = (hi - lo) || 1;
+    const X = i => (i + 0.5) / n * 100, Y = v => 10 + (hi - v) / span * 68;   // plot area 10%–78% of the height
+    const pts = its.map((q, i) => `${X(i).toFixed(2)},${Y(q.v).toFixed(2)}`).join(" ");
+    const lastI = n - 1;
+    return `<div class="sec">${head(sec)}<div class="card"><div class="eps-wrap"><div class="eps-in">
+      <div class="eps">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" x2="100" y1="${Y(0).toFixed(2)}" y2="${Y(0).toFixed(2)}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
+          <polyline points="${pts}" fill="none" stroke="var(--bar)" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <span class="ezero" style="top:${Y(0).toFixed(2)}%">$0</span>
+        ${its.map((q, i) => `<i class="ept${i === lastI ? " cur" : q.prior ? " prior" : ""}" style="left:${X(i).toFixed(2)}%;top:${Y(q.v).toFixed(2)}%"></i>
+          <span class="epl ${q.v < 0 ? "down" : ""}" style="left:${X(i).toFixed(2)}%;top:calc(${Y(q.v).toFixed(2)}% ${q.v < 0 ? "+ 10px" : "- 30px"})">${money(c, q.v, "eps")}</span>`).join("")}
+      </div>
+      <div class="eaxis" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${its.map((q, i) => {
+        const pv = its[i - 1], d = pv ? q.v - pv.v : null;
+        const ch = d === null ? "" : `<span class="sub ${Math.abs(d) < 0.005 ? "flat" : d > 0 ? "up" : "down"}">${d >= 0 ? "+" : "−"}${(c.cur || "$")}${Math.abs(d).toFixed(2)} QoQ</span>`;
+        return `<div><b>${esc(q.q)}</b>${q.s ? `<span class="sub">${esc(q.s)}</span>` : ""}${ch}</div>`; }).join("")}</div>
+    </div></div>${sec.callout ? `<p class="callout">${sec.callout}</p>` : ""}</div></div>`;
+  }
   if (sec.type === "quarters") {
     const m = Math.max(...sec.items.map(q => q.v));
     return `<div class="sec">${head(sec)}<div class="card">
