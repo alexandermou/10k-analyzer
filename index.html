@@ -69,6 +69,16 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr .tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--pos-bg);color:var(--pos)}.nr .tag.er{background:var(--n-bg);color:var(--n-fg)}
 .nr-day h3{font-size:16px;margin-bottom:8px}.nr-day h3 small{font-size:13px}
 @media (max-width:640px){.newbtn{margin-left:0}}
+/* Upcoming | New | Watchlist switch */
+.views{display:flex;gap:4px;margin-left:auto;background:var(--sunk);padding:4px;border-radius:12px}
+.vbtn{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:9px;color:var(--muted);font-weight:600;font-size:15px;text-decoration:none;white-space:nowrap}
+.vbtn:hover{color:var(--ink)}.vbtn[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.vbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center}
+#wlBtn b{background:var(--navy);color:var(--bg)}
+@media (max-width:640px){.views{margin-left:0;width:100%}.vbtn{flex:1 1 0;justify-content:center;padding:0 6px;font-size:14px;gap:5px}}
+.nr .when{font-size:11px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
+#upBody{display:flex;flex-direction:column;gap:18px}
 /* Watchlist (kept in a cookie in this browser) */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .wlbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--navy);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
@@ -373,15 +383,19 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
       <datalist id="libList"></datalist>
       <button class="btn" type="submit">Search</button>
     </form>
-    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select><a class="btn ghost newbtn" id="newBtn" href="#new">New reports <b id="newCount" hidden></b></a><a class="btn ghost wlbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></div>
+    <div class="picker"><label for="pick">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
     </div>
   </section>
 
+  <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Companies expected to report on the next business day: earnings releases (ER), 10-Qs and 10-Ks. Each button opens the company's latest report.</p></div>
+    <div id="upBody"></div>
+  </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
-    <div class="np-head"><h2 id="npTitle">New reports</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) in the last 7 days. Each button opens the infographic of that report.</p></div>
+    <div class="np-head"><h2 id="npTitle">New</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Each button opens the infographic of that report.</p></div>
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
@@ -1596,7 +1610,24 @@ function renderPeriods(c){
 }
 /* ---------------- New reports page (data/latest.json: each company's latest 10-K, 10-Q or earnings release) ---------------- */
 const NEW_DAYS = 7;
-let LATEST = null;
+let LATEST = null, UPCOMING = null;
+function loadUpcoming(){ if (!UPCOMING) UPCOMING = fetch("data/upcoming.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return UPCOMING; }
+/* Business days: Monday–Friday except NYSE holidays */
+const HOLIDAYS = new Set(["2026-01-01","2026-01-19","2026-02-16","2026-04-03","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-11-26","2026-12-25",
+  "2027-01-01","2027-01-18","2027-02-15","2027-03-26","2027-05-31","2027-06-18","2027-07-05","2027-09-06","2027-11-25","2027-12-24"]);
+const isoOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const todayISO = () => isoOf(new Date());
+const isBiz = iso => { const [y, m, d] = iso.split("-").map(Number); const w = new Date(y, m - 1, d).getDay(); return w > 0 && w < 6 && !HOLIDAYS.has(iso); };
+function stepBiz(iso, dir){ const [y, m, d] = iso.split("-").map(Number); const t = new Date(y, m - 1, d); do { t.setDate(t.getDate() + dir); } while (!isBiz(isoOf(t))); return isoOf(t); }
+/* New shows one day: today if anything was filed today, otherwise the last business day (or the latest day in the feed) */
+function newDay(items){
+  const t = todayISO();
+  if (items.some(x => x.date === t)) return {day: t, label: "Today"};
+  const lb = stepBiz(t, -1);
+  if (items.some(x => x.date === lb)) return {day: lb, label: "Last business day"};
+  const past = items.map(x => x.date).filter(d => d <= t).sort();
+  return past.length ? {day: past[past.length - 1], label: "Latest filings"} : null;
+}
 function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return LATEST; }
 const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
 const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric", year: "numeric"}); };
@@ -1606,33 +1637,44 @@ function nrButton(x, wl){
   const fav = wl && wl.has(x.ticker);
   const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
   const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
-  const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}, ${dayName(x.date)}`;
-  return `<a class="nr${fav ? " fav" : ""}" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}">${fav ? `<span class="star" aria-hidden="true">★</span>` : ""}<span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span></a>`;
+  const when = {BMO: "before open", AMC: "after close"}[x.time] || "";
+  const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}${x.expected ? " expected" : ""}, ${dayName(x.date)}${when ? ", " + when : ""}${x.test ? " (test entry)" : ""}`;
+  return `<a class="nr${fav ? " fav" : ""}" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}">${fav ? `<span class="star" aria-hidden="true">★</span>` : ""}<span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a>`;
 }
 let npFilter = "all";
-async function showNew(){
-  const d = await loadLatest(), wl = new Set(wlGet());
-  const pick = npFilter === "watch" ? d.items.filter(x => wl.has(x.ticker)) : d.items;
-  const fresh = pick.filter(x => dayDiff(x.date) <= NEW_DAYS), older = pick.filter(x => dayDiff(x.date) > NEW_DAYS);
-  const days = [...new Set(fresh.map(x => x.date))];
-  const nW = d.items.filter(x => wl.has(x.ticker) && dayDiff(x.date) <= NEW_DAYS).length;
-  $("#npBody").innerHTML = `<div class="np-filter" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="${npFilter === "all"}">All companies</button><button type="button" data-f="watch" aria-pressed="${npFilter === "watch"}">★ Watchlist only${nW ? ` (${nW})` : ""}</button></div>` +
+/* One day of report buttons, with the All / Watchlist-only switch */
+function dayList(items, wl, head, emptyText, rerender){
+  const nW = items.filter(x => wl.has(x.ticker)).length;
+  const pick = (npFilter === "watch" ? items.filter(x => wl.has(x.ticker)) : items).slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const html = `<div class="np-filter" role="group" aria-label="Show"><button type="button" data-f="all" aria-pressed="${npFilter === "all"}">All companies</button><button type="button" data-f="watch" aria-pressed="${npFilter === "watch"}">★ Watchlist only${nW ? ` (${nW})` : ""}</button></div>` +
     (npFilter === "watch" && !wl.size ? `<p class="sub">Your watchlist is empty. Add companies on the <a href="#watchlist">Watchlist</a> page, or click the ☆ next to a company's name.</p>` :
-    (days.length ? days.map(day => `<div class="nr-day"><h3>${ago(dayDiff(day))} <small>· ${esc(dayName(day))}</small></h3>
-      <div class="nr-grid">${fresh.filter(x => x.date === day).sort((a, b) => a.ticker.localeCompare(b.ticker)).map(x => nrButton(x, wl)).join("")}</div></div>`).join("")
-    : `<p class="sub">No new reports${npFilter === "watch" ? " from your watchlist" : ""} in the last ${NEW_DAYS} days.</p>`) +
-    (older.length ? `<div class="nr-day"><h3>Earlier</h3><div class="nr-grid">${older.map(x => nrButton(x, wl)).join("")}</div></div>` : ""));
-  $("#npBody").querySelectorAll(".np-filter button").forEach(btn => btn.addEventListener("click", () => { npFilter = btn.dataset.f; showNew(); }));
+    `<div class="nr-day"><h3>${head}</h3>${pick.length ? `<div class="nr-grid">${pick.map(x => nrButton(x, wl)).join("")}</div>` : `<p class="sub">${emptyText}${npFilter === "watch" ? " from your watchlist" : ""}.</p>`}</div>`);
+  return {html, bind: el => el.querySelectorAll(".np-filter button").forEach(btn => btn.addEventListener("click", () => { npFilter = btn.dataset.f; rerender(); }))};
+}
+async function showNew(){
+  const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
+  const items = nd ? d.items.filter(x => x.date === nd.day) : [];
+  const v = dayList(items, wl, nd ? `${nd.label} <small>· ${esc(dayName(nd.day))}</small>` : "No filings yet", "No new reports", showNew);
+  $("#npBody").innerHTML = v.html; v.bind($("#npBody"));
   showPage("new", "New reports");
+}
+async function showUpcoming(){
+  const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
+  const items = d.items.filter(x => x.date === day && LIBRARY[x.ticker]);
+  const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected", showUpcoming);
+  $("#upBody").innerHTML = v.html; v.bind($("#upBody"));
+  showPage("upcoming", "Upcoming reports");
 }
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   $("#filing").hidden = true; $("#missing").hidden = true;
-  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist";
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming";
+  ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
+  document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
 }
-function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -1653,6 +1695,7 @@ function wlChanged(){
   if (w) { w.setAttribute("aria-pressed", on); w.textContent = on ? "★" : "☆"; w.title = on ? `Remove ${state.ticker} from your watchlist` : `Add ${state.ticker} to your watchlist`; w.setAttribute("aria-label", w.title); }
   if (state.page === "watchlist") showWatchlist();
   if (state.page === "new") showNew();
+  if (state.page === "upcoming") showUpcoming();
 }
 async function showWatchlist(){
   const list = wlGet(), d = await loadLatest(), last = Object.fromEntries(d.items.map(x => [x.ticker, x]));
@@ -1672,7 +1715,9 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
-loadLatest().then(d => { const n = d.items.filter(x => dayDiff(x.date) <= NEW_DAYS).length; if (n) { const b = $("#newCount"); b.textContent = n; b.hidden = false; b.setAttribute("aria-label", n + " new"); } });
+const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
+loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
+loadUpcoming().then(d => { const day = stepBiz(todayISO(), 1); badge("#upCount", d.items.filter(x => x.date === day).length, "upcoming"); });
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
@@ -1755,17 +1800,18 @@ function enterSubmits(input, form){
 }
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (hh === "#new") { showNew(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
   wlChanged();
   if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
+  if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
-  /* Default view: the watchlist when it has companies, otherwise New reports */
-  if (wlGet().length) await showWatchlist(); else await showNew();
+  /* Default view: Upcoming */
+  await showUpcoming();
 })();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>

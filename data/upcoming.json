@@ -1,0 +1,17 @@
+{
+ "generated": "2026-11-11",
+ "note": "Test data: CoreWeave only, until an earnings calendar is connected.",
+ "items": [
+  {
+   "ticker": "CRWV",
+   "name": "CoreWeave, Inc.",
+   "short": "CoreWeave",
+   "date": "2026-11-12",
+   "form": "10-Q",
+   "label": "Q3 2026",
+   "period": "q3-2026",
+   "expected": true,
+   "test": true
+  }
+ ]
+}
