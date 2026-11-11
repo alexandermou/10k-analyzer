@@ -139,7 +139,7 @@ button,input{font:inherit}
 .fill.prior{background:var(--bar2)}
 .fill.neg{background:var(--node-neg)}
 .fill.prior.neg{background:var(--flow-neg)}
-.fill.qprev{background:var(--bar);opacity:.5}.fill.qprev.neg{background:var(--node-neg);opacity:.5}
+.fill.qprev{background:var(--bar);opacity:.6}.fill.qprev.neg{background:var(--node-neg);opacity:.6}.fill.qprev2{background:var(--bar);opacity:.32}.fill.qprev2.neg{background:var(--node-neg);opacity:.32}
 .chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .seg-val .chip+.chip{margin-left:0}
 .bars strong{font-family:var(--f-mono);font-weight:600;text-align:right}
@@ -745,15 +745,16 @@ function barCard(c, it){
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
   </div>`;
 }
-/* Quarter tabs: this quarter, the previous quarter and the year-ago quarter, with a YoY and a QoQ chip */
+/* Quarter tabs: three contiguous quarters (this one and the two before it), with a YoY and a QoQ chip */
 function barCardQ(c, it){
-  const m = Math.max(Math.abs(it.cur), Math.abs(it.prior), Math.abs(it.prevQ)) || 1;
+  const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]].concat(c.prevQ2 && it.prevQ2 !== undefined ? [[c.prevQ2.fy, it.prevQ2, " qprev2"]] : []);
+  const m = Math.max(...rows3.map(r => Math.abs(r[1]))) || 1;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
   const row = (lab, v, cls) => `<span>${esc(lab)}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
   return `<div class="card">
     <div class="barhead"><p>${esc(it.label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
-    <div class="bars">${row(c.fy, it.cur, "")}${row(c.prevQ.fy, it.prevQ, " qprev")}${row(c.fyPrior, it.prior, " prior")}</div>
+    <div class="bars">${rows3.map(r => row(...r)).join("")}</div>
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
   </div>`;
 }
