@@ -139,6 +139,9 @@ button,input{font:inherit}
 .fill.prior{background:var(--bar2)}
 .fill.neg{background:var(--node-neg)}
 .fill.prior.neg{background:var(--flow-neg)}
+.fill.qprev{background:var(--bar);opacity:.5}.fill.qprev.neg{background:var(--node-neg);opacity:.5}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.seg-val .chip+.chip{margin-left:0}
 .bars strong{font-family:var(--f-mono);font-weight:600;text-align:right}
 .stat{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
 .stat .big{font-size:28px}.stat .sub{color:var(--on-node-soft);font-size:14px}
@@ -715,7 +718,21 @@ function chipFor(it){
   if (y === null) return {t: "n/m", cls: "flat"};
   return {t: (y >= 0 ? "+" : "−") + Math.abs(y).toFixed(1) + "%", cls: it.tone || (y >= 0 ? "up" : "down")};
 }
+/* Quarter over quarter: change vs the previous quarter. dir says which way is good: "up" (default), "down" (debt,
+   interest, dilution) or "flat" (neutral, e.g. capital spending). Losses read as widened / narrowed. */
+function qoqChip(cur, prev, dir, label){
+  if (prev === undefined || prev === null) return null;
+  const good = up => dir === "flat" ? "flat" : ((dir === "down") !== up ? "up" : "down");
+  const out = /cash flow/i.test(label || "") ? ["Outflow grew", "Outflow shrank"] : ["Loss widened", "Loss narrowed"];
+  if (prev > 0 && cur > 0) { const y = cur / prev - 1; return {t: (y >= 1 ? (cur / prev).toFixed(1) + "×" : (y >= 0 ? "+" : "−") + Math.abs(y * 100).toFixed(1) + "%") + " QoQ", cls: Math.abs(y) < 0.0005 ? "flat" : good(y >= 0)}; }
+  if (prev < 0 && cur < 0) return {t: (cur < prev ? out[0] : out[1]) + " QoQ", cls: cur < prev ? "down" : "up"};
+  if (prev < 0) return {t: "Turned positive QoQ", cls: "up"};
+  if (cur < 0) return {t: (/cash flow/i.test(label || "") ? "Turned negative" : "Swung to a loss") + " QoQ", cls: "down"};
+  return {t: "n/m QoQ", cls: "flat"};
+}
+const ppQoQ = (c, cur, prev) => { const d = (cur / c.revenue - prev / c.prevQ.revenue) * 100; return {t: ppStr(d) + " QoQ", cls: Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}; };
 function barCard(c, it){
+  if (c.quarter && it.prevQ !== undefined && c.prevQ) return barCardQ(c, it);
   const m = Math.max(Math.abs(it.cur), Math.abs(it.prior)) || 1;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it);
@@ -725,6 +742,18 @@ function barCard(c, it){
       <span>${yr(c.fy)}</span><div class="track"><div class="fill${it.cur < 0 ? " neg" : ""}" style="width:${w(it.cur)}%"></div></div><strong class="${it.cur < 0 ? "down" : ""}">${money(c, it.cur, it.money)}</strong>
       <span>${yr(c.fyPrior)}</span><div class="track"><div class="fill prior${it.prior < 0 ? " neg" : ""}" style="width:${w(it.prior)}%"></div></div><strong class="${it.prior < 0 ? "down" : ""}">${money(c, it.prior, it.money)}</strong>
     </div>
+    ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
+  </div>`;
+}
+/* Quarter tabs: this quarter, the previous quarter and the year-ago quarter, with a YoY and a QoQ chip */
+function barCardQ(c, it){
+  const m = Math.max(Math.abs(it.cur), Math.abs(it.prior), Math.abs(it.prevQ)) || 1;
+  const w = v => (Math.abs(v) / m * 100).toFixed(1);
+  const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
+  const row = (lab, v, cls) => `<span>${esc(lab)}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
+  return `<div class="card">
+    <div class="barhead"><p>${esc(it.label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
+    <div class="bars">${row(c.fy, it.cur, "")}${row(c.prevQ.fy, it.prevQ, " qprev")}${row(c.fyPrior, it.prior, " prior")}</div>
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
   </div>`;
 }
@@ -743,7 +772,7 @@ function tileCard(t, top, c, bs){
   return `<div class="card${top ? " tile-top" : ""}">
     <p class="lbl">${esc(t.label)}</p>
     <p class="big">${esc(t.value)}</p>
-    <p class="sub">${[esc(t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs)), t.delta ? `<span class="${t.tone}">${esc(yoyDelta(t.delta))}</span>` : ""].filter(Boolean).join(" · ")}</p>
+    <p class="sub">${[esc(t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs)), t.delta ? `<span class="${t.tone}">${esc(yoyDelta(t.delta))}</span>` : "", (q => q ? `<span class="${q.cls}">${esc(q.t)}</span>` : "")(t.qoq && c.quarter ? qoqChip(t.qoq[0], t.qoq[1], t.qDir || "up", t.label) : null)].filter(Boolean).join(" · ")}</p>
     ${t.foot ? `<p class="sub">${esc(t.foot)}</p>` : ""}
   </div>`;
 }
@@ -759,8 +788,8 @@ function renderSection(c, sec){
       <div class="legend">${sec.legend.map(([sw, l]) => `<span style="--sw:${sw}">${esc(l)}</span>`).join("")}</div>
       <div class="qgrid">${sec.items.map(q => {
         const h = Math.round(q.v / m * 150), ih = q.inset ? Math.max(3, Math.round(q.inset / m * 150)) : 0;
-        const prev = sec.items[sec.items.indexOf(q) - 4];
-        return `<div class="q"><div class="q-top"><strong>${money(c, q.v)}</strong>${prev ? `<span class="sub up">${yoyStr(q.v, prev.v)} YoY</span>` : ""}
+        const prev = sec.items[sec.items.indexOf(q) - 4], last = c.quarter ? sec.items[sec.items.indexOf(q) - 1] : null, qq = last ? qoqChip(q.v, last.v, "up", "") : null;
+        return `<div class="q"><div class="q-top"><strong>${money(c, q.v)}</strong>${prev ? `<span class="sub up">${yoyStr(q.v, prev.v)} YoY</span>` : ""}${qq ? `<span class="sub ${qq.cls}">${esc(qq.t)}</span>` : ""}
           <div class="col${q.prior ? " prior" : ""}" style="height:${h}px">${ih ? `<i style="height:${ih}px"></i>` : ""}</div></div>
           <b>${esc(q.q)}</b><span class="sub q-note">${[q.s, q.s2].filter(Boolean).map(esc).join("<br>")}</span></div>`;
       }).join("")}</div>
@@ -804,11 +833,15 @@ function segBig(c, which){
   const list = which === "total"
     ? [{rev: c.revenue, revPrior: c.revenuePrior, oi: c.opIncome, oiPrior: c.opIncomePrior, total: true}]
     : c.segments.items;
+  const pq = which === "total" && c.quarter && c.prevQ ? c.prevQ : null;
+  const qc = (cur, prev) => { const q = qoqChip(cur, prev, "up", ""); return q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : ""; };
   return list.map(s => { const {mc, mp, d} = segMargins(s);
+    const yo = h => pq && !/YoY<\/span>$/.test(h) ? h.replace(/<\/span>$/, " YoY</span>") : h;
+    const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
     return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
-      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${chip(s.rev, s.revPrior)}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${chip(s.oi, s.oiPrior)}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b><span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>`}</div></div></div>
+      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${yo(chip(s.rev, s.revPrior))}${qRev}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${yo(chip(s.oi, s.oiPrior))}${qOi}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b><span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`}</div></div></div>
     </div>`; }).join("");
 }
 function segCards(c){
@@ -822,7 +855,7 @@ function segCards(c){
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
-    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}${c.quarter && c.prevQ ? ` (YoY) and ${esc(c.prevQ.fy)} (QoQ)` : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
