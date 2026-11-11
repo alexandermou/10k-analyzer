@@ -184,6 +184,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fill.qprev{background:var(--bar);opacity:.6}.fill.qprev.neg{background:var(--node-neg);opacity:.6}.fill.qprev2{background:var(--bar);opacity:.32}.fill.qprev2.neg{background:var(--node-neg);opacity:.32}
 .chips{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .seg-val .chip+.chip{margin-left:0}
+.vchips{display:inline-flex;flex-direction:column;align-items:flex-start;gap:6px}
 .bars strong{font-family:var(--f-mono);font-weight:600;text-align:right}
 .stat{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
 .stat .big{font-size:28px}.stat .sub{color:var(--on-node-soft);font-size:14px}
@@ -915,12 +916,14 @@ function segBig(c, which){
   const pq = which === "total" && c.quarter && c.prevQ ? c.prevQ : null;
   const qc = (cur, prev) => { const q = qoqChip(cur, prev, "up", ""); return q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : ""; };
   return list.map(s => { const {mc, mp, d} = segMargins(s);
-    const yo = h => pq && !/YoY<\/span>$/.test(h) ? h.replace(/<\/span>$/, " YoY</span>") : h;
+    /* Quarter tabs: YoY chip (capitalized, labelled) stacked above the QoQ chip */
+    const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
+    const V = h => pq ? `<span class="vchips">${h}</span>` : h;
     const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
     return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
-      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${yo(chip(s.rev, s.revPrior))}${qRev}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${yo(chip(s.oi, s.oiPrior))}${qOi}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b><span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`}</div></div></div>
+      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div></div></div>
     </div>`; }).join("");
 }
 function segCards(c){
@@ -1578,7 +1581,7 @@ function renderPeriods(c){
   /* Ordered by filing date, oldest first; a fourth quarter (from the 10-K) goes just before the 10-K filed the same day */
   const fd = c.filedDates || {};
   const short = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"}); };
-  const btn = (id, top, sub, date) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub + (date ? " · filed " + short(date) : ""))}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}${date ? `<span class="p-long p-date"> · ${esc(short(date).replace(/, \d{4}$/, ""))}</span>` : ""}</small></button>`;
+  const btn = (id, top, sub, date) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub + (date ? " · filed " + short(date) : ""))}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}${date ? `<span class="p-long p-date"> · ${esc(short(date))}</span>` : ""}</small></button>`;
   const entries = [{id: "", top: c.fy, sub: (c.form || "Form 10-K").replace(/^Form /, ""), date: fd["10-K"], k: 1}]
     .concat(qs.map(q => ({id: pid(q), top: yr(q), sub: forms[q] ? formShort(forms[q]) : "Quarter", date: fd[q], k: 0})));
   if (entries.every(x => x.date)) entries.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.k - b.k);
@@ -1596,7 +1599,7 @@ const NEW_DAYS = 7;
 let LATEST = null;
 function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return LATEST; }
 const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
-const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric"}); };
+const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric", year: "numeric"}); };
 const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
 function nrButton(x, wl){
   const fav = wl && wl.has(x.ticker);
