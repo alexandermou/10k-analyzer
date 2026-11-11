@@ -5,6 +5,7 @@ Each company's latest annual report (10-K / 20-F / 40-F) as an infographic, slid
 - `index.html` — the site (layout and code only)
 - `data/index.json` — list of companies for search
 - `data/companies/TICKER.json` — one file per company, loaded when opened
+- `data/quarters/TICKER.json` — the latest three quarters (10-Q, or the earnings release until the 10-Q is filed), loaded when a quarter tab is opened; the company file lists them under `quarters`
 - `vendor/html-to-image.js` — draws the downloadable infographic PNG in the browser (MIT licence)
 - Maintenance scripts live in a separate private repository.
 

@@ -92,6 +92,17 @@ button,input{font:inherit}
 .fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 @media (max-width:640px){.tabs{width:100%}.tab{flex:1 1 auto;padding:0 6px;font-size:14px;min-width:0}}
 .fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
+/* Filing strip: the annual report and the latest quarters */
+.periods{display:flex;gap:8px;flex-wrap:wrap}.periods[hidden],.tab[hidden]{display:none}
+.period{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:48px;padding:7px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);cursor:pointer;font:inherit;text-align:left}
+.period b{font-size:15px;font-weight:700;color:var(--ink)}
+.period small{font-size:12px;font-weight:600;letter-spacing:.02em}
+.period:hover{border-color:var(--muted)}
+.period[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.period[aria-selected="true"] small{color:var(--accent)}
+.period:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){.periods{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.period{padding:6px 8px;min-width:0}.period b{font-size:14px;white-space:nowrap}.period small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.p-long{display:none}}
+.is-qtr .bars{grid-template-columns:62px minmax(0,1fr) auto}.is-qtr .bars span{white-space:nowrap}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .media-bar{display:flex;align-items:center;gap:12px;margin-bottom:-4px}
 .media-bar[hidden]{display:none}
@@ -336,6 +347,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
         <button class="tab" role="tab" id="tab-feedback" data-view="feedback" aria-selected="false">Feedback</button>
       </div>
     </div>
+    <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
     <div id="view-feedback" role="tabpanel" aria-labelledby="tab-feedback" hidden>
@@ -420,6 +432,18 @@ function loadCompany(t){
     .then(c => { LIBRARY[t] = c; FULL.add(t); return c; }).finally(() => { delete pending[t]; });
   return pending[t];
 }
+
+/* Latest quarters (10-Q, or the earnings release until the 10-Q is filed): data/quarters/TICKER.json,
+   loaded only when a quarter is opened. The company file lists them as "quarters": ["Q1 2026", ...]. */
+const QUARTERS = {}, qPending = {};
+function loadQuarters(t){
+  if (QUARTERS[t]) return Promise.resolve(QUARTERS[t]);
+  if (!qPending[t]) qPending[t] = fetch(`data/quarters/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("quarters"); return r.json(); })
+    .then(d => { QUARTERS[t] = d.quarters; return d.quarters; }).finally(() => { delete qPending[t]; });
+  return qPending[t];
+}
+const pid = q => q.toLowerCase().replace(/\s+/g, "-");   // "Q2 2026" -> "q2-2026"
+const formShort = f => /10-Q/.test(f || "") ? "10-Q" : /8-K|earnings/i.test(f || "") ? "Earnings release" : (f || "10-Q");
 
 /* ---------------- Helpers ---------------- */
 const $ = s => document.querySelector(s);
@@ -842,6 +866,7 @@ async function makeInfographicBlob(c){
   root.setAttribute("data-theme", "light");
   const host = document.createElement("div");
   host.style.cssText = "position:fixed;left:-20000px;top:0;width:1224px;pointer-events:none";
+  if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
   document.body.appendChild(host);
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -889,8 +914,9 @@ async function saveShownImage(){
   st.textContent = "Downloaded " + name + ".";
 }
 async function downloadInfographic(){
-  const c = LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
-  const name = `${c.ticker}-${c.fy}-10K-infographic.png`;
+  const c = state.shown || LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
+  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+  const name = `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`;
   btn.disabled = true; st.textContent = "Drawing the image…";
   try {
     const blob = await makeInfographicBlob(c);
@@ -1229,7 +1255,7 @@ $("#stage").addEventListener("keydown", e => { if (e.target.closest("button")) r
 
 /* ---------------- Shelf, routing ---------------- */
 const VIEWS = ["infographic", "slides", "video", "report", "feedback"];
-let state = {ticker: "AMZN", view: "infographic", media: "slides"};
+let state = {ticker: "AMZN", view: "infographic", media: "slides", period: ""};   // period: "" = annual report, else e.g. "q2-2026" 
 function renderSpines(){
   const sel = $("#pick");
   if (!sel.options.length) {
@@ -1398,7 +1424,7 @@ try { visualViewport.addEventListener("resize", measureFs); } catch (e) {}
 measureFs();
 try { nvInit(); } catch (e) { NV = null; }
 let openSeq = 0;
-async function openCompany(t, view){
+async function openCompany(t, view, period){
   if (!LIBRARY[t]) return;
   const seq = ++openSeq;
   if (!FULL.has(t)) {
@@ -1407,11 +1433,45 @@ async function openCompany(t, view){
     if (seq !== openSeq) return;
   }
   const c = LIBRARY[t];
-  state.ticker = t;
+  const qs = c.quarters || [];
+  if (!qs.some(q => pid(q) === period)) period = "";
+  let shown = c;
+  if (period) {
+    try { const list = await loadQuarters(t); shown = list.find(q => pid(q.fy) === period); } catch (e) { shown = null; }
+    if (seq !== openSeq) return;
+    if (!shown) { shown = c; period = ""; }
+    else shown = Object.assign({quarter: true}, shown);
+  }
+  const fresh = state.ticker !== t || !$("#view-report").innerHTML;
+  state.ticker = t; state.period = period; state.shown = shown;
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
-  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(c.fy)}</em>`;
-  $("#fmeta").innerHTML = `<span><b>${c.form || "Form 10-K"}</b> · ${esc(c.fy)}</span><span>${esc(c.period)}</span><span>Filed ${esc(c.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
-  renderReport(c); renderInfographic(c); loadSlides(c); loadVideo(c); renderSpines(); setView(view || state.view);
+  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(shown.period)}</span><span>Filed ${esc(shown.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
+  renderPeriods(c);
+  $("#view-infographic").classList.toggle("is-qtr", !!period);
+  renderInfographic(shown);
+  /* The written report, slides and video exist for the annual report only */
+  if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });
+  renderSpines();
+  let v = view || state.view;
+  if (period && !["infographic", "feedback"].includes(v)) v = "infographic";
+  setView(v);
+}
+function renderPeriods(c){
+  const el = $("#periods"), qs = c.quarters || [];
+  if (!qs.length) { el.hidden = true; el.innerHTML = ""; return; }
+  const forms = QUARTERS[c.ticker] ? Object.fromEntries(QUARTERS[c.ticker].map(q => [q.fy, q.form])) : {};
+  const btn = (id, top, sub) => `<button type="button" class="period" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub)}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}</small></button>`;
+  el.innerHTML = btn("", c.fy, (c.form || "Form 10-K").replace(/^Form /, "")) +
+    qs.map(q => btn(pid(q), q, forms[q] ? formShort(forms[q]) : "Quarter")).join("");
+  el.hidden = false;
+  el.querySelectorAll(".period").forEach(b => b.addEventListener("click", async () => {
+    if (b.dataset.period === state.period) return;
+    await openCompany(state.ticker, state.view, b.dataset.period); writeHash();
+  }));
+  /* Fill in each quarter's form (10-Q or earnings release) once the quarters file is in */
+  if (!QUARTERS[c.ticker]) loadQuarters(c.ticker).then(() => { if (state.ticker === c.ticker) renderPeriods(c); }).catch(() => {});
 }
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
@@ -1438,8 +1498,11 @@ $("#fbForm").addEventListener("submit", async e => {
 });
 function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbName").value = ""; $("#fbEmail").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
 $("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $("#fbForm").hidden = false; $("#fbMsg").focus(); });
-function writeHash(){ const h = state.ticker.toLowerCase() + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
-function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const [t, v] = h.split("-"); return {t: (t || "").toUpperCase(), v: VIEWS.includes(v) ? v : "infographic"}; }
+/* #crwv, #crwv-report, #crwv-q2-2026, #crwv-q2-2026-feedback */
+function writeHash(){ const h = state.ticker.toLowerCase() + (state.period ? "-" + state.period : "") + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
+function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const parts = h.split("-"); const t = parts.shift() || "";
+  let p = ""; if (/^q[1-4]$/.test(parts[0] || "") && /^\d{4}$/.test(parts[1] || "")) p = parts.splice(0, 2).join("-");
+  const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value); writeHash(); });
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
@@ -1483,14 +1546,14 @@ $("#searchForm").addEventListener("submit", e => { e.preventDefault();
     $("#matchRow").hidden = true;
   }
   $("#missing").hidden = false; });
-window.addEventListener("hashchange", () => { const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v); });
+window.addEventListener("hashchange", () => { const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
   const start = readHash();
   let last = null; try { last = localStorage.getItem("10k-last-ticker"); } catch (e) {}
   const first = start && LIBRARY[start.t] ? start.t : (last && LIBRARY[last] ? last : "AMZN");
-  await openCompany(first, start ? start.v : "infographic");
+  await openCompany(first, start ? start.v : "infographic", start && start.t === first ? start.p : "");
 })();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
