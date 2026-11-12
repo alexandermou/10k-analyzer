@@ -77,7 +77,13 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .vbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center}
 #wlBtn b{background:var(--navy);color:var(--bg)}
 @media (max-width:640px){.views{margin-left:0;width:100%}.vbtn{flex:1 1 0;justify-content:center;padding:0 6px;font-size:14px;gap:5px}}
-.nr .when{font-size:11px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
+.nr .when{font-size:11px;font-weight:600;color:var(--muted)}
+.nr{padding:0 10px 0 0}.nr-a{display:inline-flex;align-items:center;gap:6px;height:100%;color:inherit;text-decoration:none}
+.nr-a:first-child{padding-left:10px}.nr-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.nr-star{border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:3px 2px;margin:0 -2px;cursor:pointer;border-radius:5px}
+.nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
+.nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
 .wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .wl-table{width:100%;border-collapse:collapse;font-size:14px}
@@ -1660,7 +1666,8 @@ function nrButton(x, wl){
   const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
   const when = {BMO: "before open", AMC: "after close"}[x.time] || "";
   const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}${x.expected ? " expected" : ""}, ${dayName(x.date)}${when ? ", " + when : ""}${x.test ? " (test entry)" : ""}`;
-  return `<a class="nr${fav ? " fav" : ""}" href="${href}" title="${esc(tip)}" aria-label="${esc(tip)}">${fav ? `<span class="star" aria-hidden="true">★</span>` : ""}<span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a>`;
+  const star = `<button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${fav ? "Remove " + esc(x.ticker) + " from" : "Add " + esc(x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button>`;
+  return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
 }
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 function dayList(items, wl, head, emptyText){
@@ -1670,6 +1677,23 @@ function dayList(items, wl, head, emptyText){
   const html = `<div class="nr-day"><h3>${head}</h3>` + (!sorted.length ? `<p class="sub">${emptyText}.</p>` :
     mine.length ? `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}${rest.length ? `<h4 class="nr-sec">Other companies</h4>${grid(rest)}` : ""}` : grid(rest)) + `</div>`;
   return {html, bind: () => {}};
+}
+/* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
+const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading starts at 9:30 am ET, usually 6–9 am ET. The stock reacts at that morning's open."],
+               ["AMC", "After market close (AMC)", "Results out after trading ends at 4:00 pm ET, usually 4–5 pm ET. The stock reacts in after-hours trading and at the next morning's open."],
+               ["", "Time not announced", "The company hasn't said whether it reports before the open or after the close."]];
+function timeList(items, wl, head, emptyText){
+  const sorted = items.slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
+  const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
+  let html = `<div class="nr-day"><h3>${head}</h3>`;
+  if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  for (const [k, title, desc] of TIMES) {
+    const list = rest.filter(x => (x.time || "") === k);
+    if (list.length) html += `<h4 class="nr-sec">${title}</h4><p class="nr-time">${desc}</p>${grid(list)}`;
+  }
+  return {html: html + `</div>`, bind: () => {}};
 }
 async function showNew(){
   const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
@@ -1681,7 +1705,7 @@ async function showNew(){
 async function showUpcoming(){
   const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
   const items = d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
-  const v = dayList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected");
+  const v = timeList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected");
   $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   v.bind($("#upBody"));
   showPage("upcoming", "Upcoming reports");
@@ -1754,6 +1778,7 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
+document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
 const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
 loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
 loadUpcoming().then(d => { const day = stepBiz(todayISO(), 1); badge("#upCount", d.items.filter(x => x.date === day && !x.estimated).length, "upcoming"); });
