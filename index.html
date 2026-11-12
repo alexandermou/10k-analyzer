@@ -83,7 +83,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star{border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:3px 2px;margin:0 -2px;cursor:pointer;border-radius:5px}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
+.nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+.nr-n{display:inline-block;margin-left:4px;padding:0 7px;border-radius:9px;background:var(--sunk);font-size:12px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
 .wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .wl-table{width:100%;border-collapse:collapse;font-size:14px}
@@ -1660,14 +1661,14 @@ const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t =
 const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric", year: "numeric"}); };
 const mdy = iso => { const [y, m, d] = iso.split("-"); return `${m}/${d}/${y.slice(2)}`; };   // 2026-05-08 -> 05/08/26
 const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
-function nrButton(x, wl){
+function nrButton(x, wl, opt = {}){
   const fav = wl && wl.has(x.ticker);
   const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
   const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
   const when = {BMO: "before open", AMC: "after close"}[x.time] || "";
   const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}${x.expected ? " expected" : ""}, ${dayName(x.date)}${when ? ", " + when : ""}${x.test ? " (test entry)" : ""}`;
   const star = `<button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${fav ? "Remove " + esc(x.ticker) + " from" : "Add " + esc(x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button>`;
-  return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
+  return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span>${opt.noType ? "" : `<span class="tag${er ? " er" : ""}">${esc(tag)}</span>`}${x.time && !opt.noTime ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
 }
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 /* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
@@ -1676,13 +1677,21 @@ const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
 const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); return m ? [m[2] ? 1 : 0, +m[3], m[1] ? +m[1] : 5] : [2, 0, 0]; };
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
+const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
-  const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
-  const html = `<div class="nr-day"><h3>${head}</h3>` + (!sorted.length ? `<p class="sub">${emptyText}.</p>` :
-    mine.length ? `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}${rest.length ? `<h4 class="nr-sec">Other companies</h4>${grid(rest)}` : ""}` : grid(rest)) + `</div>`;
-  return {html, bind: () => {}};
+  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
+  let html = `<div class="nr-day"><h3>${head}</h3>`;
+  if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  for (const [f, title] of FORMS) {
+    const list = rest.filter(x => x.form === f);
+    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
+  }
+  const other = rest.filter(x => !FORMS.some(([f]) => f === x.form));
+  if (other.length) html += `<h4 class="nr-sec">Other filings</h4>${grid(other)}`;
+  return {html: html + `</div>`, bind: () => {}};
 }
 /* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
 const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading starts at 9:30 am ET, usually 6–9 am ET. The stock reacts at that morning's open."],
@@ -1691,13 +1700,13 @@ const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading s
 function timeList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
-  const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
+  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine, {noType: true})}`;
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
-    if (list.length) html += `<h4 class="nr-sec">${title}</h4><p class="nr-time">${desc}</p>${grid(list)}`;
+    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
   }
   return {html: html + `</div>`, bind: () => {}};
 }
