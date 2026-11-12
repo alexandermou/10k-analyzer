@@ -92,7 +92,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .linkbtn{border:0;background:transparent;padding:4px 0;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .linkbtn:hover{text-decoration-thickness:2px}.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 /* Top 10 chart on the New page */
-.top10-head h4 .t10-q{font-size:14px;font-weight:400;color:var(--muted)}
+.top10-head h4 .t10-q{display:block;margin-top:2px;font-size:14px;font-weight:400;color:var(--muted)}
 .top10{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 12px;margin:10px 0 6px;max-width:760px}
 .top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
 .top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
@@ -1834,10 +1834,10 @@ async function showNew(day){
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>");
-  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>") +
+  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
-  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>");
+  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
   $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "New reports");
