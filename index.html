@@ -212,7 +212,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .big{font-family:var(--f-mono);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
 .sub{font-size:13px;color:var(--muted)}
 .up{color:var(--pos);font-weight:700}.down{color:var(--neg);font-weight:700}.flat{color:var(--n-fg);font-weight:700}
-.chip{font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.chip{font-size:12.5px;font-weight:400;padding:3px 10px;border-radius:999px;white-space:nowrap}
+/* YoY / QoQ changes are never bold: chips, and the coloured change text in tiles and charts */
+.chip.up,.chip.down,.chip.flat,.sub .up,.sub .down,.sub .flat,.sub.up,.sub.down,.sub.flat{font-weight:400}
 .chip.up{background:var(--pos-bg)}.chip.down{background:var(--neg-bg)}.chip.flat{background:var(--n-bg)}
 .kpi.hero{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
 .kpi.hero .lbl,.kpi.hero .sub{color:var(--on-node-soft)}
