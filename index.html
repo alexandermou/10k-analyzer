@@ -1808,9 +1808,11 @@ async function showNew(){
    then the next business day */
 async function upcomingDays(){
   const [d, f] = await Promise.all([loadUpcoming(), loadLatest()]), t = todayISO();
-  const filedToday = new Set(f.items.filter(x => x.date === t).map(x => x.ticker));
-  const sched = day => d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
-  const today = isBiz(t) ? sched(t).filter(x => !filedToday.has(x.ticker)) : [];
+  /* already reported: filed today, or the feed already has this quarter (e.g. released earlier than the calendar says) */
+  const lastBy = Object.fromEntries(f.items.map(x => [x.ticker, x]));
+  const reported = x => { const l = lastBy[x.ticker]; return !!l && (l.date === t || l.label === x.label); };
+  const sched = day => d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker] && !reported(x));
+  const today = isBiz(t) ? sched(t) : [];
   const next = stepBiz(t, 1);
   return {d, t, today, next, nextItems: sched(next)};
 }
