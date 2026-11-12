@@ -1672,7 +1672,10 @@ function nrButton(x, wl){
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 /* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
 const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
-const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || a.ticker.localeCompare(b.ticker);
+/* Then calendar-year labels ("Q3 2026") before fiscal-year ones ("Q1 FY2027"), each by year and quarter, then A–Z */
+const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); return m ? [m[2] ? 1 : 0, +m[3], m[1] ? +m[1] : 5] : [2, 0, 0]; };
+const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
+const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
