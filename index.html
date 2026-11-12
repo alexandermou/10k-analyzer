@@ -1770,14 +1770,14 @@ function bindTop(el, items, wl){
 async function showNew(){
   const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
   const items = nd ? d.items.filter(x => x.date === nd.day) : [];
-  const v = dayList(items, wl, nd ? `${nd.label} <small>· ${esc(dayName(nd.day))}</small>` : "No filings yet", "No new reports");
+  const v = dayList(items, wl, !nd ? "No filings yet" : nd.day === todayISO() ? `Filed today <small>· ${esc(dayName(nd.day))}</small>` : `Filed ${esc(dayName(nd.day))}`, "No new reports");
   $("#npBody").innerHTML = v.html.replace(/(<\/h3>)/, "$1" + (items.length ? topChart(items, wl) : "")); bindTop($("#npBody"), items, wl);
   showPage("new", "New reports");
 }
 async function showUpcoming(){
   const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
   const items = d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
-  const v = timeList(items, wl, `Next business day <small>· ${esc(dayName(day))}</small>`, "No reports expected");
+  const v = timeList(items, wl, dayDiff(day) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(day))}</small>` : `Reporting ${esc(dayName(day))}`, "No reports expected");
   $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   v.bind($("#upBody"));
   showPage("upcoming", "Upcoming reports");
