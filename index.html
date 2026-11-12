@@ -1760,11 +1760,13 @@ const TOP = [
   ["eps", "EPS (diluted)", "eps", x => x.eps],
   ["epsYoY", "EPS growth YoY", "growth", x => [x.eps, x.epsPrior], "EPS"],
   ["epsQoQ", "EPS growth QoQ", "growth", x => [x.eps, x.epsPrevQ], "EPS"]];
-let topKey = "netYoY";   // default ranking: profit growth YoY
+const topKeys = {};   // ranking per chart (New page "", Watchlist "W"); default: profit growth YoY
+const topKeyOf = sfx => topKeys[sfx] || "netYoY";
 /* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
 const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
 function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
+  const topKey = topKeyOf(sfx);
   const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
   const rows = [];
   for (const x of items) {
@@ -1790,9 +1792,10 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
       : `<p class="sub">No company here has the figures for this ranking.</p>`}
     <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
+const WL_HEAD = "Top 10 <small class=\"t10-q\">Quarterly figures</small>";
 function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
-  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
+  if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
 }
 /* Watchlist chart: each watched company's latest quarter, read from its quarter file */
 const QFIG = {};
@@ -1929,7 +1932,7 @@ async function showWatchlist(){
   if (list.length) {
     const seq = ++wlSeq, figs = await watchFigures(list), miss = list.length - figs.length;
     const note2 = (miss ? `${miss} watched ${miss === 1 ? "company has" : "companies have"} no quarterly figures yet. ` : "") + "Figures are for each company's latest quarter";
-    if (seq === wlSeq) { $("#wlBody").insertAdjacentHTML("afterbegin", topChart(figs, new Set(list), "W", note2)); bindTop($("#wlBody"), figs, new Set(list), "W", note2); }
+    if (seq === wlSeq) { $("#wlBody").insertAdjacentHTML("afterbegin", topChart(figs, new Set(list), "W", note2, WL_HEAD)); bindTop($("#wlBody"), figs, new Set(list), "W", note2, WL_HEAD); }
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
