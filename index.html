@@ -51,6 +51,7 @@ button,input{font:inherit}
 .btn{height:48px;padding:0 18px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font-weight:600;cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn:disabled{opacity:.5;cursor:default}
+.search-btn{display:inline-flex;align-items:center;justify-content:center;width:52px;padding:0}
 .picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .picker label{font-weight:600;font-size:14px;color:var(--muted)}
 /* New reports: a page of buttons for companies with a recent 10-K, 10-Q or earnings release */
@@ -445,7 +446,7 @@ body.home .tagline{display:block;margin:14px 0 0;text-align:center;font-size:16p
       <label for="ticker">Search the library</label>
       <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
       <datalist id="libList"></datalist>
-      <button class="btn" type="submit">Search</button>
+      <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
     <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <p class="tagline">Visualize 10-K or 10-Q reports.</p>
