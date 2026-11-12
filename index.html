@@ -1670,8 +1670,11 @@ function nrButton(x, wl){
   return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span><span class="tag${er ? " er" : ""}">${esc(tag)}</span>${x.time ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
 }
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
+/* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
+const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
+const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || a.ticker.localeCompare(b.ticker);
 function dayList(items, wl, head, emptyText){
-  const sorted = items.slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
   const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
   const html = `<div class="nr-day"><h3>${head}</h3>` + (!sorted.length ? `<p class="sub">${emptyText}.</p>` :
@@ -1683,7 +1686,7 @@ const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading s
                ["AMC", "After market close (AMC)", "Results out after trading ends at 4:00 pm ET, usually 4–5 pm ET. The stock reacts in after-hours trading and at the next morning's open."],
                ["", "Time not announced", "The company hasn't said whether it reports before the open or after the close."]];
 function timeList(items, wl, head, emptyText){
-  const sorted = items.slice().sort((a, b) => a.ticker.localeCompare(b.ticker));
+  const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
   const grid = list => `<div class="nr-grid">${list.map(x => nrButton(x, wl)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
