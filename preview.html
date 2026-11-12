@@ -1823,12 +1823,11 @@ async function showNew(day){
   if (nd && !days.includes(nd.day)) days.push(nd.day);
   if (day) newSel = day; if (!days.includes(newSel)) newSel = nd ? nd.day : days[0];
   const items = all.filter(x => x.date === newSel), isToday = newSel === t;
-  const opts = days.map(x => { const n = all.filter(y => y.date === x).length;
-    return `<option value="${x}"${x === newSel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))} (${n})</option>`; }).join("");
+  const opts = days.map(x => `<option value="${x}"${x === newSel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}</option>`).join("");
   const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
   const v = dayList(items, wl, head, "No reports filed this day");
   const note = "Figures are for the quarter each report covers";
-  const linkText = newOpen ? "Hide the list of companies" : `Click to view all the companies that filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
+  const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
