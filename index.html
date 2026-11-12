@@ -444,12 +444,12 @@ body.home .tagline{display:block;margin:14px 0 0;text-align:center;font-size:16p
     </div>
     <form class="search" id="searchForm">
       <label for="ticker">Search the library</label>
-      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
+      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. AMZN or Apple" maxlength="60">
       <datalist id="libList"></datalist>
       <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
     <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
-    <p class="tagline">Visualize 10-K or 10-Q reports.</p>
+    <p class="tagline">Visualize annual (10-K) and quarterly (10-Q) reports.</p>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
