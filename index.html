@@ -1739,9 +1739,10 @@ const TOP = [
   ["epsYoY", "EPS growth YoY", "growth", x => [x.eps, x.epsPrior], "EPS"],
   ["epsQoQ", "EPS growth QoQ", "growth", x => [x.eps, x.epsPrevQ], "EPS"]];
 let topKey = "netYoY";   // default ranking: profit growth YoY
-const fmtM = v => { const a = Math.abs(v), t = a >= 999950 ? `$${(a / 1e6).toFixed(1)}T` : a >= 999.5 ? `$${(a / 1000).toFixed(1)}B` : a >= 99.5 ? `$${a.toFixed(0)}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
+/* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
+const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
-function topChart(items, wl){
+function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers"){
   const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
   const rows = [];
   for (const x of items) {
@@ -1758,18 +1759,39 @@ function topChart(items, wl){
   const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
   const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
   const note = kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`;
-  return `<section class="top10" aria-labelledby="topTitle"><div class="top10-head"><h4 id="topTitle">Top 10</h4>
-    <label class="sr-only" for="topPick">Rank by</label><select id="topPick">${opts}</select></div>
+  return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">Top 10</h4>
+    <label class="sr-only" for="topPick${sfx}">Rank by</label><select id="topPick${sfx}" class="top-pick">${opts}</select></div>
     ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
       const fav = wl.has(r.x.ticker);
       return `<li title="${esc(tip(r))}"><span class="t10-rank">${i + 1}</span><span class="t10-name"><a class="t10-tk" href="${href}" aria-label="${esc(tip(r))}">${esc(r.x.ticker)}</a><button type="button" class="nr-star" data-t="${esc(r.x.ticker)}" aria-pressed="${fav}" aria-label="${fav ? "Remove " + esc(r.x.ticker) + " from" : "Add " + esc(r.x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button></span>
         <a class="t10-link" href="${href}" tabindex="-1" aria-hidden="true"><span class="t10-track"><span class="t10-bar${r.v < 0 ? " neg" : ""}" style="width:${(len(r) / max * 100).toFixed(1)}%"></span></span><span class="t10-v">${esc(val(r))}</span></a></li>`; }).join("")}</ol>`
-      : `<p class="sub">No company in today's list has the figures for this ranking.</p>`}
-    <p class="t10-note">${note} Figures are for the quarter each report covers; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
+      : `<p class="sub">No company here has the figures for this ranking.</p>`}
+    <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
-function bindTop(el, items, wl){
-  const pick = el.querySelector("#topPick");
-  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl); bindTop(el, items, wl); el.querySelector("#topPick").focus(); });
+function bindTop(el, items, wl, sfx = "", note2){
+  const pick = el.querySelector(".top-pick");
+  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2); bindTop(el, items, wl, sfx, note2); el.querySelector(".top-pick").focus(); });
+}
+/* Watchlist chart: each watched company's latest quarter, read from its quarter file */
+const QFIG = {};
+function figuresOf(q){
+  const bars = q.sections.filter(s => s.type === "bars").flatMap(s => s.items);
+  const eps = bars.find(i => i.money === "eps"), net = bars.find(i => i.label === "Net income" || i.label === "Net loss");
+  return {rev: q.revenue, revPrior: q.revenuePrior, revPrevQ: (q.prevQ || {}).revenue, net: q.netIncome, netPrior: q.netIncomePrior, netPrevQ: net ? net.prevQ : null,
+          eps: eps ? eps.cur : null, epsPrior: eps ? eps.prior : null, epsPrevQ: eps ? eps.prevQ : null, of: q.fy};
+}
+async function watchFigures(list){
+  const out = [];
+  await Promise.all(list.map(async t => {
+    if (!(t in QFIG)) {
+      QFIG[t] = null;
+      try { const r = await fetch(`data/quarters/${encodeURIComponent(t)}.json`); if (r.ok) {     // companies without quarter tabs have no file
+        const qs = (await r.json()).quarters, q = qs.slice().sort((a, b) => (a.filedDate || "").localeCompare(b.filedDate || "") || (a.end || "").localeCompare(b.end || "")).pop();
+        QFIG[t] = {ticker: t, name: q.name, period: q.fy.toLowerCase().replace(/\s+/g, "-"), m: figuresOf(q)}; } } catch (e) {}
+    }
+    if (QFIG[t]) out.push(QFIG[t]);
+  }));
+  return out;
 }
 async function showNew(){
   const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
@@ -1819,7 +1841,7 @@ function wlChanged(){
   if (state.page === "upcoming") showUpcoming();
 }
 /* Watchlist: one row per company with its next report and earnings release date, soonest first */
-let wlSort = {key: "date", dir: 1};
+let wlSort = {key: "date", dir: 1}, wlSeq = 0;
 const daysUntil = iso => -dayDiff(iso);
 const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
 async function showWatchlist(){
@@ -1842,6 +1864,11 @@ async function showWatchlist(){
           <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
     }</tbody></table></div>
     <p class="sub">Dates from Nasdaq's earnings calendar; “~ … est.” is an estimate (last year's date for the same quarter + 52 weeks) until the company announces it. BMO = before the market opens, AMC = after it closes.${up.tickers ? ` Trial: dates for ${up.tickers.length} companies only.` : ""}${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+  if (list.length) {
+    const seq = ++wlSeq, figs = await watchFigures(list), miss = list.length - figs.length;
+    const note2 = (miss ? `${miss} watched ${miss === 1 ? "company has" : "companies have"} no quarterly figures yet. ` : "") + "Figures are for each company's latest quarter";
+    if (seq === wlSeq) { $("#wlBody").insertAdjacentHTML("afterbegin", topChart(figs, new Set(list), "W", note2)); bindTop($("#wlBody"), figs, new Set(list), "W", note2); }
+  }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
   const clr = $("#wlClear"); if (clr) clr.addEventListener("click", () => { if (confirm("Remove all companies from your watchlist?")) wlSet([]); });
