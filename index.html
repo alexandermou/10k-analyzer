@@ -440,7 +440,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
   </section>
 
   <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
-    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Companies expected to release earnings (ER) on the next business day, from Nasdaq's earnings calendar. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Earnings releases (ER) scheduled for today that haven't been filed yet — each moves to New once filed — and those due the next business day, from Nasdaq's earnings calendar. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
@@ -1804,12 +1804,22 @@ async function showNew(){
   $("#npBody").innerHTML = v.html.replace(/(<\/h3>)/, "$1" + (items.length ? topChart(items, wl) : "")); bindTop($("#npBody"), items, wl);
   showPage("new", "New reports");
 }
+/* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
+   then the next business day */
+async function upcomingDays(){
+  const [d, f] = await Promise.all([loadUpcoming(), loadLatest()]), t = todayISO();
+  const filedToday = new Set(f.items.filter(x => x.date === t).map(x => x.ticker));
+  const sched = day => d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
+  const today = isBiz(t) ? sched(t).filter(x => !filedToday.has(x.ticker)) : [];
+  const next = stepBiz(t, 1);
+  return {d, t, today, next, nextItems: sched(next)};
+}
 async function showUpcoming(){
-  const d = await loadUpcoming(), wl = new Set(wlGet()), day = stepBiz(todayISO(), 1);
-  const items = d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker]);
-  const v = timeList(items, wl, dayDiff(day) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(day))}</small>` : `Reporting ${esc(dayName(day))}`, "No reports expected");
-  $("#upBody").innerHTML = v.html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
-  v.bind($("#upBody"));
+  const {d, t, today, next, nextItems} = await upcomingDays(), wl = new Set(wlGet());
+  let html = "";
+  if (isBiz(t)) html += timeList(today, wl, `Reporting today <small>· ${esc(dayName(t))} · not filed yet</small>`, "Everyone scheduled for today has filed — see New").html;
+  html += timeList(nextItems, wl, dayDiff(next) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(next))}</small>` : `Reporting ${esc(dayName(next))}`, "No reports expected").html;
+  $("#upBody").innerHTML = html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   showPage("upcoming", "Upcoming reports");
 }
 /* One of the list pages (new reports, watchlist) instead of a company */
@@ -1888,7 +1898,8 @@ $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) w
 document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
 const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
 loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
-loadUpcoming().then(d => { const day = stepBiz(todayISO(), 1); badge("#upCount", d.items.filter(x => x.date === day && !x.estimated).length, "upcoming"); });
+/* badge: today's not-yet-filed releases, or the next business day's when today's are done */
+const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length || u.nextItems.length, "upcoming"));
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
@@ -1975,7 +1986,7 @@ window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCa
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
-  wlChanged();
+  wlChanged(); upBadge();
   if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
