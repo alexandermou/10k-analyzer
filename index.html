@@ -89,8 +89,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
 .top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
 .top10-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.t10-name{display:inline-flex;align-items:center;gap:3px;min-width:0}
-.top10-bars li{display:grid;grid-template-columns:22px 84px minmax(0,1fr);align-items:center;gap:6px;min-height:28px;padding:0 6px;border-radius:6px}
+.t10-name{display:contents}
+.top10-bars li{display:grid;grid-template-columns:22px 52px 22px minmax(0,1fr);align-items:center;gap:6px;min-height:28px;padding:0 6px;border-radius:6px}
 .top10-bars li:hover{background:var(--sunk)}
 .top10-bars a{color:var(--ink);text-decoration:none}.top10-bars a:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
 .t10-link{display:grid;grid-template-columns:minmax(0,1fr) 76px;align-items:center;gap:8px;min-height:28px}
@@ -100,7 +100,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .t10-bar{display:block;height:16px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0}.t10-bar.neg{background:var(--node-neg)}
 .t10-v{font-family:var(--f-mono);font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
 .t10-note{margin-top:8px;font-size:12px;color:var(--muted)}
-@media (max-width:640px){.top10{padding:12px 10px}.top10-bars li{grid-template-columns:18px 72px minmax(0,1fr);gap:4px;padding:0 2px}.t10-link{grid-template-columns:minmax(0,1fr) 62px;gap:6px}.top10-head select{flex:1;min-width:0}}
+@media (max-width:640px){.top10{padding:12px 10px}.top10-bars li{grid-template-columns:18px 46px 20px minmax(0,1fr);gap:4px;padding:0 2px}.t10-link{grid-template-columns:minmax(0,1fr) 62px;gap:6px}.top10-head select{flex:1;min-width:0}}
 .nr-n{display:inline-block;margin-left:4px;padding:0 7px;border-radius:9px;background:var(--sunk);font-size:12px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
 .wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
