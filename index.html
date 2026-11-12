@@ -84,7 +84,14 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+/* New page: day picker in the heading, link that shows the day's list */
+.day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
+.nr-day h3 label{font-weight:inherit}
+.nr-more{margin:4px 0 10px}
+.linkbtn{border:0;background:transparent;padding:4px 0;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{text-decoration-thickness:2px}.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 /* Top 10 chart on the New page */
+.top10-head h4 .t10-q{font-size:14px;font-weight:400;color:var(--muted)}
 .top10{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 12px;margin:10px 0 6px;max-width:760px}
 .top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
 .top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
@@ -417,13 +424,19 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .sl-lines p{border-left:6px solid var(--bar);padding-left:16px}
 .sl-foot{margin-top:auto;display:flex;justify-content:space-between;font-size:16px;color:var(--muted);font-family:var(--f-mono)}
 .notes #snote{font-size:15px;line-height:1.6;max-width:72ch}
+/* Home: only the search box and the company selector; everything else appears once a company or list is opened */
+body.home .brand,body.home .views,body.home #filing{display:none}
+body.home .wrap{min-height:calc(100svh - 120px);justify-content:center}
+body.home .shelf{width:100%;max-width:560px;margin:0 auto}
+body.home .picker select{max-width:none}
+.brand h1 a{color:inherit;text-decoration:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
-      <h1>10-K <span>Analyzer</span> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
+      <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
       <p>Annual reports, read and drawn. Figures from each company's latest annual filing with the SEC.</p>
     </div>
     <form class="search" id="searchForm">
@@ -432,7 +445,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
       <datalist id="libList"></datalist>
       <button class="btn" type="submit">Search</button>
     </form>
-    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
+    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
@@ -444,7 +457,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
-    <div class="np-head"><h2 id="npTitle">New</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Each button opens the infographic of that report.</p></div>
+    <div class="np-head"><h2 id="npTitle">New</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
@@ -1604,6 +1617,7 @@ try { nvInit(); } catch (e) { NV = null; }
 let openSeq = 0;
 async function openCompany(t, view, period){
   if (!LIBRARY[t]) return;
+  document.body.classList.remove("home");
   const seq = ++openSeq;
   if (!FULL.has(t)) {
     $("#fname").textContent = `Loading ${t}…`;
@@ -1746,7 +1760,7 @@ let topKey = "netYoY";   // default ranking: profit growth YoY
 /* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
 const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
-function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers"){
+function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
   const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
   const rows = [];
   for (const x of items) {
@@ -1763,7 +1777,7 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
   const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
   const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
   const note = kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`;
-  return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">Top 10</h4>
+  return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">${heading}</h4>
     <label class="sr-only" for="topPick${sfx}">Rank by</label><select id="topPick${sfx}" class="top-pick">${opts}</select></div>
     ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
       const fav = wl.has(r.x.ticker);
@@ -1772,9 +1786,9 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
       : `<p class="sub">No company here has the figures for this ranking.</p>`}
     <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
-function bindTop(el, items, wl, sfx = "", note2){
+function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
-  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2); bindTop(el, items, wl, sfx, note2); el.querySelector(".top-pick").focus(); });
+  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
 }
 /* Watchlist chart: each watched company's latest quarter, read from its quarter file */
 const QFIG = {};
@@ -1797,11 +1811,31 @@ async function watchFigures(list){
   }));
   return out;
 }
-async function showNew(){
-  const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
-  const items = nd ? d.items.filter(x => x.date === nd.day) : [];
-  const v = dayList(items, wl, !nd ? "No filings yet" : nd.day === todayISO() ? `Filed today <small>· ${esc(dayName(nd.day))}</small>` : `Filed ${esc(dayName(nd.day))}`, "No new reports");
-  $("#npBody").innerHTML = v.html.replace(/(<\/h3>)/, "$1" + (items.length ? topChart(items, wl) : "")); bindTop($("#npBody"), items, wl);
+/* New: one day at a time — today (or the latest filing day) by default, or any of the 8 business days before it */
+let RECENT = null, newSel = "", newOpen = false;
+function loadRecent(){ if (!RECENT) RECENT = fetch("data/recent.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : null).catch(() => null)
+  .then(r => r || loadLatest()); return RECENT; }
+async function showNew(day){
+  const [d, l] = await Promise.all([loadRecent(), loadLatest()]), wl = new Set(wlGet()), t = todayISO();
+  const all = d.items.concat(l.items.filter(x => !d.items.some(y => y.ticker === x.ticker && y.date === x.date)));   // newest entries win
+  const nd = newDay(all), days = [];
+  if (isBiz(t)) days.push(t);                                   // today, then the 8 business days before it with filings (skips SEC holidays such as Veterans Day)
+  for (let x = stepBiz(t, -1), k = 0; days.length < (isBiz(t) ? 9 : 8) && k < 20; x = stepBiz(x, -1), k++) if (all.some(y => y.date === x)) days.push(x);
+  if (nd && !days.includes(nd.day)) days.push(nd.day);
+  if (day) newSel = day; if (!days.includes(newSel)) newSel = nd ? nd.day : days[0];
+  const items = all.filter(x => x.date === newSel), isToday = newSel === t;
+  const opts = days.map(x => `<option value="${x}"${x === newSel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}</option>`).join("");
+  const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
+  const v = dayList(items, wl, head, "No reports filed this day");
+  const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
+  const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
+  const [top, list] = v.html.split("</h3>");
+  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>") +
+    `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
+    `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
+  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>");
+  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
+  const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "New reports");
 }
 /* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
@@ -1827,11 +1861,19 @@ async function showUpcoming(){
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  document.body.classList.remove("home");
   $("#filing").hidden = true; $("#missing").hidden = true;
   $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming";
   ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
+}
+/* Home: just the search box and the company selector */
+function goHome(){
+  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  ++openSeq; hideNew(); $("#filing").hidden = true; $("#missing").hidden = true;
+  renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
+  try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
 function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
@@ -1984,7 +2026,9 @@ function enterSubmits(input, form){
 }
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+$("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
@@ -1994,8 +2038,8 @@ window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCa
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
-  /* Default view: Upcoming */
-  await showUpcoming();
+  /* Default: home (search box and company selector only) */
+  goHome();
 })();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
