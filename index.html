@@ -84,6 +84,20 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+/* Top 10 chart on the New page */
+.top10{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 12px;margin:10px 0 6px;max-width:760px}
+.top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
+.top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
+.top10-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.top10-bars a{display:grid;grid-template-columns:22px 78px minmax(0,1fr) 76px;align-items:center;gap:8px;min-height:28px;padding:0 6px;border-radius:6px;color:var(--ink);text-decoration:none}
+.top10-bars a:hover{background:var(--sunk)}.top10-bars a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.t10-rank{font-size:12px;color:var(--muted);text-align:right}
+.t10-tk{font-family:var(--f-mono);font-weight:600;font-size:13.5px;color:var(--accent);white-space:nowrap}.t10-tk .star{font-size:11px}
+.t10-track{height:16px;display:flex;align-items:center}
+.t10-bar{display:block;height:16px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0}.t10-bar.neg{background:var(--node-neg)}
+.t10-v{font-family:var(--f-mono);font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
+.t10-note{margin-top:8px;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.top10{padding:12px 10px}.top10-bars a{grid-template-columns:18px 64px minmax(0,1fr) 66px;gap:6px;padding:0 2px}.top10-head select{flex:1;min-width:0}}
 .nr-n{display:inline-block;margin-left:4px;padding:0 7px;border-radius:9px;background:var(--sunk);font-size:12px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
 #upBody{display:flex;flex-direction:column;gap:18px}
 .wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
@@ -1710,11 +1724,54 @@ function timeList(items, wl, head, emptyText){
   }
   return {html: html + `</div>`, bind: () => {}};
 }
+/* Top 10 among the day's reports: horizontal bars, one metric at a time (pick from the dropdown) */
+const TOP = [
+  ["revYoY", "Revenue growth YoY", "growth", x => [x.rev, x.revPrior], "revenue"],
+  ["revQoQ", "Revenue growth QoQ", "growth", x => [x.rev, x.revPrevQ], "revenue"],
+  ["rev", "Revenue", "money", x => x.rev],
+  ["net", "Profit (net income)", "money", x => x.net],
+  ["netYoY", "Profit growth YoY", "growth", x => [x.net, x.netPrior], "net income"],
+  ["netQoQ", "Profit growth QoQ", "growth", x => [x.net, x.netPrevQ], "net income"],
+  ["eps", "EPS (diluted)", "eps", x => x.eps],
+  ["epsYoY", "EPS growth YoY", "growth", x => [x.eps, x.epsPrior], "EPS"],
+  ["epsQoQ", "EPS growth QoQ", "growth", x => [x.eps, x.epsPrevQ], "EPS"]];
+let topKey = "revYoY";
+const fmtM = v => { const a = Math.abs(v), t = a >= 999950 ? `$${(a / 1e6).toFixed(1)}T` : a >= 999.5 ? `$${(a / 1000).toFixed(1)}B` : a >= 99.5 ? `$${a.toFixed(0)}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
+const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
+function topChart(items, wl){
+  const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
+  const rows = [];
+  for (const x of items) {
+    const m = x.m; if (!m) continue;
+    if (kind === "growth") { const [c, b] = get(m); if (c == null || b == null || !(c > 0) || !(b > 0)) continue; rows.push({x, v: c / b, cur: c, base: b}); }
+    else { const v = get(m); if (v == null) continue; rows.push({x, v}); }
+  }
+  rows.sort((a, b) => b.v - a.v || a.x.ticker.localeCompare(b.x.ticker));
+  const top = rows.slice(0, 10);
+  const len = r => kind === "growth" ? Math.max(r.v - 1, 0) : Math.abs(r.v);             // growth bars measure the increase
+  const max = Math.max(...top.map(len), 1e-9);
+  const val = r => kind === "growth" ? fmtGrowth(r.v) : kind === "eps" ? `${r.v < 0 ? "−" : ""}$${Math.abs(r.v).toFixed(2)}` : fmtM(r.v);
+  const amt = v => what === "EPS" ? `$${v.toFixed(2)}` : fmtM(v);
+  const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
+  const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
+  const note = kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`;
+  return `<section class="top10" aria-labelledby="topTitle"><div class="top10-head"><h4 id="topTitle">Top 10</h4>
+    <label class="sr-only" for="topPick">Rank by</label><select id="topPick">${opts}</select></div>
+    ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
+      return `<li><a href="${href}" title="${esc(tip(r))}"><span class="t10-rank">${i + 1}</span><span class="t10-tk">${esc(r.x.ticker)}${wl.has(r.x.ticker) ? ` <span class="star" aria-label="on your watchlist">★</span>` : ""}</span>
+        <span class="t10-track"><span class="t10-bar${r.v < 0 ? " neg" : ""}" style="width:${(len(r) / max * 100).toFixed(1)}%"></span></span><span class="t10-v">${esc(val(r))}</span></a></li>`; }).join("")}</ol>`
+      : `<p class="sub">No company in today's list has the figures for this ranking.</p>`}
+    <p class="t10-note">${note} Figures are for the quarter each report covers; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
+}
+function bindTop(el, items, wl){
+  const pick = el.querySelector("#topPick");
+  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl); bindTop(el, items, wl); el.querySelector("#topPick").focus(); });
+}
 async function showNew(){
   const d = await loadLatest(), wl = new Set(wlGet()), nd = newDay(d.items);
   const items = nd ? d.items.filter(x => x.date === nd.day) : [];
   const v = dayList(items, wl, nd ? `${nd.label} <small>· ${esc(dayName(nd.day))}</small>` : "No filings yet", "No new reports");
-  $("#npBody").innerHTML = v.html; v.bind($("#npBody"));
+  $("#npBody").innerHTML = v.html.replace(/(<\/h3>)/, "$1" + (items.length ? topChart(items, wl) : "")); bindTop($("#npBody"), items, wl);
   showPage("new", "New reports");
 }
 async function showUpcoming(){
