@@ -1042,7 +1042,9 @@ function sparkline(c, it, wide){
   const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
-  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${approx}<span>${esc(sq(q[last]))}</span></div>`;
+  /* 10-K tab: the card is the full year, the line is quarters — say so */
+  const qnote = !c.quarter && !full ? `<span class="sp-note" title="The card shows the full year; the line shows the last five quarters">Quarterly${it.sparkNote === "approx" ? " · ≈ as filed" : ""}</span>` : approx;
+  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${qnote}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
   /* Wide (desktop) trend cards: each point labelled with its value; the axis below shows only the quarters */
   const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%">${esc(sq(q[i]))}</span>`).join("")}</div>` : "";
