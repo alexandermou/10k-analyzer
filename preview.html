@@ -1214,6 +1214,10 @@ async function makeInfographicBlob(c){
       const vb = svg.viewBox.baseVal, w = box.clientWidth || 1160, hgt = Math.round(w * vb.height / vb.width);
       const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
+    n.querySelectorAll(".spark svg").forEach(svg => {      // sparklines as plain pictures (the image library can't draw them reliably)
+      const w = Math.round(svg.getBoundingClientRect().width) || 300, hgt = Math.round(svg.getBoundingClientRect().height) || 56;
+      const cv = drawSparkToCanvas(svg, w, hgt); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      svg.replaceWith(cv); });
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     const fontEmbedCSS = await getFontEmbedCSS();
     const opts = {pixelRatio: 2, backgroundColor: "#F3F5F8", cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})};
@@ -1252,6 +1256,25 @@ async function downloadInfographic(){
     st.textContent = ""; showImage(lastImgUrl);
   } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
   finally { btn.disabled = false; }
+}
+/* Paints a sparkline (line, points, zero line) onto a canvas at 2x, in the colors the card shows */
+function drawSparkToCanvas(svg, w, h){
+  const vb = svg.viewBox.baseVal, R = 2, sx = w / vb.width, sy = h / vb.height;
+  const cv = document.createElement("canvas"); cv.width = w * R; cv.height = h * R;
+  const g = cv.getContext("2d"); g.scale(R, R);
+  const line = svg.querySelector(".sp-line"); if (!line) return cv;
+  const col = getComputedStyle(line).stroke || "#1D3557", bg = (() => { let e = svg.closest(".card"); const c = e ? getComputedStyle(e).backgroundColor : ""; return c && c !== "rgba(0, 0, 0, 0)" ? c : "#FFFFFF"; })();
+  const z = svg.querySelector(".sp-zero");
+  if (z) { g.strokeStyle = col; g.globalAlpha = .45; g.setLineDash([2, 3]); g.lineWidth = 1; const y = +z.getAttribute("y1") * sy;
+    g.beginPath(); g.moveTo(+z.getAttribute("x1") * sx, y); g.lineTo(+z.getAttribute("x2") * sx, y); g.stroke(); g.setLineDash([]); g.globalAlpha = 1; }
+  const pts = [], d = line.getAttribute("d") || "";
+  g.strokeStyle = col; g.lineWidth = 2; g.lineJoin = "round"; g.lineCap = "round"; g.beginPath();
+  d.replace(/([ML])\s*([-\d.]+)[ ,]([-\d.]+)/g, (m, cmd, x, y) => { const X = +x * sx, Y = +y * sy; cmd === "M" ? g.moveTo(X, Y) : g.lineTo(X, Y); pts.push([X, Y]); return m; });
+  g.stroke();
+  const n = svg.querySelectorAll(".sp-pt, .sp-dot, .sp-last").length ? pts : [];
+  n.forEach(([X, Y], i) => { const last = i === n.length - 1; g.beginPath(); g.arc(X, Y, last ? 4 : 3, 0, Math.PI * 2);
+    g.fillStyle = last ? col : bg; g.fill(); if (!last) { g.lineWidth = 1.5; g.stroke(); } });
+  return cv;
 }
 /* Paints the flow chart's paths, rects and text onto a canvas (no SVG-image decoding, which Safari can leave blank) */
 /* Fixed light-theme colors, so the image looks the same whatever theme the viewer's device uses */
