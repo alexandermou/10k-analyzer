@@ -230,6 +230,11 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .tile-top{border-top:4px solid var(--accent)}
 .spark{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
 .spark svg{flex:none;overflow:visible}
+.spark.wide{display:block;padding-top:12px}
+.spark.wide svg{display:block;width:100%;height:auto}
+.sp-axis{display:flex;justify-content:space-between;margin-top:4px}
+.sp-axis span{font-size:11.5px;color:var(--muted)}
+.sp-card .big small{font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
 .spark span{font-size:11.5px;line-height:1.35;color:var(--muted);white-space:nowrap}
 .sp-line{fill:none;stroke:var(--navy);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .sp-dot{fill:var(--surface);stroke:var(--navy);stroke-width:1.5}.sp-last{fill:var(--navy)}
@@ -879,6 +884,8 @@ function qoqChip(cur, prev, dir, label){
 const ppQoQ = (c, cur, prev) => { const d = (cur / c.revenue - prev / c.prevQ.revenue) * 100; return {t: ppStr(d) + " QoQ", cls: Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}; };
 function barCard(c, it){
   if (c.quarter && it.prevQ !== undefined && c.prevQ) return barCardQ(c, it);
+  if (it.spark && c.sparkQ) { const ch = chipFor(it);
+    return sparkCard(c, it, it.label, `<span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>`, yr(c.fy)); }
   const m = Math.max(Math.abs(it.cur), Math.abs(it.prior)) || 1;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it);
@@ -892,6 +899,15 @@ function barCard(c, it){
     ${sparkline(c, it)}
   </div>`;
 }
+/* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last five quarters */
+function sparkCard(c, it, label, chips, period){
+  return `<div class="card sp-card">
+    <div class="barhead"><p>${esc(label)}</p><div class="chips">${chips}</div></div>
+    <p class="big${it.cur < 0 ? " down" : ""}">${money(c, it.cur, it.money)} <small>${esc(period)}</small></p>
+    ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
+    ${sparkline(c, it, true)}
+  </div>`;
+}
 /* Quarter tabs: this quarter and the previous one, with a YoY and a QoQ chip */
 function barCardQ(c, it){
   const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]];   // this quarter and the previous one
@@ -902,6 +918,10 @@ function barCardQ(c, it){
   const label = mixed && NEUTRAL[it.label] ? NEUTRAL[it.label] : it.label;
   const w = v => (Math.abs(v) / m * 100).toFixed(1);
   const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
+  if (it.spark && c.sparkQ) {
+    const sv = it.spark.filter(x => x !== null), lab = sv.some(x => x > 0) && sv.some(x => x < 0) && NEUTRAL[it.label] ? NEUTRAL[it.label] : label;
+    return sparkCard(c, it, lab, `<span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}`, yr(c.fy));
+  }
   const row = (lab, v, cls) => `<span>${esc(yr(lab))}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
   return `<div class="card">
     <div class="barhead"><p>${esc(label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
@@ -940,10 +960,10 @@ function sparkFmt(v, k){
   return neg + "$" + (a >= 1e6 ? (a / 1e6).toFixed(2) + "T" : a >= 1000 ? (a / 1000).toFixed(1) + "B" : a >= 10 ? Math.round(a) + "M" : a.toFixed(1) + "M");
 }
 const sq = l => String(l).replace(/FY20(\d\d)\b/, "FY$1").replace(/ 20(\d\d)$/, " \u2019$1");   // "Q1 FY2026" -> "Q1 FY26", "Q3 2025" -> "Q3 ’25"
-function sparkline(c, it){
+function sparkline(c, it, wide){
   const v = it.spark, q = c.sparkQ;
   if (!v || !q || v.length !== q.length) return "";
-  const W = 120, H = 30, P = 4, k = it.sparkK, known = v.filter(x => x !== null);
+  const W = wide ? 300 : 120, H = wide ? 64 : 30, P = wide ? 6 : 4, k = it.sparkK, known = v.filter(x => x !== null);
   let lo = Math.min(...known), hi = Math.max(...known);
   if (hi === lo) { lo -= Math.abs(lo) * 0.1 || 1; hi += Math.abs(hi) * 0.1 || 1; }
   const X = i => P + i * (W - 2 * P) / (v.length - 1), Y = x => P + (hi - x) / (hi - lo) * (H - 2 * P);
@@ -954,7 +974,9 @@ function sparkline(c, it){
   const dots = v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${i === last ? 3.2 : 2}" class="${i === last ? "sp-last" : "sp-dot"}"/>`).join("");
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(sparkFmt(x, k))}</title></rect>`).join("");
   const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${sparkFmt(x, k)}`).join(", ");
-  return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg><span>5 quarters<br>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="xMidYMid meet"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
+  if (wide) return `<div class="spark wide">${svg}<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>5 quarters</span><span>${esc(sq(q[last]))}</span></div></div>`;
+  return `<div class="spark">${svg}<span>5 quarters<br>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
 }
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
 function renderSection(c, sec){
