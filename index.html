@@ -433,8 +433,15 @@ body.home .picker select{max-width:none}
 .tagline{display:none}
 body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16px;color:var(--muted)}
 .brand h1 a{color:inherit;text-decoration:none}
+/* Home: New / Upcoming / Watchlist links in the top right corner */
+.homelinks{display:none}
+body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);right:clamp(16px,4vw,40px);z-index:2}
+.homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
+.homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<nav class="homelinks" aria-label="Report lists"><a href="#new">New</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
