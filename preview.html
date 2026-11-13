@@ -241,10 +241,19 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sp-axis .sp-note{font-style:italic}
 .trend-grid{grid-template-columns:minmax(0,1fr)!important}
 .sp-axis-full{display:none}
+.sp-plot{position:relative}
+.sp-vals{display:none;position:absolute;inset:0;pointer-events:none}
+.sp-vals span{position:absolute;transform:translate(-50%,calc(-100% - 8px));font-family:var(--f-mono);font-size:13px;color:var(--ink);white-space:nowrap;background:var(--surface);padding:0 3px;border-radius:4px}
+.sp-vals span.below{transform:translate(-50%,8px)}
+.sp-vals span.first{transform:translate(0,calc(-100% - 8px))}.sp-vals span.first.below{transform:translate(0,8px)}
+.sp-vals span.last{transform:translate(-100%,calc(-100% - 8px))}.sp-vals span.last.below{transform:translate(-100%,8px)}
 @container (min-width:560px){
   .spark.full .sp-axis{display:none}
-  .sp-axis-full{display:block;position:relative;height:40px;margin-top:8px}
-  .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-family:var(--f-mono);font-size:13px;color:var(--ink);white-space:nowrap}
+  .sp-axis-full{display:block;position:relative;height:20px;margin-top:8px}
+  .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
+  .sp-vals{display:block}
+  .spark.full .sp-plot{margin:22px 0}
+  .sp-vals span.neg{color:var(--neg,#A8321F)}
   .sp-axis-full span:first-child{transform:none;align-items:flex-start}
   .sp-axis-full span:last-child{transform:translateX(-100%);align-items:flex-end}
   .sp-axis-full b{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--muted)}
@@ -1035,8 +1044,13 @@ function sparkline(c, it, wide){
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
   const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${approx}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
-  const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%"><b>${esc(sq(q[i]))}</b>${esc(F(x))}</span>`).join("")}</div>` : "";
-  if (wide) return `<div class="spark wide${full ? " full" : ""}">${svg}${axis}${axisFull}</div>`;
+  /* Wide (desktop) trend cards: each point labelled with its value; the axis below shows only the quarters */
+  const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%">${esc(sq(q[i]))}</span>`).join("")}</div>` : "";
+  const ptLabels = full ? `<div class="sp-vals" aria-hidden="true">${v.map((x, i) => x === null ? "" : (() => {
+      const yp = Y(x) / H * 100, nb = [v[i - 1], v[i + 1]].filter(y => y !== null && y !== undefined),
+        below = nb.length && nb.reduce((a, b) => a + b, 0) / nb.length > x;      // a dip: label under the point, clear of the line
+      return `<span class="${i === 0 ? "first" : i === last ? "last" : ""}${below ? " below" : ""}${x < 0 ? " neg" : ""}" style="left:${(X(i) / W * 100).toFixed(2)}%;top:${yp.toFixed(2)}%">${esc(F(x))}</span>`; })()).join("")}</div>` : "";
+  if (wide) return `<div class="spark wide${full ? " full" : ""}"><div class="sp-plot">${svg}${ptLabels}</div>${axis}${axisFull}</div>`;
   return `<div class="spark">${svg}<span>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
 }
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
