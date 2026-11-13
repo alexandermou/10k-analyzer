@@ -1,0 +1,2071 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>10-K Analyzer by Alexander</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a filing-room shelf — search bar on top, one company's filing below, three tabs (report, infographic, video). */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E9EDF2; --ink:#15202B; --muted:#55606E; --line:#D7DDE5;
+  --navy:#1D3557; --node-rev:#1D3557; --accent:#A9550D; --accent-soft:#FBEBD8;
+  --pos:#17703F; --neg:#A8321F; --pos-bg:#E2F2E8; --neg-bg:#FAE5E0; --n-bg:#E6EAF0; --n-fg:#3B4452;
+  --flow-src:#E9A23B; --flow-pos:#3DA56B; --flow-neg:#DD6A55; --node-pos:#1E7B4A; --node-neg:#B23A27;
+  --src-fill:#FFF3E0; --src-stroke:#EFC27E; --bar:#1D3557; --bar2:#9AAFC9; --on-node:#FFFFFF; --on-node-soft:#DCE6F2;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#17202A; --sunk:#1E2833; --ink:#E6EBF0; --muted:#9DA9B7; --line:#2C3744;
+  --navy:#9DBDE6; --node-rev:#2A4A74; --accent:#EBA05A; --accent-soft:#33261A;
+  --pos:#6BCF95; --neg:#F28E78; --pos-bg:#173326; --neg-bg:#3A1F1A; --n-bg:#26313E; --n-fg:#C7D0DB;
+  --flow-src:#D89536; --flow-pos:#3DA56B; --flow-neg:#D9604B; --node-pos:#1F7A4A; --node-neg:#A9392A;
+  --src-fill:#2A2318; --src-stroke:#6A5128; --bar:#7FA6D8; --bar2:#3B4B5E; --on-node:#FFFFFF; --on-node-soft:#D2DDEA;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#17202A; --sunk:#1E2833; --ink:#E6EBF0; --muted:#9DA9B7; --line:#2C3744;
+  --navy:#9DBDE6; --node-rev:#2A4A74; --accent:#EBA05A; --accent-soft:#33261A;
+  --pos:#6BCF95; --neg:#F28E78; --pos-bg:#173326; --neg-bg:#3A1F1A; --n-bg:#26313E; --n-fg:#C7D0DB;
+  --flow-src:#D89536; --flow-pos:#3DA56B; --flow-neg:#D9604B; --node-pos:#1F7A4A; --node-neg:#A9392A;
+  --src-fill:#2A2318; --src-stroke:#6A5128; --bar:#7FA6D8; --bar2:#3B4B5E; --on-node:#FFFFFF; --on-node-soft:#D2DDEA;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+p{margin:0}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button,input{font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Shelf */
+.shelf{display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.brand p{color:var(--muted);font-size:14px}
+.search{display:flex;gap:8px;flex-wrap:wrap}
+.search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.search input{flex:1 1 220px;min-width:0;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-family:var(--f-mono);font-size:17px;text-transform:uppercase;letter-spacing:.04em}
+.search input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);color:var(--muted)}
+.btn{height:48px;padding:0 18px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.search-btn{display:inline-flex;align-items:center;justify-content:center;width:52px;padding:0}
+.picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.picker label{font-weight:600;font-size:14px;color:var(--muted)}
+/* New reports: a page of buttons for companies with a recent 10-K, 10-Q or earnings release */
+a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.newbtn{margin-left:auto}.newbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center}
+.newpage{display:flex;flex-direction:column;gap:22px}.newpage[hidden]{display:none}
+.newpage .np-head{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.newpage .np-head h2{font-size:clamp(28px,5vw,40px);font-weight:700}
+.nr-day h3{font-size:20px;margin-bottom:10px}.nr-day h3 small{font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:14px}
+#npBody{display:flex;flex-direction:column;gap:18px}
+.nr-grid{display:flex;flex-wrap:wrap;gap:6px}
+.nr{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:13px;white-space:nowrap}
+.nr:hover{border-color:var(--accent)}.nr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nr .tk{font-family:var(--f-mono);font-weight:600;font-size:14px;color:var(--accent)}
+.nr .what{color:var(--muted)}
+.nr .tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--pos-bg);color:var(--pos)}.nr .tag.er{background:var(--n-bg);color:var(--n-fg)}
+.nr-day h3{font-size:16px;margin-bottom:8px}.nr-day h3 small{font-size:13px}
+@media (max-width:640px){.newbtn{margin-left:0}}
+/* Upcoming | New | Watchlist switch */
+.views{display:flex;gap:4px;margin-left:auto;background:var(--sunk);padding:4px;border-radius:12px}
+.vbtn{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:9px;color:var(--muted);font-weight:600;font-size:15px;text-decoration:none;white-space:nowrap}
+.vbtn:hover{color:var(--ink)}.vbtn[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.vbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.vbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--accent);color:var(--surface);display:inline-flex;align-items:center;justify-content:center}
+#wlBtn b{background:var(--navy);color:var(--bg)}
+@media (max-width:640px){.views{margin-left:0;width:100%}.vbtn{flex:1 1 0;justify-content:center;padding:0 6px;font-size:14px;gap:5px}}
+.nr .when{font-size:11px;font-weight:600;color:var(--muted)}
+.nr{padding:0 10px 0 0}.nr-a{display:inline-flex;align-items:center;gap:6px;height:100%;color:inherit;text-decoration:none}
+.nr-a:first-child{padding-left:10px}.nr-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.nr-star{border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:3px 2px;margin:0 -2px;cursor:pointer;border-radius:5px}
+.nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
+.nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+/* New page: day picker in the heading, link that shows the day's list */
+.day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
+.nr-day h3 label{font-weight:inherit}
+.nr-more{margin:4px 0 10px}
+.linkbtn{border:0;background:transparent;padding:4px 0;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:hover{text-decoration-thickness:2px}.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+/* Top 10 chart on the New page */
+.top10-head h4 .t10-q{display:block;margin-top:2px;font-size:14px;font-weight:400;color:var(--muted)}
+.top10{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 12px;margin:10px 0 6px;max-width:760px}
+.top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
+.top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
+.top10-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.t10-name{display:contents}
+.top10-bars li{display:grid;grid-template-columns:22px 52px 22px minmax(0,1fr);align-items:center;gap:6px;min-height:28px;padding:0 6px;border-radius:6px}
+.top10-bars li:hover{background:var(--sunk)}
+.top10-bars a{color:var(--ink);text-decoration:none}.top10-bars a:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
+.t10-link{display:grid;grid-template-columns:minmax(0,1fr) 76px;align-items:center;gap:8px;min-height:28px}
+.t10-rank{font-size:12px;color:var(--muted);text-align:right}
+.t10-tk{font-family:var(--f-mono);font-weight:400;font-size:13.5px;white-space:nowrap}.top10-bars a.t10-tk{color:var(--accent)}
+.t10-track{height:16px;display:flex;align-items:center}
+.t10-bar{display:block;height:16px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0}.t10-bar.neg{background:var(--node-neg)}
+.t10-v{font-family:var(--f-mono);font-size:13px;font-weight:400;text-align:right;white-space:nowrap}
+.t10-note{margin-top:8px;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.top10{padding:12px 10px}.top10-bars li{grid-template-columns:18px 46px 20px minmax(0,1fr);gap:4px;padding:0 2px}.t10-link{grid-template-columns:minmax(0,1fr) 62px;gap:6px}.top10-head select{flex:1;min-width:0}}
+.nr-n{display:inline-block;margin-left:4px;padding:0 7px;border-radius:9px;background:var(--sunk);font-size:12px;font-weight:600;color:var(--muted)}.nr .tag.test{background:var(--accent-soft);color:var(--accent)}
+#upBody{display:flex;flex-direction:column;gap:18px}
+.wl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.wl-table{width:100%;border-collapse:collapse;font-size:14px}
+.wl-table th{text-align:left;padding:0;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap}
+.wl-table th button{width:100%;text-align:inherit;padding:10px 14px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.wl-table th[aria-sort="ascending"] button,.wl-table th[aria-sort="descending"] button{color:var(--ink)}
+.wl-table th.num,.wl-table td.num{text-align:right}
+.wl-table td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap;text-align:left;font-family:var(--f-body);font-weight:400}
+.wl-table td.num b{font-weight:600}.wl-table td:last-child,.wl-table th:last-child{width:40px;text-align:right}
+.wl-table tr:last-child td{border-bottom:0}
+.wl-table tbody tr:hover{background:var(--sunk)}
+.wl-co{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink)}
+.wl-co .tk{font-family:var(--f-mono);font-weight:600;font-size:15px;color:var(--accent)}.wl-co .nm{color:var(--muted)}
+.wl-co:hover .nm{text-decoration:underline}
+.wl-table .when{font-size:11px;font-weight:600;color:var(--muted)}.wl-table .est{color:var(--muted);margin-right:2px}
+.wl-table .est-tag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:5px;background:var(--n-bg);color:var(--n-fg)}
+.wl-table .muted{color:var(--muted)}.wl-table .s-short{display:none}.wl-table b.soon{color:var(--accent)}
+.wl-rm{width:30px;height:30px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;cursor:pointer}
+.wl-rm:hover{color:var(--neg);border-color:var(--neg)}
+@media (max-width:640px){.wl-table{font-size:12px}.wl-table td,.wl-table th button{padding:9px 4px}.wl-table td:first-child,.wl-table th:first-child button{padding-left:10px}.wl-co .nm,.wl-table .when,.wl-table .est-tag,.wl-table .wd,.wl-table .s-long{display:none}.wl-table .s-short{display:inline}.wl-co .tk{font-size:13.5px}.wl-table td:last-child,.wl-table th:last-child{width:28px;padding:0 4px}}
+.nr-sec{font-size:14px;font-weight:700;color:var(--muted);margin:14px 0 8px}.nr-day h3+.nr-sec{margin-top:4px}
+/* Watchlist (kept in a cookie in this browser) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.wlbtn b{font-size:12px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--navy);color:var(--bg);display:inline-flex;align-items:center;justify-content:center}
+.star-btn{display:inline-flex;align-items:center;justify-content:center;width:1.1em;height:1.1em;margin-left:.15em;vertical-align:-.08em;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.85em;line-height:1;cursor:pointer;padding:0}
+.star-btn:hover{color:var(--accent);background:var(--accent-soft)}.star-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.star-btn[aria-pressed="true"]{color:var(--accent)}
+.nr.fav{border-color:var(--accent)}.nr .star{color:var(--accent);font-size:12px}
+.np-filter{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:10px;width:max-content}
+.np-filter button{height:32px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:600;font-size:13px;cursor:pointer}
+.np-filter button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.wl-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wl-add input{height:40px;flex:1 1 220px;max-width:420px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px}
+.wl-add .btn{height:40px}
+.wl-item{display:inline-flex;align-items:center}.wl-item .nr{border-radius:8px 0 0 8px}
+.wl-x{height:34px;width:30px;border:1px solid var(--line);border-left:0;border-radius:0 8px 8px 0;background:var(--surface);color:var(--muted);font-size:16px;cursor:pointer}
+.wl-x:hover{color:var(--neg);border-color:var(--neg)}
+.wl-item .nr.fav+.wl-x{border-color:var(--accent)}.wl-item .nr.fav+.wl-x:hover{border-color:var(--neg)}
+#wlBody{display:flex;flex-direction:column;gap:12px}
+#wlPage .wl-add{margin-top:4px}
+.picker select{height:48px;flex:1 1 260px;min-width:0;max-width:520px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:16px;cursor:pointer}
+.spine{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px 6px 6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.spine b{font-family:var(--f-mono);font-size:13px;background:var(--sunk);padding:6px 8px;border-radius:6px}
+.spine small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
+.spine[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.missing{background:var(--accent-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.missing .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.missing code{font-family:var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:8px 10px;border-radius:8px;user-select:all;overflow-wrap:anywhere}
+
+/* Filing header + tabs */
+.filing{display:flex;flex-direction:column;gap:16px}
+.fhead{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px}
+.fhead h2{font-size:clamp(28px,5vw,44px);font-weight:700;letter-spacing:-.015em}
+.fhead h2 span{color:var(--accent)}
+.fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
+.meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.meta b{color:var(--ink);font-weight:600}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
+.tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.fb-card{max-width:720px;padding:22px 22px 20px}
+.fb-card form,.fb-thanks{display:flex;flex-direction:column;gap:10px}
+.fb-thanks[hidden],.fb-card form[hidden]{display:none}
+.fb-h{font-size:20px;margin:0;letter-spacing:-.01em}
+.fb-sub{margin:0;color:var(--muted)}
+.fb-lbl{font-weight:600;margin-top:6px}
+.fb-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.fb-two{grid-template-columns:1fr}}
+.fb-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fb-opt{font-weight:400;color:var(--muted)}
+.fb-hint{margin:-4px 0 0;font-size:13px;color:var(--muted)}
+#fbName,#fbEmail{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+#fbName:focus,#fbEmail:focus{outline:2px solid var(--accent);outline-offset:1px}
+#fbMsg{width:100%;min-height:150px;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
+#fbMsg:focus{outline:2px solid var(--accent);outline-offset:1px}
+.fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fb-row .btn{height:44px}
+.fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+@media (max-width:640px){.tabs{width:100%}.tab{flex:1 1 auto;padding:0 6px;font-size:14px;min-width:0}}
+.fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
+/* Filing strip: the annual report and the latest quarters */
+.periods{display:flex;gap:8px;flex-wrap:wrap}.periods[hidden],.tab[hidden]{display:none}
+.period{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:48px;padding:7px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);cursor:pointer;font:inherit;text-align:left}
+.period b{font-size:15px;font-weight:700;color:var(--ink)}
+.period small{font-size:12px;font-weight:600;letter-spacing:.02em}.period .p-date{font-weight:500;color:var(--muted)}
+.period:hover{border-color:var(--muted)}
+.period.annual{background:color-mix(in srgb,var(--bar) 10%,var(--surface));border-color:color-mix(in srgb,var(--bar) 45%,var(--line))}
+.period.annual small{color:color-mix(in srgb,var(--bar) 75%,var(--muted))}
+.period[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.period[aria-selected="true"] small{color:var(--accent)}
+.period:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){.periods{display:flex;flex-wrap:nowrap;gap:5px}.period{flex:1 1 0;padding:6px 5px;min-width:0;min-height:44px}.period b{font-size:12.5px;white-space:nowrap;letter-spacing:-.01em}.period small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.p-long{display:none}}
+.is-qtr .bars{grid-template-columns:66px minmax(0,1fr) auto}.is-qtr .bars span{white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.media-bar{display:flex;align-items:center;gap:12px;margin-bottom:-4px}
+.media-bar[hidden]{display:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg-btn{min-height:40px;min-width:88px;padding:0 16px;border:0;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.seg-btn+.seg-btn{border-left:1px solid var(--line)}
+.seg-btn[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+
+/* Shared blocks */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec>h3{font-size:22px;font-weight:700}
+.sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
+.lbl{font-size:14px;font-weight:600;color:var(--muted)}
+.big{font-family:var(--f-mono);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.sub{font-size:13px;color:var(--muted)}
+.up{color:var(--pos);font-weight:700}.down{color:var(--neg);font-weight:700}.flat{color:var(--n-fg);font-weight:700}
+.chip{font-size:12.5px;font-weight:400;padding:3px 10px;border-radius:999px;white-space:nowrap}
+/* YoY / QoQ changes are never bold: chips, and the coloured change text in tiles and charts */
+.chip.up,.chip.down,.chip.flat,.sub .up,.sub .down,.sub .flat,.sub.up,.sub.down,.sub.flat{font-weight:400}
+.chip.up{background:var(--pos-bg)}.chip.down{background:var(--neg-bg)}.chip.flat{background:var(--n-bg)}
+.kpi.hero{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.kpi.hero .lbl,.kpi.hero .sub{color:var(--on-node-soft)}
+.kpi.hero .up{color:#9BE7BC}
+.tile-top{border-top:4px solid var(--accent)}
+.barhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.barhead p{line-height:1.3}
+.card>.bars{margin-top:auto}
+.two-line .barhead p{min-height:2.6em}
+.barhead p{font-weight:700;font-size:16px}
+.bars{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-size:13px}
+.bars span{color:var(--muted)}
+.track{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.fill{height:100%;border-radius:6px;background:var(--bar)}
+.fill.prior{background:var(--bar2)}
+.fill.neg{background:var(--node-neg)}
+.fill.prior.neg{background:var(--flow-neg)}
+.eps-wrap{overflow-x:auto}.eps-in{min-width:440px}
+.eps{position:relative;height:200px;margin:6px 0 4px}
+.eps svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ept{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--surface);border:3px solid var(--bar);box-sizing:border-box}
+.ept.prior{border-color:var(--bar2)}.ept.cur{width:16px;height:16px;margin:-8px 0 0 -8px;background:var(--accent);border-color:var(--accent)}
+.epl{position:absolute;transform:translateX(-50%);text-shadow:0 0 3px var(--surface),0 0 3px var(--surface),0 0 3px var(--surface);font-family:var(--f-mono);font-size:14px;font-weight:400;white-space:nowrap}
+.ezero{position:absolute;left:0;font-size:11px;color:var(--muted);transform:translateY(-120%)}
+.eaxis{display:grid;gap:12px;text-align:center}.eaxis b{display:block;font-weight:400}.eaxis .sub{display:block;font-size:12px}
+.fill.qprev{background:var(--bar);opacity:.6}.fill.qprev.neg{background:var(--node-neg);opacity:.6}.fill.qprev2{background:var(--bar);opacity:.32}.fill.qprev2.neg{background:var(--node-neg);opacity:.32}
+.chips{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.seg-val .chip+.chip{margin-left:0}
+.vchips{display:inline-flex;flex-direction:column;align-items:flex-start;gap:6px}
+.bars strong{font-family:var(--f-mono);font-weight:400;text-align:right}
+.stat{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.stat .big{font-size:28px}.stat .sub{color:var(--on-node-soft);font-size:14px}
+.callout{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-size:14px}
+.bridge{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.bridge span{padding:4px 10px;border-radius:8px;background:var(--sunk);font-family:var(--f-mono);font-size:13px}
+.bridge span.first{background:var(--pos-bg);color:var(--pos);font-weight:600}
+.bridge span.last{background:var(--node-rev);color:var(--on-node);font-weight:600}
+.bridge i{font-style:normal;color:var(--muted)}
+.foot{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.foot b{color:var(--ink)}
+
+/* Sankey */
+.sankey{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
+.fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
+.ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
+.nrev{fill:var(--node-rev)}.npos{fill:var(--node-pos)}.nneg{fill:var(--node-neg)}
+.sbox{fill:var(--src-fill);stroke:var(--src-stroke)}
+.t-m{fill:var(--muted)}.t-i{fill:var(--ink)}.t-w{fill:var(--on-node)}.t-ws{fill:var(--on-node-soft)}.t-p{fill:var(--pos)}.t-n{fill:var(--neg)}
+
+/* Quarters */
+.qgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;overflow-x:auto}
+.q-top{height:212px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.q-note{min-height:3em;line-height:1.5}
+.q{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:96px}
+.q .col{width:56px;border-radius:6px 6px 0 0;background:var(--bar);display:flex;flex-direction:column;overflow:hidden}
+.q .col.prior{background:var(--bar2)}
+.q .col i{display:block;background:var(--flow-src)}
+.q strong{font-family:var(--f-mono);font-size:14px;font-weight:400}.q b{font-weight:400}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--sw)}
+
+/* Report */
+.report{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:820px){.report{grid-template-columns:minmax(0,1fr)}}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:68ch}
+.prose p{font-size:16px;line-height:1.65}
+.prose h3{font-size:20px;margin-top:6px}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--f-body)}
+tr.key td{font-weight:700}
+.side{display:flex;flex-direction:column;gap:14px}
+.side a{color:var(--navy);overflow-wrap:anywhere}
+
+/* Video */
+.player{display:flex;flex-direction:column;gap:12px}
+.screen{position:relative;border-radius:14px;overflow:hidden;background:#0E1A2B;aspect-ratio:16/9;max-width:100%}
+.screen canvas{display:block;width:100%;height:100%}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.controls .btn{height:44px}
+.mc-ov{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;justify-content:center;padding:28px 12px 14px;
+  background:linear-gradient(to bottom,rgba(10,15,22,0),rgba(10,15,22,.38));transition:opacity .25s;pointer-events:none}
+.mc-btns{display:flex;gap:16px;align-items:center;pointer-events:auto}
+.fs-btn{transition:opacity .25s}
+.fs-box.playing .mc-ov,.fs-box.playing .fs-btn{opacity:0;pointer-events:none}
+.fs-box.playing .mc-ov .mc-btns{pointer-events:none}
+.fs-box.playing .stage,.fs-box.playing .screen{cursor:pointer}
+.screen .mc-ov{bottom:16%;padding:8px 12px;background:none}
+@media (max-width:640px){.mc-ov{padding:16px 8px 8px}.screen .mc-ov{padding:4px 8px}.mc-btns{gap:10px}.ic-btn{width:34px;height:34px}.ic-btn svg{width:16px;height:16px}.ic-btn.main{width:44px;height:44px}.ic-btn.main svg{width:19px;height:19px}}
+.ic-btn{width:40px;height:40px;padding:0;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.94);box-shadow:0 1px 6px rgba(0,0,0,.18);color:#15202B;display:grid;place-items:center;cursor:pointer;transition:transform .1s,opacity .15s}
+.ic-btn:active{transform:scale(.94)}
+.ic-btn:disabled{opacity:.45;cursor:default;transform:none}
+.ic-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ic-btn svg{width:19px;height:19px}
+.ic-btn.main{width:50px;height:50px;border:2px solid rgba(255,255,255,.9);background:#1D3557;color:#fff}
+.ic-btn.main svg{width:22px;height:22px}
+.ic-btn .ic-pause,.ic-btn.is-playing .ic-play{display:none}
+.ic-btn.is-playing .ic-pause{display:inline}
+@media (max-height:500px){.fs-box.is-fs .ic-btn{width:36px;height:36px}.fs-box.is-fs .ic-btn.main{width:46px;height:46px}}
+.fs-box{display:flex;flex-direction:column;gap:12px}
+.fs-btn{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;border-radius:10px;
+  background:rgba(14,26,43,.6);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:.85;transition:opacity .15s,background .15s}
+.fs-btn:hover,.fs-btn:focus-visible{opacity:1;background:rgba(14,26,43,.85)}
+.fs-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fs-btn svg{width:22px;height:22px}
+.fs-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fs-btn .fs-out,.fs-box.is-fs .fs-btn .fs-in{display:none}
+.fs-box.is-fs .fs-btn .fs-out{display:inline}
+.fs-box.is-fs{position:fixed;top:0;left:0;right:auto;bottom:auto;width:var(--fs-w,100vw);height:var(--fs-h,100dvh);box-sizing:border-box;z-index:1000;background:var(--bg);justify-content:safe center;overflow:auto;align-items:center;gap:10px;
+  padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 36px) * 16 / 9));flex:none}
+.fs-box.is-fs>.controls{justify-content:center}
+
+.fs-box.is-fs .status{display:none}
+.fs-box.is-fs .stage{border-radius:10px}
+html.fs-lock,html.fs-lock body{overflow:hidden}
+@media (max-height:500px){.fs-box.is-fs{gap:8px}.fs-box.is-fs .controls .btn,.fs-box.is-fs .toggle{height:36px;min-height:36px}.fs-box.is-fs>.stage,.fs-box.is-fs>.screen,.fs-box.is-fs>.progress,.fs-box.is-fs>.controls{width:min(100%,calc((var(--fs-h,100dvh) - 30px) * 16 / 9))}}
+.toggle{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 6px;color:var(--ink);font-weight:500}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.status{font-size:13px;color:var(--muted)}
+.progress{height:4px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.progress div{height:100%;width:0;background:var(--accent)}
+/* Segment results */
+.seg-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.seg-card.total{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
+.seg-card.total .lbl{color:var(--on-node-soft)}
+.seg-card.total .seg-metric{border-top-color:rgba(255,255,255,.22)}
+.seg-name{font-family:var(--f-display);font-size:20px;font-weight:700}
+.seg-card{gap:14px;border-top:4px solid var(--accent)}
+.seg-metric{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}
+.seg-metrics{display:flex;flex-direction:column;gap:14px}
+.seg-card.wide{grid-column:1/-1}
+.seg-card.wide .seg-metric{border-top:0;padding-top:0}
+.seg-card.wide{border-top-width:1px}
+.seg-card.wide .seg-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+@media (max-width:640px){.seg-card.wide .seg-metrics{gap:10px}.seg-card.wide .seg-val{gap:4px}.seg-card.wide .seg-val b{font-size:18px;letter-spacing:-.03em}.seg-card.wide .seg-val .chip{font-size:10.5px;padding:2px 6px;white-space:normal}.seg-card.wide .lbl{font-size:12px}}
+.seg-val{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg-val b{font-family:var(--f-mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
+.seg-val .chip{font-size:13px}
+.segtable th,.segtable td{padding:7px 6px;font-size:13.5px}
+.segtable th{font-size:11.5px}
+.segtable .chip{font-size:12px;padding:2px 8px}
+
+/* Infographic download */
+.info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.ov[hidden]{display:none}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
+.ov-acts{display:flex;gap:8px;flex:none}
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.ov-tt{min-width:0;display:flex;flex-direction:column;gap:1px}
+#ovTitle{margin:0;font-weight:600;font-size:16px;line-height:1.25;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-hint{margin:0;font-size:12px;line-height:1.3;color:var(--muted)}
+.ov-ic{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.ov-ic.primary{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+.ov-ic:active{transform:scale(.95)}
+.ov-ic:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ov.img-fs .ov-head{display:none}
+#ovImg{touch-action:manipulation;cursor:zoom-in;-webkit-user-select:none;user-select:none}
+.ov.img-fs{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#05080d;z-index:1001}
+.ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
+.ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
+.ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+
+/* Slides (authored at 1280x720, scaled to fit) */
+.stage{position:relative;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.slide{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;padding:56px 80px 40px;display:flex;flex-direction:column;gap:22px;color:var(--ink)}
+.sl-kick{font-family:var(--f-body);font-size:20px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.sl-h{font-family:var(--f-display);font-size:54px;font-weight:700;line-height:1.05}
+.sl-big{font-family:var(--f-mono);font-size:84px;font-weight:600;letter-spacing:-.02em;line-height:1}
+.sl-sub{font-size:24px;color:var(--muted)}
+.sl-center{margin:auto 0;display:flex;flex-direction:column;gap:14px}
+.sl-tick{font-family:var(--f-display);font-size:120px;font-weight:700;color:var(--accent);line-height:1}
+.sl-rows{display:flex;flex-direction:column;gap:12px}
+.sl-row{display:grid;grid-template-columns:320px 1fr 190px;align-items:center;gap:20px;font-size:21px}
+.sl-row b{font-family:var(--f-mono);font-weight:600;text-align:right}
+.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.sl-track i{display:block;height:100%;background:var(--flow-src);border-radius:6px}
+.sl-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.sl-kpi{border:1px solid var(--line);border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:6px}
+.sl-kpi .v{font-family:var(--f-mono);font-size:44px;font-weight:600}
+.sl-kpi .l{font-size:20px;font-weight:600;color:var(--muted)}
+.sl-kpi .s{font-size:19px;color:var(--muted)}
+.sl-stack{display:flex;height:84px;border-radius:8px;overflow:hidden}
+.sl-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 24px;font-size:19px}
+.sl-legend div{display:flex;gap:12px;align-items:flex-start}
+.sl-legend i{width:18px;height:18px;border-radius:4px;flex:none;margin-top:4px}
+.sl-legend b{display:block;font-family:var(--f-mono);font-weight:600;color:var(--ink)}
+.sl-legend span{color:var(--muted)}
+.slide table td,.slide table th{font-size:24px;padding:12px 14px}
+.slide table th{font-size:16px}
+.sl-list{margin:0;padding-left:30px;display:flex;flex-direction:column;gap:18px;font-size:27px;line-height:1.4;max-width:1060px}
+.sl-lines{display:flex;flex-direction:column;gap:14px;font-size:28px}
+.sl-lines p{border-left:6px solid var(--bar);padding-left:16px}
+.sl-foot{margin-top:auto;display:flex;justify-content:space-between;font-size:16px;color:var(--muted);font-family:var(--f-mono)}
+.notes #snote{font-size:15px;line-height:1.6;max-width:72ch}
+/* Home: only the search box and the company selector; everything else appears once a company or list is opened */
+body.home .brand,body.home .views,body.home #filing{display:none}
+body.home .wrap{min-height:calc(100svh - 120px);justify-content:center}
+body.home .shelf{width:100%;max-width:560px;margin:0 auto}
+body.home .picker select{max-width:none}
+.tagline{display:none}
+body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16px;color:var(--muted)}
+.brand h1 a{color:inherit;text-decoration:none}
+/* Home: New / Upcoming / Watchlist links in the top right corner */
+.homelinks{display:none}
+body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);right:clamp(16px,4vw,40px);z-index:2}
+.homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
+.homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<nav class="homelinks" aria-label="Report lists"><a href="#new">New</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
+
+<div class="wrap">
+  <section class="shelf" aria-label="Find a company">
+    <div class="brand">
+      <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
+      <p>Annual reports, read and drawn. Figures from each company's latest annual filing with the SEC.</p>
+    </div>
+    <p class="tagline">Visualize annual 10K &amp; quarterly 10Q reports.</p>
+    <form class="search" id="searchForm">
+      <label for="ticker">Search the library</label>
+      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. AMZN or Apple" maxlength="60">
+      <datalist id="libList"></datalist>
+      <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
+    </form>
+    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
+    <div class="missing" id="missing" hidden role="status">
+      <p id="missingText"></p>
+      <div class="row" id="matchRow"></div>
+    </div>
+  </section>
+
+  <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Earnings releases (ER) scheduled for today that haven't been filed yet — each moves to New once filed — and those due the next business day, from Nasdaq's earnings calendar. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
+    <div id="upBody"></div>
+  </section>
+  <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
+    <div class="np-head"><h2 id="npTitle">New</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
+    <div id="npBody"></div>
+  </section>
+  <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
+    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here, or search for a company and click the ☆ next to its name.</p></div>
+    <div id="wlBody"></div>
+    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
+  </section>
+  <section class="filing" id="filing">
+    <div class="fhead">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <h2 id="fname"></h2>
+        <div class="meta" id="fmeta"></div>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Views">
+        <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
+        <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
+        <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
+        <button class="tab" role="tab" id="tab-feedback" data-view="feedback" aria-selected="false">Feedback</button>
+      </div>
+    </div>
+    <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
+    <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
+    <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
+    <div id="view-feedback" role="tabpanel" aria-labelledby="tab-feedback" hidden>
+      <div class="card fb-card">
+        <form id="fbForm" novalidate>
+          <h2 class="fb-h">Send feedback</h2>
+          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
+          <div class="fb-two">
+            <div class="fb-field"><label class="fb-lbl" for="fbName">Name <span class="fb-opt">(optional)</span></label>
+              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
+            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email <span class="fb-opt">(optional)</span></label>
+              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
+          </div>
+          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
+          <label class="fb-lbl" for="fbMsg">Your message</label>
+          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
+          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
+          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
+        </form>
+        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
+          <h2 class="fb-h">Thank you!</h2>
+          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
+          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
+        </div>
+      </div>
+    </div>
+    <div class="media-bar" id="mediaBar" hidden>
+      <div class="seg" role="group" aria-label="Media type">
+        <button type="button" class="seg-btn" id="seg-slides" data-media="slides" aria-pressed="true">Slides</button>
+        <button type="button" class="seg-btn" id="seg-video" data-media="video" aria-pressed="false">Video</button>
+      </div>
+    </div>
+    <div id="view-slides" role="tabpanel" aria-labelledby="tab-media" hidden>
+      <div class="player">
+        <div class="fs-box" id="fsSlides">
+        <div class="stage" id="stage" tabindex="0" aria-label="Slide deck; use the arrow keys to move between slides"><div class="slide" id="slideInner"></div><div class="mc-ov"><div class="mc-btns">
+            <button class="ic-btn" type="button" id="prevSlide" aria-label="Previous slide" title="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="ic-btn main" type="button" id="voSlide" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
+            <button class="ic-btn" type="button" id="nextSlide" aria-label="Next slide" title="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div></div><span class="fs-lab" id="scount" aria-live="polite"></span><button class="fs-btn" type="button" id="fsSlidesBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
+        <div class="progress" aria-hidden="true"><div id="sprog"></div></div>
+        </div>
+        <div class="card notes"><p class="lbl">Voice-over script</p><p id="snote"></p></div>
+        <p class="status" id="sstatus">Press play to hear each slide read aloud; it moves on by itself. Narration uses your device's voice.</p>
+      </div>
+    </div>
+    <div id="view-video" role="tabpanel" aria-labelledby="tab-media" hidden>
+      <div class="player">
+        <div class="fs-box" id="fsVideo">
+        <div class="screen"><canvas id="cv" width="1280" height="720" aria-label="Animated walkthrough of the 10-K numbers"></canvas><div class="mc-ov"><div class="mc-btns">
+            <button class="ic-btn" type="button" id="prevScene" aria-label="Previous part" title="Previous part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="ic-btn main" type="button" id="playBtn" aria-label="Play" title="Play"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path class="ic-play" d="M8.5 5.6v12.8a.8.8 0 0 0 1.2.7l10.2-6.4a.8.8 0 0 0 0-1.4L9.7 4.9a.8.8 0 0 0-1.2.7z"/><path class="ic-pause" d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg></button>
+            <button class="ic-btn" type="button" id="nextScene" aria-label="Next part" title="Next part"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div></div><button class="fs-btn" type="button" id="fsVideoBtn" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg><span class="fs-lab">Full screen</span></button></div>
+        <div class="progress" aria-hidden="true"><div id="prog"></div></div>
+        </div>
+        <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box">
+    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic image</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen</p></div>
+      <div class="ov-acts"><button class="ov-ic primary" type="button" id="ovSave" aria-label="Save image" title="Save image"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+    <img id="ovImg" alt="Infographic image">
+  </div>
+</div>
+
+<script>
+/* ---------------- Library data (each entry from that company's Form 10-K) ---------------- */
+const LIBRARY = {};   // filled from data/index.json; full entries load from data/companies/TICKER.json when opened
+const FULL = new Set();
+async function loadIndex(){
+  const res = await fetch("data/index.json", {cache: "no-cache"}); if (!res.ok) throw new Error("index");
+  (await res.json()).forEach(c => { LIBRARY[c.ticker] = c; });
+}
+const pending = {};
+function loadCompany(t){
+  if (FULL.has(t)) return Promise.resolve(LIBRARY[t]);
+  if (!pending[t]) pending[t] = fetch(`data/companies/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("company"); return r.json(); })
+    .then(c => { LIBRARY[t] = c; FULL.add(t); return c; }).finally(() => { delete pending[t]; });
+  return pending[t];
+}
+
+/* Latest quarters (10-Q, or the earnings release until the 10-Q is filed): data/quarters/TICKER.json,
+   loaded only when a quarter is opened. The company file lists them as "quarters": ["Q1 2026", ...]. */
+const QUARTERS = {}, qPending = {};
+function loadQuarters(t){
+  if (QUARTERS[t]) return Promise.resolve(QUARTERS[t]);
+  if (!qPending[t]) qPending[t] = fetch(`data/quarters/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("quarters"); return r.json(); })
+    .then(d => { QUARTERS[t] = d.quarters; return d.quarters; }).finally(() => { delete qPending[t]; });
+  return qPending[t];
+}
+const pid = q => q.toLowerCase().replace(/\s+/g, "-");   // "Q2 2026" -> "q2-2026"
+const formShort = f => /10-Q/.test(f || "") ? "10-Q" : /10-K/.test(f || "") ? "10-K (Q4)" : /8-K|earnings/i.test(f || "") ? "Earnings release" : (f || "10-Q");
+
+/* ---------------- Helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+function money(c, v, kind){
+  if (v === null || v === undefined) return "—";
+  const cur = c.cur || "$";
+  if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0).join("");
+  return v < 0 ? "(" + s + ")" : s;
+}
+/* Amounts always start with a non-zero digit: $1.2T, $12.9B, $322M (or $322.4M for companies shown to one decimal),
+   $84.3M, $950K. Takes millions; returns [number text, unit letter]. */
+function scaled(m, dec){
+  const fmt = (x, d) => x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+  if (m >= 999950) return [fmt(m / 1e6, 1), "T"];
+  if (m >= (dec ? 999.95 : 999.5)) return [fmt(m / 1000, 1), "B"];
+  if (m >= 99.95) return [fmt(m, dec), "M"];
+  if (m >= 0.9995) return [fmt(m, 1), "M"];
+  if (m === 0) return ["0", ""];
+  return [fmt(Math.round(m * 1000), 0), "K"];
+}
+/* Reporting currencies other than the US dollar: the word the narration uses for each symbol */
+const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian dollars", "R$": "Brazilian reais", "R": "rand", "₩": "won", "¥": "yen",
+  "Mex$": "Mexican pesos", "CN¥": "yuan", "£": "pounds", "₹": "rupees", "HK$": "Hong Kong dollars", "A$": "Australian dollars", "S$": "Singapore dollars",
+  "DKK ": "Danish kroner", "SEK ": "Swedish kronor", "NOK ": "Norwegian kroner", "CHF ": "Swiss francs", "S/": "Peruvian soles", "₪": "shekels"};
+const curWord = c => CURWORD[c.cur] || "dollars";
+function spoken(c, v){ return spokenUSD(c, v).replace(/dollars$/, curWord(c)); }
+function spokenUSD(c, v){
+  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0);
+  return n.replace(/\.0$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
+}
+const yr = s => s.replace("FY20", "FY");
+const pctOf = (c, v) => (c.revenue > 0 && Math.abs(v / c.revenue) <= 10) ? (v / c.revenue * 100).toFixed(1) + "%" : "n/m";
+const yoy = (cur, prior) => (prior > 0 && cur > 0) ? ((cur / prior - 1) * 100) : null;
+const yoyStr = (cur, prior) => { const y = yoy(cur, prior); if (y !== null && y >= 100) return (cur / prior).toFixed(1) + "×"; return y === null ? "n/m" : (y >= 0 ? "+" : "−") + Math.abs(y).toFixed(1) + "%"; };
+
+/* ---------------- Report ---------------- */
+function renderReport(c){
+  const r = c.report;
+  const rows = r.table.map(([label, cur, prior, key, kind]) => {
+    const y = yoy(cur, prior);
+    const cls = y === null ? "" : (y >= 0 ? "up" : "down");
+    return `<tr class="${key ? "key" : ""}"><td>${esc(label)}</td><td>${money(c, cur, kind)}</td><td>${money(c, prior, kind)}</td><td class="${cls}">${yoyStr(cur, prior)}</td></tr>`;
+  }).join("");
+  $("#view-report").innerHTML = `
+  <div class="report">
+    <div class="prose">
+      ${r.summary.map(p => `<p>${esc(p)}</p>`).join("")}
+      <h3>What stood out</h3>
+      <ul>${r.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+      <h3>What to watch</h3>
+      <ul>${r.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+    </div>
+    <div class="side">
+      <div class="card">
+        <p class="lbl">Key figures</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Line item</th><th>${c.fy}</th><th>${c.fyPrior}</th><th>YoY</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>
+      ${c.segments ? `<p class="lbl">Segment results</p>${segCards(c)}${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}` : ""}
+      <div class="card">
+        <p class="lbl">Sources</p>
+        ${r.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}
+        <p class="sub">${c.footnotes.map(esc).join(" ")}</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- Sankey ---------------- */
+function ribbon(x0,a0,b0,x1,a1,b1,cls){
+  const xm = (x0 + x1) / 2;
+  if (b0 - a0 < 1.2) { const m0 = (a0 + b0) / 2, m1 = (a1 + b1) / 2; return `<path class="ln" d="M${x0} ${m0}C${xm} ${m0} ${xm} ${m1} ${x1} ${m1}"/>`; }
+  return `<path class="${cls}" d="M${x0} ${a0}C${xm} ${a0} ${xm} ${a1} ${x1} ${a1}L${x1} ${b1}C${xm} ${b1} ${xm} ${b0} ${x0} ${b0}Z"/>`;
+}
+function txt(x,y,s,size,cls,weight,anchor){ if (anchor === "middle" && /^t-w/.test(cls)) { const n = String(s).replace(/<[^>]+>/g, "").length; if (n * size * 0.6 > 88) size = Math.max(9.5, +(88 / (n * 0.6)).toFixed(1)); } return `<text x="${x}" y="${y}" font-size="${size}" class="${cls}" font-weight="400"${anchor ? ` text-anchor="${anchor}"` : ""}>${s}</text>`; }
+function sankey(c){
+  if (c.opIncome < 0) return sankeyLoss(c);
+  const s = 358 / c.revenue, H = v => Math.max(v * s, 0);
+  const SX1 = 180, RX = 260, NW = 92, GX = 440, OX = 620, PX = 780, FX = 940, LX = 958;
+  const f = v => money(c, v), out = [];
+  const gp = c.revenue - c.cogs, gpH = H(gp), cogsH = H(c.cogs), revH = H(c.revenue);
+  const credT = (c.opexCredits || []).reduce((a, x) => a + x[1], 0), showCred = credT > 0.02 * c.revenue && gp >= c.opIncome, credH = showCred ? H(credT) : 0;
+  const gpY = 30, credY = gpY + gpH + 16, cogsY = gpY + gpH + 70 + (showCred ? Math.max(credH, 44) + 30 : 0), revY = cogsY + cogsH - revH;
+  // sources
+  const gap = 6, boxes = c.sources.map(([n, v]) => ({n, v, h: H(v), bh: Math.max(46, H(v))}));
+  const total = boxes.reduce((a, b) => a + b.bh, 0) + gap * (boxes.length - 1);
+  let y = Math.max(6, revY + revH / 2 - total / 2), acc = revY;
+  boxes.forEach(b => {
+    const cy = y + b.bh / 2;
+    out.push(ribbon(SX1, cy - b.h / 2, cy + b.h / 2, RX, acc, acc + b.h, "fs"));
+    out.push(`<rect x="0" y="${y}" width="180" height="${b.bh}" rx="9" class="sbox"/>`);
+    out.push(txt(12, cy - 4, esc(b.n), 12.5, "t-m", 400));
+    out.push(`<text x="12" y="${cy + 15}" font-size="15" class="t-i" font-weight="400">${f(b.v)} <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, b.v)}</tspan></text>`);
+    acc += b.h; y += b.bh + gap;
+  });
+  const srcBottom = y;
+  // revenue → GP / COGS
+  out.push(ribbon(RX + NW, revY, revY + gpH, GX, gpY, gpY + gpH, "fp"));
+  if (c.cogs > 0) out.push(ribbon(RX + NW, revY + gpH, revY + revH, GX, cogsY, cogsY + cogsH, "fn"));
+  // GP → OI / opex
+  const oiH = H(c.opIncome), oiY = 50, opexT = c.opex.reduce((a, o) => a + o[1], 0), opexH = H(opexT), opexY = Math.max(oiY + oiH + 110, c.nonOp > 0 ? oiY + Math.max(oiH + 14, 34) + H(c.nonOp) + 44 : 0);
+  out.push(ribbon(GX + NW, gpY, gpY + oiH, OX, oiY, oiY + oiH, "fp"));
+  if (gp - c.opIncome > 0.0005 * c.revenue) out.push(ribbon(GX + NW, gpY + oiH, gpY + gpH, OX, opexY, opexY + gpH - oiH, "fn"));
+  if (showCred) {
+    out.push(ribbon(GX + NW, credY, credY + credH, OX, opexY + Math.max(gpH - oiH, 0), opexY + Math.max(gpH - oiH, 0) + credH, "fp"));
+    out.push(`<rect x="${GX}" y="${credY}" width="${NW}" height="${Math.max(credH, 16)}" rx="5" class="npos"/>`);
+    const cl = (c.opexCredits.length === 1 ? c.opexCredits[0][0] : "Gains & credits");
+    out.push(txt(GX + NW/2, credY + Math.max(credH, 16) / 2 + 5, "+" + f(credT), 13, "t-w", 700, "middle"));
+    out.push(txt(GX + NW/2, credY + Math.max(credH, 16) + 15, esc(cl), 11, "t-m", 600, "middle"));
+  }
+  // pretax
+  const pretax = c.opIncome + c.nonOp, ptH = H(pretax), ptY = 30;
+  const lossBelow = pretax <= 0; // operating profit fully absorbed by non-operating costs
+  const toPt = c.nonOp < 0 ? ptH : oiH; // net interest expense leaves the operating income node on its own band
+  if (!lossBelow) out.push(ribbon(OX + NW, oiY, oiY + toPt, PX, ptY, ptY + toPt, "fp"));
+  const noY = oiY + Math.max(oiH + 14, 34);
+  if (c.nonOp > 0) out.push(ribbon(OX + NW, noY, noY + H(c.nonOp), PX, ptY + oiH, ptY + ptH, "fp"));
+  // finals
+  // add-backs after pre-tax income (tax benefits, discontinued operations, noncontrolling interests' share of losses):
+  // they have no ribbon of their own, so they are listed under the net income figure
+  const credits = lossBelow ? [] : [...(c.tax < 0 ? [["Tax benefit", -c.tax]] : []), ...c.belowTax.filter(x => x[1] < 0).map(([n, v]) => [n, -v])];
+  const finals = lossBelow ? [] : [{n: c.netLabel, v: c.netFlow, show: c.netIncome, from: [PX + NW, ptY], net: true}];
+  let pacc = ptY + H(c.netFlow);
+  if (!lossBelow) {
+    if (c.tax > 0) { finals.push({n: "Income tax", v: c.tax, from: [PX + NW, pacc]}); pacc += H(c.tax); }
+    c.belowTax.forEach(([n, v, lab]) => { if (v > 0) { finals.push({n, v, lab, from: [PX + NW, pacc]}); pacc += H(v); } });
+  }
+  if (lossBelow) finals.push({n: c.nonOpLabel, v: c.opIncome, pv: -c.nonOp, lab: "(" + f(-c.nonOp) + ")", from: [OX + NW, oiY], summary: true});
+  else if (c.nonOp < 0) finals.push({n: c.nonOpLabel, v: -c.nonOp, from: [OX + NW, oiY + ptH]});
+  let oacc = opexY;
+  c.opex.forEach(([n, v]) => { finals.push({n, v, from: [OX + NW, oacc], opex: true}); oacc += H(v); });
+  let cur = 20;
+  finals.forEach((it, i) => {
+    if (it.opex && i > 0 && finals[i - 1] && !finals[i - 1].opex) cur = Math.max(cur, opexY - 50);
+    const h = Math.max(H(it.v), 1.5), y0 = cur, cy = y0 + h / 2;
+    out.push(ribbon(it.from[0], it.from[1], it.from[1] + H(it.v), FX, y0, y0 + H(it.v), it.net ? "fp" : "fn"));
+    out.push(`<rect x="${FX}" y="${y0}" width="8" height="${h}" class="${it.net ? "npos" : "nneg"}"/>`);
+    if (it.net) {
+      out.push(txt(LX, cy - 4, esc(it.n), 13, "t-m", 400));
+      out.push(`<text x="${LX}" y="${cy + 18}" font-size="21" class="t-p" font-weight="400">${f(it.show)} <tspan font-size="13" font-weight="400" class="t-m">· ${pctOf(c, it.show)}</tspan></text>`);
+      credits.forEach(([n, v], k) => out.push(`<text x="${LX}" y="${cy + 40 + 19 * k}" font-size="12" class="t-m" font-weight="400">${esc(n)} <tspan class="t-p" font-weight="400">+${f(v)}</tspan></text>`));
+    } else {
+      out.push(txt(LX, cy - 3, esc(it.n), it.n.length > 34 ? 10.5 : 12, "t-m", 400));
+      out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">${it.lab || "(" + f(it.v) + ")"} <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, it.pv ?? it.v)}</tspan></text>`);
+    }
+    cur = y0 + Math.max(h, 26) + (it.net ? 26 + 19 * credits.length : 16);
+    if (it.summary) {
+      const rows = [["Pre-tax loss", "(" + f(-pretax) + ")"]];
+      if (c.tax) rows.push([c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax)]);
+      // a negative below-tax item is a credit (e.g. losses allocated to noncontrolling interests); show the all-owners subtotal first
+      if (c.belowTax.some(x => x[1] < 0 && /noncontrolling/i.test(x[0]))) rows.push(["Net loss, all owners", "(" + f(-(pretax - c.tax)) + ")"]);
+      c.belowTax.forEach(([n, v]) => rows.push([n, v < 0 ? "+" + f(-v) : "(" + f(v) + ")"]));
+      rows.forEach(([n, v]) => { out.push(`<text x="${LX}" y="${cur + 12}" font-size="12" class="t-m" font-weight="400">${esc(n)} <tspan class="${v[0] === "+" ? "t-p" : "t-n"}" font-weight="400">${v}</tspan></text>`); cur += 20; });
+      out.push(txt(LX, cur + 14, esc(c.netLabel), 13, "t-m", 400));
+      out.push(txt(LX, cur + 36, f(c.netIncome), 21, c.netIncome < 0 ? "t-n" : "t-p", 400));
+      cur += 60;
+    }
+  });
+  // nodes
+  out.push(`<rect x="${RX}" y="${revY}" width="${NW}" height="${revH}" rx="8" class="nrev"/>`);
+  const rc = revY + revH / 2;
+  out.push(txt(RX + NW/2, rc - 22, "Revenue", 13, "t-ws", 600, "middle"));
+  out.push(txt(RX + NW/2, rc + 2, f(c.revenue), 16, "t-w", 700, "middle"));
+  out.push(txt(RX + NW/2, rc + 22, yoyStr(c.revenue, c.revenuePrior) + " YoY", 12.5, "t-ws", 600, "middle"));
+  const node = (x, y0, h, cls, l1, l2, l3) => {
+    out.push(`<rect x="${x}" y="${y0}" width="${NW}" height="${h}" rx="8" class="${cls}"/>`);
+    const cy = y0 + h / 2;
+    if (h > 70) { out.push(txt(x + NW/2, cy - 20, l1, 11.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 3, l2, 15, "t-w", 700, "middle")); out.push(txt(x + NW/2, cy + 21, l3, 12.5, "t-ws", 500, "middle")); }
+    else out.push(txt(x + NW/2, cy + 5, l2, 13, "t-w", 700, "middle"));
+  };
+  node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
+  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  if (opexT > 0) node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
+  out.push(txt(OX + NW/2, 18, c.totalLabels ? c.totalLabels[0] : "Operating income", 12, "t-m", 600, "middle"));
+  out.push(txt(OX + NW/2, 36, pctOf(c, c.opIncome) + " margin", 12, "t-p", 700, "middle"));
+  out.push(`<rect x="${OX}" y="${oiY}" width="${NW}" height="${Math.max(oiH, 16)}" rx="5" class="npos"/>`);
+  out.push(txt(OX + NW/2, oiY + Math.max(oiH, 16) / 2 + 5, f(c.opIncome), 13.5, "t-w", 700, "middle"));
+  if (c.nonOp > 0) {
+    out.push(`<rect x="${OX + NW - 8}" y="${noY}" width="8" height="${Math.max(H(c.nonOp), 1.5)}" class="npos"/>`);
+    out.push(txt(OX + NW - 14, noY + 2, esc(c.nonOpLabel), 11.5, "t-m", 600, "end"));
+    out.push(txt(OX + NW - 14, noY + 18, "+" + f(c.nonOp), 13, "t-p", 700, "end"));
+  }
+  if (lossBelow) {} else { out.push(`<rect x="${PX}" y="${ptY}" width="${NW}" height="${Math.max(ptH, 18)}" rx="5" class="npos"/>`); }
+  if (lossBelow) {} else if (ptH >= 40) { out.push(txt(PX + NW/2, ptY + ptH/2 - 4, "Pre-tax income", 11, "t-ws", 600, "middle")); out.push(txt(PX + NW/2, ptY + ptH/2 + 14, f(pretax), 14, "t-w", 700, "middle")); }
+  else out.push(txt(PX + NW/2, ptY + Math.max(ptH, 18)/2 + 4, "Pre-tax " + f(pretax), 11.5, "t-w", 700, "middle"));
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} ${c.cogsLabel.replace("*","").toLowerCase()}, ${f(opexT)} operating expenses, ${f(c.opIncome)} operating income, ${f(c.netIncome)} net income.`)}">${out.join("")}</svg>`;
+}
+
+/* Flow chart for a company with an operating loss: gross profit, any expense credits and the loss together fund operating expenses */
+function sankeyLoss(c){
+  const s = 358 / Math.max(c.revenue, 0.75 * c.opex.reduce((a, o) => a + o[1], 0)), H = v => Math.max(v * s, 0);
+  const SX1 = 180, RX = 260, NW = 92, GX = 440, OX = 620, FX = 940, LX = 958;
+  const f = v => money(c, v), out = [], credits = c.opexCredits || [];
+  const gp = c.revenue - c.cogs, gpH = H(gp), cogsH = H(c.cogs), revH = H(c.revenue);
+  const opexT = c.opex.reduce((a, o) => a + o[1], 0), opexH = H(opexT), loss = -c.opIncome;
+  const gpY = 30; let yy = gpY + gpH + 16;
+  const extras = credits.map(([n, v]) => ({n, v, credit: true})).concat([{n: "Operating loss", v: loss}]);
+  extras.forEach(e => { e.y = yy; e.h = H(e.v); e.box = Math.max(44, e.h); yy += e.box + 12; });
+  const cogsY = yy + 18, revY = cogsY + cogsH - revH;
+  // sources
+  const gap = 6, boxes = c.sources.map(([n, v]) => ({n, v, h: H(v), bh: Math.max(46, H(v))}));
+  const total = boxes.reduce((a, b) => a + b.bh, 0) + gap * (boxes.length - 1);
+  let y = Math.max(6, revY + revH / 2 - total / 2), acc = revY;
+  boxes.forEach(b => {
+    const cy = y + b.bh / 2;
+    out.push(ribbon(SX1, cy - b.h / 2, cy + b.h / 2, RX, acc, acc + b.h, "fs"));
+    out.push(`<rect x="0" y="${y}" width="180" height="${b.bh}" rx="9" class="sbox"/>`);
+    out.push(txt(12, cy - 4, esc(b.n), 12.5, "t-m", 400));
+    out.push(`<text x="12" y="${cy + 15}" font-size="15" class="t-i" font-weight="400">${f(b.v)} <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, b.v)}</tspan></text>`);
+    acc += b.h; y += b.bh + gap;
+  });
+  const srcBottom = y;
+  out.push(ribbon(RX + NW, revY, revY + gpH, GX, gpY, gpY + gpH, "fp"));
+  if (c.cogs > 0) out.push(ribbon(RX + NW, revY + gpH, revY + revH, GX, cogsY, cogsY + cogsH, "fn"));
+  // inflows to operating expenses: gross profit, credits, then the operating loss
+  const opexY = 30; let oacc = opexY;
+  out.push(ribbon(GX + NW, gpY, gpY + gpH, OX, oacc, oacc + gpH, "fp")); oacc += gpH;
+  extras.forEach(e => { out.push(ribbon(GX + NW, e.y, e.y + e.h, OX, oacc, oacc + e.h, e.credit ? "fp" : "fn")); oacc += e.h; });
+  // operating expense lines
+  let cur = 160 + 24 * ((c.belowTax || []).length + ((c.belowTax || []).some(x => x[1] < 0 && /noncontrolling/i.test(x[0])) ? 1 : 0)), facc = opexY;
+  c.opex.forEach(([n, v]) => {
+    const h = Math.max(H(v), 1.5), cy = cur + h / 2;
+    out.push(ribbon(OX + NW, facc, facc + H(v), FX, cur, cur + H(v), "fn"));
+    out.push(`<rect x="${FX}" y="${cur}" width="8" height="${h}" class="nneg"/>`);
+    out.push(txt(LX, cy - 3, esc(n), 12, "t-m", 400));
+    out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">(${f(v)}) <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, v)}</tspan></text>`);
+    facc += H(v); cur += Math.max(h, 26) + 16;
+  });
+  // nodes
+  out.push(`<rect x="${RX}" y="${revY}" width="${NW}" height="${revH}" rx="8" class="nrev"/>`);
+  const rc = revY + revH / 2;
+  out.push(txt(RX + NW/2, rc - 22, "Revenue", 13, "t-ws", 600, "middle"));
+  out.push(txt(RX + NW/2, rc + 2, f(c.revenue), 15, "t-w", 700, "middle"));
+  out.push(txt(RX + NW/2, rc + 22, yoyStr(c.revenue, c.revenuePrior) + " YoY", 12.5, "t-ws", 600, "middle"));
+  const node = (x, y0, h, cls, l1, l2, l3) => {
+    out.push(`<rect x="${x}" y="${y0}" width="${NW}" height="${h}" rx="8" class="${cls}"/>`);
+    const cy = y0 + h / 2;
+    if (l3) { out.push(txt(x + NW/2, cy - 20, l1, 11.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 3, l2, 14, "t-w", 700, "middle")); out.push(txt(x + NW/2, cy + 21, l3, 12, "t-ws", 500, "middle")); }
+    else { out.push(txt(x + NW/2, cy - 4, l1, 10.5, "t-ws", 600, "middle")); out.push(txt(x + NW/2, cy + 13, l2, 13, "t-w", 700, "middle")); }
+  };
+  if (gpH >= 20) node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
+  extras.forEach(e => node(GX, e.y, e.box, e.credit ? "npos" : "nneg", esc(e.n), e.credit ? "+" + f(e.v) : "(" + f(e.v) + ")"));
+  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
+  // below the operating line
+  const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : label.length > 24 ? 10.5 : 12, "t-m", 400)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
+  row(30, "Operating loss", "(" + f(loss) + ")", "t-n");
+  row(54, esc(c.nonOpLabel), (c.nonOp >= 0 ? "+" : "") + f(c.nonOp), c.nonOp >= 0 ? "t-p" : "t-n");
+  let ry = 78;
+  if (c.tax) { row(ry, c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax), c.tax > 0 ? "t-n" : "t-p"); ry += 24; }
+  if ((c.belowTax || []).some(x => x[1] < 0 && /noncontrolling/i.test(x[0]))) { row(ry, "Net loss, all owners", "(" + f(-(c.opIncome + c.nonOp - c.tax)) + ")", "t-n"); ry += 24; }
+  (c.belowTax || []).forEach(([n, v]) => { row(ry, esc(n), v < 0 ? "+" + f(-v) : "(" + f(v) + ")", v < 0 ? "t-p" : "t-n"); ry += 24; });
+  out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
+  row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
+  out.push(txt(LX, ry + 30, pctOf(c, c.netIncome) + " of revenue", 11.5, "t-m", 400));
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} cost of revenue, ${f(opexT)} operating expenses before credits, operating loss ${f(loss)}, net loss ${f(-c.netIncome)}.`)}">${out.join("")}</svg>`;
+}
+
+/* ---------------- Infographic ---------------- */
+function chipFor(it){
+  if (it.chip) return {t: it.chip, cls: it.tone || "up"};
+  const y = yoy(it.cur, it.prior);
+  if (y === null) return {t: "n/m", cls: "flat"};
+  return {t: (y >= 0 ? "+" : "−") + Math.abs(y).toFixed(1) + "%", cls: it.tone || (y >= 0 ? "up" : "down")};
+}
+/* Quarter over quarter: change vs the previous quarter. dir says which way is good: "up" (default), "down" (debt,
+   interest, dilution) or "flat" (neutral, e.g. capital spending). Losses read as widened / narrowed. */
+function qoqChip(cur, prev, dir, label){
+  if (prev === undefined || prev === null) return null;
+  const good = up => dir === "flat" ? "flat" : ((dir === "down") !== up ? "up" : "down");
+  const out = /cash flow/i.test(label || "") ? ["Outflow grew", "Outflow shrank"] : ["Loss widened", "Loss narrowed"];
+  if (prev > 0 && cur > 0) { const y = cur / prev - 1; return {t: (y >= 1 ? (cur / prev).toFixed(1) + "×" : (y >= 0 ? "+" : "−") + Math.abs(y * 100).toFixed(1) + "%") + " QoQ", cls: Math.abs(y) < 0.0005 ? "flat" : good(y >= 0)}; }
+  if (prev < 0 && cur < 0) return {t: (cur < prev ? out[0] : out[1]) + " QoQ", cls: cur < prev ? "down" : "up"};
+  if (prev < 0) return {t: "Turned positive QoQ", cls: "up"};
+  if (cur < 0) return {t: (/cash flow/i.test(label || "") ? "Turned negative" : "Swung to a loss") + " QoQ", cls: "down"};
+  return {t: "n/m QoQ", cls: "flat"};
+}
+const ppQoQ = (c, cur, prev) => { const d = (cur / c.revenue - prev / c.prevQ.revenue) * 100; return {t: ppStr(d) + " QoQ", cls: Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}; };
+function barCard(c, it){
+  if (c.quarter && it.prevQ !== undefined && c.prevQ) return barCardQ(c, it);
+  const m = Math.max(Math.abs(it.cur), Math.abs(it.prior)) || 1;
+  const w = v => (Math.abs(v) / m * 100).toFixed(1);
+  const ch = chipFor(it);
+  return `<div class="card">
+    <div class="barhead"><p>${esc(it.label)}</p><span class="chip ${ch.cls}">${esc(ch.t)}</span></div>
+    <div class="bars">
+      <span>${yr(c.fy)}</span><div class="track"><div class="fill${it.cur < 0 ? " neg" : ""}" style="width:${w(it.cur)}%"></div></div><strong class="${it.cur < 0 ? "down" : ""}">${money(c, it.cur, it.money)}</strong>
+      <span>${yr(c.fyPrior)}</span><div class="track"><div class="fill prior${it.prior < 0 ? " neg" : ""}" style="width:${w(it.prior)}%"></div></div><strong class="${it.prior < 0 ? "down" : ""}">${money(c, it.prior, it.money)}</strong>
+    </div>
+    ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
+  </div>`;
+}
+/* Quarter tabs: this quarter and the previous one, with a YoY and a QoQ chip */
+function barCardQ(c, it){
+  const rows3 = [[c.fy, it.cur, ""], [c.prevQ.fy, it.prevQ, " qprev"]];   // this quarter and the previous one
+  const m = Math.max(...rows3.map(r => Math.abs(r[1]))) || 1;
+  /* When the quarters shown include both a profit and a loss, name the line neutrally, e.g. "Operating income (loss)" */
+  const mixed = rows3.some(r => r[1] > 0) && rows3.some(r => r[1] < 0);
+  const NEUTRAL = {"Operating loss": "Operating income (loss)", "Operating income": "Operating income (loss)", "Net loss": "Net income (loss)", "Net income": "Net income (loss)", "Loss per share": "Earnings (loss) per share", "Earnings per share": "Earnings (loss) per share"};
+  const label = mixed && NEUTRAL[it.label] ? NEUTRAL[it.label] : it.label;
+  const w = v => (Math.abs(v) / m * 100).toFixed(1);
+  const ch = chipFor(it), qc = qoqChip(it.cur, it.prevQ, it.qDir || (it.tone === "flat" ? "flat" : "up"), it.label);
+  const row = (lab, v, cls) => `<span>${esc(yr(lab))}</span><div class="track"><div class="fill${cls}${v < 0 ? " neg" : ""}" style="width:${w(v)}%"></div></div><strong class="${v < 0 ? "down" : ""}">${money(c, v, it.money)}</strong>`;
+  return `<div class="card">
+    <div class="barhead"><p>${esc(label)}</p><div class="chips"><span class="chip ${ch.cls}">${esc(/YoY$/.test(ch.t) ? ch.t : ch.t + " YoY")}</span>${qc ? `<span class="chip ${qc.cls}">${esc(qc.t)}</span>` : ""}</div></div>
+    <div class="bars">${rows3.map(r => row(...r)).join("")}</div>
+    ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
+  </div>`;
+}
+/* Adds the comparison year to "vs ..." text that lacks one, and to margin-change notes */
+function withYear(c, sub, bs){
+  if (!sub) return sub || "";
+  const m = sub.match(/^vs ([^·]+?)(\s·.*)?$/);
+  if (!m || /\b(19|20)\d\d\b/.test(m[1])) return sub;
+  return `vs ${m[1]} ${bs ? `at ${c.fyPrior} year-end` : `in ${c.fyPrior}`}${m[2] || ""}`;
+}
+const footYear = (c, foot) => (!foot || /\bvs\b/.test(foot)) ? foot : foot.replace(/ pp\b/, " pp YoY");
+/* Tiles with a change badge drop the prior-year value; the badge says YoY */
+const stripPrior = sub => { if (!sub) return ""; const m = sub.match(/^vs [^·]+?(?:\s·\s(.*))?$/); return m ? (m[1] || "") : sub; };
+const yoyDelta = d => { if (!d || /YoY/.test(d)) return d; if (d === "flat") return "flat YoY"; if (/ dilution$/.test(d)) return d.replace(" dilution", " YoY (dilution)"); return /^[+−-]?[\d.,]+(%| pp|×)$/.test(d) ? d + " YoY" : d; };
+function tileCard(t, top, c, bs){
+  return `<div class="card${top ? " tile-top" : ""}">
+    <p class="lbl">${esc(t.label)}</p>
+    <p class="big">${esc(t.value)}</p>
+    <p class="sub">${[esc(t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs)), t.delta ? `<span class="${t.tone}">${esc(yoyDelta(t.delta))}</span>` : "", (q => q ? `<span class="${q.cls}">${esc(q.t)}</span>` : "")(t.qoq && c.quarter ? qoqChip(t.qoq[0], t.qoq[1], t.qDir || "up", t.label) : null)].filter(Boolean).join(" · ")}</p>
+    ${t.foot ? `<p class="sub">${esc(t.foot)}</p>` : ""}
+  </div>`;
+}
+function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
+function renderSection(c, sec){
+  if (sec.type === "tiles") return `<div class="sec">${head(sec)}<div class="grid">${sec.tiles.map(t => tileCard(t, sec.top, c, sec.title === "Balance sheet")).join("")}</div></div>`;
+  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : ""}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
+  if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
+  if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
+  if (sec.type === "eps") {
+    /* Earnings per share by quarter: a line over the same quarters as the revenue chart, with a zero line */
+    const its = sec.items, n = its.length, vs = its.map(q => q.v);
+    const hi = Math.max(0, ...vs), lo = Math.min(0, ...vs), span = (hi - lo) || 1;
+    const X = i => (i + 0.5) / n * 100, Y = v => 10 + (hi - v) / span * 68;   // plot area 10%–78% of the height
+    const pts = its.map((q, i) => `${X(i).toFixed(2)},${Y(q.v).toFixed(2)}`).join(" ");
+    const lastI = n - 1;
+    return `<div class="sec">${head(sec)}<div class="card"><div class="eps-wrap"><div class="eps-in">
+      <div class="eps">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" x2="100" y1="${Y(0).toFixed(2)}" y2="${Y(0).toFixed(2)}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
+          <polyline points="${pts}" fill="none" stroke="var(--bar)" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <span class="ezero" style="top:${Y(0).toFixed(2)}%">$0</span>
+        ${its.map((q, i) => `<i class="ept${i === lastI ? " cur" : q.prior ? " prior" : ""}" style="left:${X(i).toFixed(2)}%;top:${Y(q.v).toFixed(2)}%"></i>
+          <span class="epl ${q.v < 0 ? "down" : ""}" style="left:${X(i).toFixed(2)}%;top:calc(${Y(q.v).toFixed(2)}% ${q.v < 0 ? "+ 10px" : "- 30px"})">${money(c, q.v, "eps")}</span>`).join("")}
+      </div>
+      <div class="eaxis" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${its.map((q, i) => {
+        const pv = its[i - 1], d = pv ? q.v - pv.v : null;
+        const ch = d === null ? "" : `<span class="sub ${Math.abs(d) < 0.005 ? "flat" : d > 0 ? "up" : "down"}">${d >= 0 ? "+" : "−"}${(c.cur || "$")}${Math.abs(d).toFixed(2)} QoQ</span>`;
+        return `<div><b>${esc(q.q)}</b>${q.s ? `<span class="sub">${esc(q.s)}</span>` : ""}${ch}</div>`; }).join("")}</div>
+    </div></div>${sec.callout ? `<p class="callout">${sec.callout}</p>` : ""}</div></div>`;
+  }
+  if (sec.type === "quarters") {
+    const m = Math.max(...sec.items.map(q => q.v));
+    return `<div class="sec">${head(sec)}<div class="card">
+      <div class="legend">${sec.legend.map(([sw, l]) => `<span style="--sw:${sw}">${esc(l)}</span>`).join("")}</div>
+      <div class="qgrid">${sec.items.map(q => {
+        const h = Math.round(q.v / m * 150), ih = q.inset ? Math.max(3, Math.round(q.inset / m * 150)) : 0;
+        const prev = sec.items[sec.items.indexOf(q) - 4], last = c.quarter ? sec.items[sec.items.indexOf(q) - 1] : null, qq = last ? qoqChip(q.v, last.v, "up", "") : null;
+        return `<div class="q"><div class="q-top"><strong>${money(c, q.v)}</strong>${prev ? `<span class="sub up">${yoyStr(q.v, prev.v)} YoY</span>` : ""}${qq ? `<span class="sub ${qq.cls}">${esc(qq.t)}</span>` : ""}
+          <div class="col${q.prior ? " prior" : ""}" style="height:${h}px">${ih ? `<i style="height:${ih}px"></i>` : ""}</div></div>
+          <b>${esc(q.q)}</b><span class="sub q-note">${[q.s, q.s2].filter(Boolean).map(esc).join("<br>")}</span></div>`;
+      }).join("")}</div>
+      ${sec.callout ? `<p class="callout">${sec.callout}</p>` : ""}
+    </div></div>`;
+  }
+  return "";
+}
+const fromLoss = (c, prior, cur) => {
+  if (cur !== undefined && cur < 0 && prior >= 0) return "swung to a loss";
+  if (cur !== undefined && cur < 0) return `loss ${cur > prior ? "narrowed" : "widened"} from ${money(c, Math.abs(prior))}`;
+  return `up from a ${money(c, Math.abs(prior))} loss`;
+};
+function segChange(cur, prior, c){
+  const y = yoy(cur, prior);
+  if (y === null) return (prior < 0 || cur < 0) ? `<span class="chip ${cur > prior ? "up" : "down"}">${fromLoss(c, prior, cur)}</span>` : `<span class="chip flat">n/m</span>`;
+  return `<span class="chip ${y >= 0 ? "up" : "down"}">${yoyStr(cur, prior)}</span>`;
+}
+const segPct = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "%";
+function segMargins(s){ const mc = s.oi / s.rev * 100, mp = s.oiPrior / s.revPrior * 100; return {mc, mp, d: mc - mp}; }
+const ppStr = d => Math.abs(d) < 0.05 ? "0.0 pp" : (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + " pp";
+/* Total company first, then the segments (a single-segment company is its own total) */
+function segItems(c){
+  const items = c.segments.items;
+  return items.length > 1
+    ? [{name: "Total company", rev: c.revenue, revPrior: c.revenuePrior, oi: c.opIncome, oiPrior: c.opIncomePrior, total: true}].concat(items)
+    : items.map(s => Object.assign({}, s, {total: true}));
+}
+/* Segment profit labels: some companies report segment gross profit or EBT instead of operating income */
+function segL(c, s){
+  if (s.total) return c.totalLabels || null;
+  if (!c.segments) return null;
+  if (c.segments.labels) return c.segments.labels;
+  if (c.segments.metric === "gross") return ["Segment gross profit", "Gross margin"];
+  return null;
+}
+function segBig(c, which){
+  const chip = (cur, prior) => { const y = yoy(cur, prior);
+    if (y === null) return (prior < 0 || cur < 0) ? `<span class="chip ${cur > prior ? "up" : "down"}">${fromLoss(c, prior, cur)}</span>` : `<span class="chip flat">n/m</span>`;
+    return `<span class="chip ${y >= 0 ? "up" : "down"}">${yoyStr(cur, prior)} YoY</span>`; };
+  const list = which === "total"
+    ? [{rev: c.revenue, revPrior: c.revenuePrior, oi: c.opIncome, oiPrior: c.opIncomePrior, total: true}]
+    : c.segments.items;
+  const pq = which === "total" && c.quarter && c.prevQ ? c.prevQ : null;
+  const qc = (cur, prev) => { const q = qoqChip(cur, prev, "up", ""); return q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : ""; };
+  return list.map(s => { const {mc, mp, d} = segMargins(s);
+    /* Quarter tabs: YoY chip (capitalized, labelled) stacked above the QoQ chip */
+    const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
+    const V = h => pq ? `<span class="vchips">${h}</span>` : h;
+    const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
+    return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
+      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div></div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div></div></div>
+    </div>`; }).join("");
+}
+function segCards(c){
+  return segItems(c).map(s => { const {mc, mp, d} = segMargins(s);
+    return `<div class="card"><p class="seg-name">${esc(s.name)}</p><div class="tablewrap"><table class="segtable"><thead><tr><th></th><th>${yr(c.fy)}</th><th>${yr(c.fyPrior)}</th><th>Change</th></tr></thead><tbody>
+      <tr><td>Revenue</td><td>${money(c, s.rev)}</td><td>${money(c, s.revPrior)}</td><td>${segChange(s.rev, s.revPrior, c)}</td></tr>
+      <tr><td>${segL(c, s) ? segL(c, s)[0] : "Operating income"}</td><td>${money(c, s.oi)}</td><td class="${s.oiPrior < 0 ? "down" : ""}">${money(c, s.oiPrior)}</td><td>${segChange(s.oi, s.oiPrior, c)}</td></tr>
+      <tr class="key"><td>${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</td><td>${segPct(mc)}</td><td>${segPct(mp)}</td><td><span class="chip ${d >= 0 ? "up" : "down"}">${ppStr(d)}</span></td></tr>
+    </tbody></table></div></div>`; }).join("");
+}
+function renderInfographic(c){
+  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
+  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}${c.quarter && c.prevQ ? ` (YoY) and ${esc(c.prevQ.fy)} (QoQ)` : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
+    ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
+    <div class="card" style="padding:18px 20px">
+      <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
+      <div class="sankey">${sankey(c)}</div>
+    </div>
+    ${c.sections.map(sec => renderSection(c, sec)).join("")}
+    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(c.period)}; filed ${esc(c.filed)}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
+  </div>`;
+  $("#dlInfo").addEventListener("click", downloadInfographic);
+}
+
+/* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
+/* Bakes the site's fonts (IBM Plex, Latin subset) into the image as data, so a phone draws the picture with
+   the same fonts the page was measured with; otherwise wider fallback fonts make numbers overlap their tags. */
+let fontCSSPromise = null;
+function getFontEmbedCSS(){
+  if (fontCSSPromise) return fontCSSPromise;
+  fontCSSPromise = (async () => {
+    const link = document.querySelector('link[href*="fonts.googleapis.com/css"]'); if (!link) return "";
+    const css = await (await fetch(link.href)).text();
+    const blocks = css.split(/(?=\/\*[^*]*\*\/\s*@font-face)/).filter(b => /\/\*\s*latin\s*\*\//.test(b));
+    const toData = async url => { const blob = await (await fetch(url)).blob();
+      return await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); }); };
+    const out = await Promise.all(blocks.map(async b => {
+      const m = b.match(/url\((['"]?)([^)'"]+)\1\)/); if (!m) return "";
+      try { return b.replace(m[0], `url(${await toData(m[2])})`); } catch (e) { return ""; }
+    }));
+    return out.join("\n");
+  })().catch(() => { fontCSSPromise = null; return ""; });
+  return fontCSSPromise;
+}
+function loadImgLib(){
+  // html-to-image 1.11.13 (MIT), bundled with the site under vendor/
+  if (window.htmlToImage) return Promise.resolve();
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = "vendor/html-to-image.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+async function makeInfographicBlob(c){
+  // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
+  await loadImgLib();
+  const root = document.documentElement, prevTheme = root.getAttribute("data-theme");
+  root.setAttribute("data-theme", "light");
+  const host = document.createElement("div");
+  host.style.cssText = "position:fixed;left:-20000px;top:0;width:1224px;pointer-events:none";
+  if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
+  document.body.appendChild(host);
+  try {
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const n = $("#infoBody").cloneNode(true); n.removeAttribute("id");
+    n.style.width = "1160px"; n.style.padding = "32px"; n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
+    n.querySelectorAll(".seg-card.wide .seg-metrics").forEach(x => { x.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))"; x.style.gap = "28px"; });
+    n.querySelectorAll(".seg-card.wide .seg-val").forEach(x => { x.style.gap = "10px"; });
+    n.querySelectorAll(".seg-card.wide .seg-val b").forEach(x => { x.style.fontSize = "32px"; x.style.letterSpacing = "-.02em"; });
+    n.querySelectorAll(".seg-card.wide .seg-val .chip").forEach(x => { x.style.fontSize = "13px"; x.style.padding = "3px 10px"; x.style.whiteSpace = "nowrap"; });
+    n.querySelectorAll(".seg-card.wide .lbl").forEach(x => { x.style.fontSize = "14px"; });
+    n.querySelectorAll(".barhead .sub").forEach(x => { x.textContent = x.textContent.replace(" · scroll sideways on a phone", ""); });
+    const h = document.createElement("div");
+    h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
+    h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer by Alexander</p>`;
+    n.prepend(h);
+    host.appendChild(n);
+    n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
+      svg.style.minWidth = "0";
+      const vb = svg.viewBox.baseVal, w = box.clientWidth || 1160, hgt = Math.round(w * vb.height / vb.width);
+      const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      svg.replaceWith(cv); });
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const fontEmbedCSS = await getFontEmbedCSS();
+    const opts = {pixelRatio: 2, backgroundColor: "#F3F5F8", cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})};
+    await window.htmlToImage.toBlob(n, opts).catch(() => null);   // first pass warms fonts and images (Safari)
+    const blob = await window.htmlToImage.toBlob(n, opts);
+    if (!blob) throw new Error("blob");
+    return blob;
+  } finally {
+    host.remove();
+    if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
+  }
+}
+let lastImgUrl = null, lastImg = null;
+/* Saves the image shown in the preview: the host's save dialog when there is one, otherwise an ordinary
+   browser download (on iPhone it lands in Files > Downloads; the Share button offers Save Image to Photos). */
+async function saveShownImage(){
+  if (!lastImg) return;
+  const {blob, name} = lastImg, st = $("#ovStatus");
+  if (downloads) {
+    try { await downloads.save({filename: name, data: blob}); st.textContent = "Saved " + name + "."; return; }
+    catch (e) { if (e && e.code === "declined") { st.textContent = "Save cancelled."; return; } }
+  }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  st.textContent = "Downloaded " + name + ".";
+}
+async function downloadInfographic(){
+  const c = state.shown || LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
+  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+  const name = `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`;
+  btn.disabled = true; st.textContent = "Drawing the image…";
+  try {
+    const blob = await makeInfographicBlob(c);
+    lastImg = {blob, name};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
+    lastImgUrl = URL.createObjectURL(blob);
+    st.textContent = ""; showImage(lastImgUrl);
+  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+  finally { btn.disabled = false; }
+}
+/* Paints the flow chart's paths, rects and text onto a canvas (no SVG-image decoding, which Safari can leave blank) */
+/* Fixed light-theme colors, so the image looks the same whatever theme the viewer's device uses */
+const PAINT = {
+  fs: {fill: "#E9A23B", a: .42}, fp: {fill: "#3DA56B", a: .38}, fn: {fill: "#DD6A55", a: .34}, ln: {stroke: "#DD6A55", lw: 1.2},
+  nrev: {fill: "#1D3557"}, npos: {fill: "#1E7B4A"}, nneg: {fill: "#B23A27"}, sbox: {fill: "#FFF3E0", stroke: "#EFC27E", lw: 1},
+  "t-m": {fill: "#55606E"}, "t-i": {fill: "#15202B"}, "t-w": {fill: "#FFFFFF"}, "t-ws": {fill: "#DCE6F2"}, "t-p": {fill: "#17703F"}, "t-n": {fill: "#A8321F"}
+};
+const paintOf = el => PAINT[(el.getAttribute("class") || "").split(" ")[0]] || {};
+function drawSvgToCanvas(svg, W, H){
+  const vb = svg.viewBox.baseVal, sx = W / vb.width, sy = H / vb.height;
+  const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = H;
+  const g = cvs.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H);
+  g.setTransform(sx, 0, 0, sy, -vb.x * sx, -vb.y * sy);
+  const paint = (el, shape) => {
+    const p = paintOf(el);
+    if (p.fill) { g.globalAlpha = p.a || 1; g.fillStyle = p.fill; shape ? g.fill(shape) : g.fill(); }
+    if (p.stroke) { g.globalAlpha = 1; g.strokeStyle = p.stroke; g.lineWidth = p.lw || 1; shape ? g.stroke(shape) : g.stroke(); }
+    g.globalAlpha = 1;
+  };
+  const FAM = '"IBM Plex Sans", Helvetica, Arial, sans-serif';
+  svg.querySelectorAll("path, rect, text").forEach(el => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "path") { paint(el, new Path2D(el.getAttribute("d"))); return; }
+    if (tag === "rect") {
+      const x = +el.getAttribute("x") || 0, y = +el.getAttribute("y") || 0, rw = +el.getAttribute("width") || 0, rh = +el.getAttribute("height") || 0, rx = Math.min(+el.getAttribute("rx") || 0, rw / 2, rh / 2);
+      g.beginPath(); if (rx && g.roundRect) g.roundRect(x, y, rw, rh, rx); else g.rect(x, y, rw, rh); paint(el); return;
+    }
+    const fs = el.getAttribute("font-size") || "12", fw = el.getAttribute("font-weight") || "500", ff = paintOf(el).fill || "#15202B";
+    const runs = Array.from(el.childNodes).map(nd => nd.nodeType === 3 ? {t: nd.textContent, s: fs, w: fw, f: ff}
+      : {t: nd.textContent, s: nd.getAttribute("font-size") || fs, w: nd.getAttribute("font-weight") || fw, f: paintOf(nd).fill || ff}).filter(r => r.t);
+    let total = 0; runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; r.width = g.measureText(r.t).width; total += r.width; });
+    const anchor = el.getAttribute("text-anchor") || "start", x0 = +el.getAttribute("x") || 0, y0 = +el.getAttribute("y") || 0;
+    let x = anchor === "middle" ? x0 - total / 2 : anchor === "end" ? x0 - total : x0;
+    g.textAlign = "left"; g.textBaseline = "alphabetic";
+    runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; g.fillStyle = r.f; g.fillText(r.t, x, y0); x += r.width; });
+  });
+  return cvs;
+}
+function showImage(url){
+  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false;
+  $("#ovStatus").innerHTML = "Double-tap: full screen";
+  $("#ovShare").hidden = !canShareImage();
+  $("#ovSave").focus();
+}
+$("#ovSave").addEventListener("click", saveShownImage);
+/* Share button: the phone's or computer's share sheet with the picture attached (Messages, Mail, AirDrop, Save Image…).
+   Shown only where the browser can share image files. */
+const shareFileOf = () => lastImg ? new File([lastImg.blob], lastImg.name, {type: "image/png"}) : null;
+function canShareImage(){
+  try { const f = shareFileOf() || new File([new Blob([""], {type: "image/png"})], "x.png", {type: "image/png"});
+        return !!(navigator.share && navigator.canShare && navigator.canShare({files: [f]})); } catch (e) { return false; }
+}
+async function shareShownImage(){
+  const f = shareFileOf(), st = $("#ovStatus"); if (!f) return;
+  try { await navigator.share({files: [f], title: lastImg.name}); }
+  catch (e) { if (!e || e.name !== "AbortError") st.textContent = "Sharing isn't available here. Use the save button instead."; }
+}
+$("#ovShare").addEventListener("click", shareShownImage);
+/* Double-tap (or double-click) the preview picture to fill the screen with it; do it again to go back.
+   Uses the browser's real full screen where allowed, otherwise just covers the page. */
+const ovFsReal = () => (document.fullscreenElement || document.webkitFullscreenElement) === $("#imgOverlay");
+function setImgFs(on){
+  const ov = $("#imgOverlay");
+  ov.classList.toggle("img-fs", on); ov.scrollTop = 0;
+  if (on) {
+    const req = ov.requestFullscreen || ov.webkitRequestFullscreen;
+    if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+  } else if (ovFsReal()) {
+    const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+  }
+}
+const toggleImgFs = () => setImgFs(!$("#imgOverlay").classList.contains("img-fs"));
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
+  if (!ovFsReal() && $("#imgOverlay").classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement)) {
+    // left real full screen with the system gesture or Esc: drop the full-screen look too, unless we never had real full screen
+    if (document.fullscreenEnabled || document.webkitFullscreenEnabled) $("#imgOverlay").classList.remove("img-fs");
+  }
+}));
+let lastTap = {t: 0, x: 0, y: 0}, lastToggle = 0;
+$("#ovImg").addEventListener("pointerup", e => {
+  if (e.pointerType === "mouse") return;
+  const now = Date.now();
+  if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+    e.preventDefault(); lastTap.t = 0; lastToggle = now; toggleImgFs();
+  } else lastTap = {t: now, x: e.clientX, y: e.clientY};
+});
+$("#ovImg").addEventListener("dblclick", e => { e.preventDefault(); if (Date.now() - lastToggle > 500) toggleImgFs(); });  // skip the dblclick a phone adds after our own double-tap
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape" || $("#imgOverlay").hidden) return;
+  if ($("#imgOverlay").classList.contains("img-fs")) setImgFs(false); else $("#ovClose").click();
+});
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
+
+/* ---------------- Video ---------------- */
+const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
+const FD = '"IBM Plex Sans Condensed","Arial Narrow",sans-serif', FB = '"IBM Plex Sans",system-ui,sans-serif', FM = '"IBM Plex Mono",monospace';
+const ease = p => 1 - Math.pow(1 - Math.min(1, Math.max(0, p)), 3);
+function T(ctx, s, x, y, size, color, font, weight, align){ ctx.font = `${weight || 500} ${size}px ${font || FB}`; ctx.fillStyle = color; ctx.textAlign = align || "left"; ctx.fillText(s, x, y); }
+function rr(ctx, x, y, w, h, r, color){ ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, Math.max(w,0), h, Math.min(r, Math.max(w,0)/2)) : ctx.rect(x, y, Math.max(w,0), h); ctx.fill(); }
+function wrapLines(ctx, text, maxW){ const words = text.split(" "), lines = []; let line = ""; for (const w of words){ const t = line ? line + " " + w : w; if (ctx.measureText(t).width > maxW && line){ lines.push(line); line = w; } else line = t; } if (line) lines.push(line); return lines; }
+function frame(ctx, c, kicker){
+  ctx.fillStyle = V.bg; ctx.fillRect(0, 0, 1280, 720);
+  T(ctx, c.ticker + " · " + c.fy + " 10-K", 64, 60, 20, V.muted, FM, 600);
+  if (kicker) T(ctx, kicker.toUpperCase(), 64, 112, 22, V.amber, FB, 700);
+}
+function buildScenes(c){
+  const f = v => money(c, v), sp = v => spoken(c, v), gp = c.revenue - c.cogs, opexT = c.opex.reduce((a, o) => a + o[1], 0);
+  const ry = yoyStr(c.revenue, c.revenuePrior);
+  const cash = (c.sections.find(s => s.title === "Cash flow & earnings") || {items: []}).items;
+  const ocf = cash[0], capex = cash[1], fcf = cash[2], eps = cash.find(i => i.money === "eps");
+  const scenes = [];
+  scenes.push({cap: `${c.short}'s ${c.fy.replace("FY", "fiscal ")} annual report, in about a minute.`, say: `${c.short}'s ${c.fy.replace("FY", "fiscal ")} annual report, in about a minute.`,
+    draw(ctx, p){ ctx.fillStyle = V.bg; ctx.fillRect(0,0,1280,720);
+      ctx.globalAlpha = ease(p); T(ctx, c.ticker, 640, 300, 150, V.amber, FD, 700, "center"); T(ctx, c.name, 640, 380, 44, V.white, FD, 600, "center");
+      T(ctx, (c.form || "Form 10-K") + " · " + c.period, 640, 432, 24, V.muted, FB, 500, "center"); ctx.globalAlpha = 1; }});
+  scenes.push({cap: `Revenue grew ${ry} to ${f(c.revenue)}. ${c.video.revenueLine.cap}`, say: `${c.short} grew revenue ${ry.replace("+","")} to ${sp(c.revenue)}. ${c.video.revenueLine.say}`,
+    draw(ctx, p){ frame(ctx, c, "Revenue"); const e = ease(p);
+      T(ctx, money(c, c.revenue * e), 64, 230, 96, V.white, FM, 600); T(ctx, ry + " vs " + c.fyPrior + " (" + f(c.revenuePrior) + ")", 64, 280, 26, V.green, FB, 700);
+      const m = Math.max(...c.sources.map(s => s[1])), n = c.sources.length, rowH = Math.min(52, 280 / n);
+      c.sources.forEach(([name, v], i) => { const y = 312 + i * rowH; const w = 640 * v / m * ease(p * 1.3 - i * 0.08);
+        T(ctx, name, 64, y + rowH * 0.55, Math.min(22, rowH * 0.45), V.muted, FB, 600); rr(ctx, 420, y + rowH * 0.18, w, rowH * 0.5, 6, V.amber);
+        if (e > 0.6) T(ctx, f(v), 430 + w, y + rowH * 0.55, Math.min(22, rowH * 0.45), V.white, FM, 600); }); }});
+  const cr = (c.opexCredits || [])[0], isLoss = c.opIncome < 0;
+  const tailCap = isLoss ? `${cr ? `, partly offset by a ${f(cr[1])} ${cr[0].toLowerCase()}` : ""}, for an operating loss of ${f(-c.opIncome)}.` : `, leaving operating income of ${f(c.opIncome)}, a ${pctOf(c, c.opIncome)} margin.`;
+  const tailSay = isLoss ? `${cr ? `, partly offset by a ${sp(cr[1])} ${cr[0].toLowerCase()}` : ""}, for an operating loss of ${sp(-c.opIncome)}.` : `, leaving operating income of ${sp(c.opIncome)}, a ${pctOf(c, c.opIncome)} margin.`;
+  scenes.push({cap: c.cogs > 0 ? `${c.cogsLabel.replace("*","")} took ${pctOf(c, c.cogs)} of revenue and operating expenses ${pctOf(c, opexT)}${tailCap}` : `With no cost of sales, operating expenses took ${pctOf(c, opexT)} of revenue${tailCap}`,
+    say: c.cogs > 0 ? `${c.cogsLabel.replace("*","")} took ${pctOf(c, c.cogs)} of revenue, and operating expenses another ${pctOf(c, opexT)}${tailSay}` : `With no cost of sales, operating expenses took ${pctOf(c, opexT)} of revenue${tailSay}`,
+    draw(ctx, p){ frame(ctx, c, "Where each dollar went"); const W = 1152, x0 = 64; let x = x0; const e = ease(p);
+      const parts = [[c.cogsLabel.replace("*",""), c.cogs, V.red]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? V.red2 : "#E39A87"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, V.green]] : []);
+      const denom = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
+      parts.forEach(([n, v, col]) => { const w = W * v / denom * e; rr(ctx, x, 200, w, 90, 4, col); x += w; });
+      parts.forEach(([n, v, col], i) => { const cx = x0 + (i % 3) * 384, cy = 360 + Math.floor(i / 3) * 70; rr(ctx, cx, cy - 18, 20, 20, 4, col);
+        T(ctx, n, cx + 32, cy - 2, 20, V.muted, FB, 600); T(ctx, f(v) + " · " + pctOf(c, v), cx + 32, cy + 26, 22, V.white, FM, 600); }); }});
+  const prof = [[c.gpLabel.replace("*",""), gp, c.gpPrior], ["Operating income", c.opIncome, c.opIncomePrior], [c.netLabel, c.netIncome, c.netIncomePrior]];
+  const lossNI = c.netIncome < 0, niDir = c.netIncomePrior < 0 ? "compared with" : c.netIncome > c.netIncomePrior ? "up from" : c.netIncome < c.netIncomePrior ? "down from" : "unchanged from";
+  scenes.push({cap: lossNI ? `${c.netIncomePrior < 0 ? `Net loss narrowed to ${f(-c.netIncome)} from ${f(-c.netIncomePrior)}` : `${c.short} swung to a net loss of ${f(-c.netIncome)} from net income of ${f(c.netIncomePrior)}`}${eps ? `; loss per share was ${money(c, Math.abs(eps.cur), "eps")}` : ""}.` : `Net income was ${f(c.netIncome)}, ${niDir} ${c.netIncomePrior < 0 ? "a net loss of " + f(-c.netIncomePrior) : f(c.netIncomePrior)}${eps ? `; diluted EPS was ${money(c, eps.cur, "eps")}` : ""}.`,
+    say: lossNI ? `${c.netIncomePrior < 0 ? `The net loss narrowed to ${sp(-c.netIncome)}, from ${sp(-c.netIncomePrior)} a year earlier` : `${c.short} swung to a net loss of ${sp(-c.netIncome)}, from net income of ${sp(c.netIncomePrior)} a year earlier`}${eps ? `, or ${Math.abs(eps.cur).toFixed(2)} ${curWord(c)} per share` : ""}.` : `Net income came in at ${sp(c.netIncome)}, ${niDir} ${c.netIncomePrior < 0 ? "a net loss of " + sp(-c.netIncomePrior) : sp(c.netIncomePrior)} a year earlier${eps ? `, and diluted earnings per share were ${eps.cur.toFixed(2)} ${curWord(c)}` : ""}.`,
+    draw(ctx, p){ frame(ctx, c, "Profitability"); groupBars(ctx, c, prof, p); }});
+  if (ocf && fcf) scenes.push({cap: `Operating cash flow was ${f(ocf.cur)}. After ${f(capex.cur)} of capital spending, free cash flow was ${f(fcf.cur)} (${yoyStr(fcf.cur, fcf.prior)}).`,
+    say: `Operating cash flow was ${sp(ocf.cur)}. After capital spending of ${sp(capex.cur)}, free cash flow was ${sp(fcf.cur)}.`,
+    draw(ctx, p){ frame(ctx, c, "Cash flow"); groupBars(ctx, c, [["Operating cash flow", ocf.cur, ocf.prior], [capex.label, capex.cur, capex.prior], ["Free cash flow", fcf.cur, fcf.prior]], p); }});
+  c.video.spotlights.forEach(sl => scenes.push({cap: sl.cap, say: sl.say, draw(ctx, p){ frame(ctx, c, sl.kicker); const e = ease(p);
+    ctx.globalAlpha = e; T(ctx, sl.big, 64, 300, 110, V.white, FM, 600); T(ctx, sl.sub, 64, 360, 30, V.amber, FB, 600);
+    sl.lines.forEach((l, i) => { ctx.globalAlpha = ease(p * 1.4 - 0.3 - i * 0.2); rr(ctx, 64, 412 + i * 56, 8, 34, 2, V.blue); T(ctx, l, 90, 440 + i * 56, 28, V.white, FB, 500); }); ctx.globalAlpha = 1; }}));
+  scenes.push({cap: `Source: ${c.name} ${c.form || "Form 10-K"}, filed ${c.filed}. The full report and infographic are in the other tabs.`, say: `That's ${c.short}'s ${c.fy.replace("FY", "fiscal ")} in brief. The full report and infographic are in the other tabs.`,
+    draw(ctx, p){ ctx.fillStyle = V.bg; ctx.fillRect(0,0,1280,720); ctx.globalAlpha = ease(p);
+      T(ctx, "10-K Analyzer", 640, 300, 64, V.white, FD, 700, "center"); T(ctx, c.name + " · " + c.fy, 640, 360, 30, V.amber, FB, 600, "center");
+      T(ctx, c.accession ? "SEC accession " + c.accession : "SEC CIK " + c.cik, 640, 410, 22, V.muted, FM, 500, "center"); ctx.globalAlpha = 1; }});
+  scenes.forEach(sc => { sc.dur = Math.max(6, sc.say.split(" ").length / 2.6 + 1.5); });
+  return scenes;
+}
+function groupBars(ctx, c, groups, p){
+  const base = 460, maxH = 250;
+  const m = Math.max(...groups.flatMap(g => [Math.abs(g[1]), Math.abs(g[2])]));
+  groups.forEach(([label, cur, prior], i) => { const gx = 110 + i * 380, e = ease(p * 1.3 - i * 0.12);
+    const hp = prior > 0 ? maxH * prior / m * e : 0, hc = cur > 0 ? maxH * cur / m * e : 0;
+    rr(ctx, gx, base - hp, 110, hp, 6, V.blue2); rr(ctx, gx + 130, base - hc, 110, hc, 6, V.blue);
+    T(ctx, money(c, prior), gx + 55, base - hp - 14, 22, prior < 0 ? V.red : V.muted, FM, 600, "center");
+    T(ctx, money(c, cur), gx + 185, base - hc - 14, 24, V.white, FM, 600, "center");
+    T(ctx, c.fyPrior, gx + 55, base + 30, 18, V.muted, FB, 500, "center"); T(ctx, c.fy, gx + 185, base + 30, 18, V.muted, FB, 500, "center");
+    T(ctx, label, gx + 120, base + 66, 22, V.white, FB, 600, "center");
+    const y = yoy(cur, prior); T(ctx, y === null ? ((prior < 0 || cur < 0) ? fromLoss(c, prior, cur) : "n/m") : yoyStr(cur, prior), gx + 120, base + 96, 20, (y === null ? cur >= prior : y >= 0) ? V.green : V.red, FB, 700, "center"); });
+  ctx.fillStyle = V.blue2; ctx.fillRect(80, base, 1120, 2);
+}
+const player = {scenes: [], i: 0, t: 0, playing: false, last: 0, spoken: true, company: null};
+const cv = $("#cv"), ctx = cv.getContext("2d");
+function drawCaption(text){
+  ctx.font = `500 26px ${FB}`; const lines = wrapLines(ctx, text, 1100).slice(0, 2);
+  rr(ctx, 0, 720 - 40 - lines.length * 36, 1280, 40 + lines.length * 36, 0, "rgba(6,12,22,0.82)");
+  lines.forEach((l, k) => T(ctx, l, 640, 720 - 26 - (lines.length - 1 - k) * 36, 26, V.white, FB, 500, "center"));
+}
+function render(){
+  const sc = player.scenes[player.i]; if (!sc) return;
+  sc.draw(ctx, player.t / 1.4, player.t); drawCaption(sc.cap);
+  const total = player.scenes.reduce((a, s) => a + s.dur, 0), done = player.scenes.slice(0, player.i).reduce((a, s) => a + s.dur, 0) + Math.min(player.t, sc.dur);
+  $("#prog").style.width = (done / total * 100).toFixed(1) + "%";
+  if (typeof updSceneBtns === "function") updSceneBtns();
+}
+function setPP(sel, playing, ended){
+  const b = $(sel); if (!b) return; const lab = playing ? "Pause" : ended ? "Play again" : "Play";
+  b.classList.toggle("is-playing", !!playing); b.setAttribute("aria-label", lab); b.title = lab;
+  const box = b.closest(".fs-box"); if (box) box.classList.toggle("playing", !!playing);
+  if (typeof nvFollow === "function") nvFollow(sel === "#playBtn" ? "video" : "slides", !!playing);
+}
+/* Last step before speaking: turns figures into words the device voice reads naturally: "+12.5%" -> "up 12 point 5 percent",
+   "2.0 percentage points" -> "2 percentage points", "193.7 billion" -> "193 point 7 billion". */
+function speakable(t){
+  const num = (i, d) => { i = i.replace(/,/g, ""); d = (d || "").replace(/0+$/, ""); return d ? `${i} point ${d.split("").join(" ")}` : i; };
+  return curSay(t)
+    .replace(/\s*\((?:plus |up |\+)?Infinity[^)]*\)/g, "").replace(/,?\s*(?:plus |up |\+)?Infinity[^.,;]*/g, "").replace(/,\s*undefined\b/g, "").replace(/\bundefined\b/g, "")
+    .replace(/(\d[\d,.]*) dollars([tmbk])\b/gi, (m, n, u) => `${n} ${({t: "trillion", m: "million", b: "billion", k: "thousand"})[u.toLowerCase()]} dollars`)
+    .replace(/\$(\d[\d,.]*)\s?([TBMK])\b/g, (m, n, u) => `${n} ${({T: "trillion", M: "million", B: "billion", K: "thousand"})[u]} dollars`).replace(/\$(\d[\d,.]*)/g, "$1 dollars")
+    .replace(/grew revenue n\/m to/g, "reported revenue of").replace(/\bn\/m\b/g, "not meaningful")
+    .replace(/grew revenue ([\u2212-]|minus )/g, "saw revenue fall ")
+    .replace(/([+−-])?(\d[\d,]*)(?:\.(\d+))?\s?%/g, (m, sg, i, d) => (sg === "+" ? "up " : sg ? "down " : "") + num(i, d) + " percent")
+    .replace(/([+−])(\d[\d,]*)(?:\.(\d+))?/g, (m, sg, i, d) => (sg === "+" ? "plus " : "minus ") + num(i, d))
+    .replace(/(\d[\d,]*)\.(\d+)\s+dollars/g, (m, i, d) => d.replace(/0+$/, "") ? `${i.replace(/,/g, "")} dollars and ${parseInt(d.padEnd(2, "0").slice(0, 2), 10)} cents` : `${i} dollars`)
+    .replace(/(\d[\d,]*)\.(\d+)/g, (m, i, d) => num(i, d))
+    .replace(/\bpp\b/g, "percentage points").replace(/\bYoY\b/g, "year over year").replace(/&/g, " and ");
+}
+function speak(sc){
+  player.spoken = true;
+  if (!("speechSynthesis" in window)) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(speakable(sc.say)); u.rate = 1.02; player.spoken = false;
+    u.onend = u.onerror = () => { player.spoken = true; }; speechSynthesis.speak(u); } catch (e) { player.spoken = true; }
+}
+function tick(now){
+  if (!player.playing) return;
+  const dt = Math.min(0.1, (now - player.last) / 1000); player.last = now; player.t += dt;
+  const sc = player.scenes[player.i];
+  if (player.t >= sc.dur && (player.spoken || player.t > sc.dur + 10)) {
+    if (player.i < player.scenes.length - 1) { player.i++; player.t = 0; speak(player.scenes[player.i]); }
+    else { player.t = sc.dur; render(); stop(true); return; }
+  }
+  render(); requestAnimationFrame(tick);
+}
+function play(){ if (player.playing) return; if (deck.playing) stopDeck(false); if (player.i === player.scenes.length - 1 && player.t >= player.scenes[player.i].dur) { player.i = 0; player.t = 0; }
+  player.playing = true; player.last = performance.now(); setPP("#playBtn", true);
+  if (player.t === 0) speak(player.scenes[player.i]); else { try { speechSynthesis.resume(); } catch (e) {} }
+  requestAnimationFrame(tick); }
+function stop(ended){ player.playing = false; setPP("#playBtn", false, ended);
+  try { ended ? speechSynthesis.cancel() : speechSynthesis.pause(); } catch (e) {} }
+function restart(){ stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.i = 0; player.t = 0; render(); setPP("#playBtn", false); }
+function loadVideo(c){ restart(); player.company = c; player.scenes = buildScenes(c); player.i = 0; player.t = 0; render();
+  const secs = Math.round(player.scenes.reduce((a, s) => a + s.dur, 0)); $("#vstatus").textContent = `About ${secs} seconds, with captions and voice narration. Narration uses your device's voice.`; }
+$("#playBtn").addEventListener("click", () => player.playing ? stop(false) : play());
+/* Back and forward jump between the video's parts; back within the first two seconds of a part goes to the one before. */
+function goScene(d){
+  if (!player.scenes.length) return;
+  const i = d < 0 && player.t > 2 ? player.i : Math.max(0, Math.min(player.scenes.length - 1, player.i + d));
+  player.i = i; player.t = 0; render(); updSceneBtns();
+  if (player.playing) speak(player.scenes[i]); else { try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true; setPP("#playBtn", false); }
+}
+function updSceneBtns(){ $("#prevScene").disabled = player.i === 0 && player.t < .05; $("#nextScene").disabled = player.i >= player.scenes.length - 1; }
+/* While playing, the buttons hide; a tap anywhere on the picture pauses and brings them back. */
+$(".screen").addEventListener("click", e => { if (player.playing && !e.target.closest(".mc-btns, .fs-btn")) stop(false); });
+$("#stage").addEventListener("click", e => { if (deck.playing && !e.target.closest(".mc-btns, .fs-btn")) stopDeck(false); });
+$("#prevScene").addEventListener("click", () => goScene(-1));
+$("#nextScene").addEventListener("click", () => goScene(1));
+
+/* The host's save dialog, used by the infographic's Save image button when the page runs inside Claude */
+let downloads = null;
+(async () => { try { downloads = window.claude ? await window.claude.use("downloads") : null; } catch (e) { downloads = null; } })();
+
+/* ---------------- Slides with voice-over ---------------- */
+/* Amounts in currencies other than the US dollar, as words: "CN¥1.2T" -> "1.2 trillion yuan", "DKK 59.0B" -> "59.0 billion Danish kroner" */
+function curSay(t){
+  const unit = u => u ? " " + ({T: "trillion", B: "billion", M: "million", K: "thousand"})[u] : "";
+  return String(t)
+    .replace(/(^|[^A-Za-z])(CN¥|HK\$|NT\$|C\$|R\$|£|₹|₪|€|₩|S\/|DKK |SEK |NOK |CHF )([\d,.]*\d)([TBMK])?(?![A-Za-z])/g, (m, pre, c, n, u) => `${pre}${n}${unit(u)} ${CURWORD[c]}`)
+    .replace(/(Mex\$|¥)([\d,.]*\d)([TBMK])?(?![A-Za-z])/g, (m, c, n, u) => `${n}${unit(u)} ${CURWORD[c]}`);
+}
+function sayify(s){
+  return String(s).replace(/<[^>]+>/g, "").replace(/\(≈?\$?([\d,.]+)([BM])\)/g, "$$$1$2")
+    .replace(/−/g, "minus ").replace(/≈/g, "about ").replace(/×/g, " times")
+    .replace(/^[\s\S]*$/, curSay)
+    .replace(/(NT\$|US\$|C\$|R\$|\$|₩|€|\bR)(\d[\d,.]*)([TK])\b/g, (m, c, n, u) => `${n} ${u === "T" ? "trillion" : "thousand"} ` +
+      ({"NT$": "New Taiwan dollars", "US$": "US dollars", "C$": "Canadian dollars", "R$": "Brazilian reais", "$": "dollars", "₩": "won", "€": "euros", "R": "rand"})[c])
+    .replace(/NT\$([\d,.]+)B\b/g, "$1 billion New Taiwan dollars").replace(/NT\$([\d,.]+)/g, "$1 New Taiwan dollars").replace(/US\$([\d,.]+)B\b/g, "$1 billion US dollars")
+    .replace(/C\$([\d,.]+)B\b/g, "$1 billion Canadian dollars").replace(/C\$([\d,.]+)M\b/g, "$1 million Canadian dollars").replace(/C\$([\d.]+)/g, "$1 Canadian dollars")
+    .replace(/R\$([\d,.]+)B\b/g, "$1 billion Brazilian reais").replace(/R\$([\d,.]+)M\b/g, "$1 million Brazilian reais").replace(/R\$([\d.]+)/g, "$1 Brazilian reais")
+    .replace(/\bR([\d,.]+)B\b/g, "$1 billion rand").replace(/\bR([\d,.]+)M\b/g, "$1 million rand").replace(/\bR(\d[\d,.]*)/g, "$1 rand")
+    .replace(/₩([\d,.]+)B\b/g, "$1 billion won").replace(/₩([\d,.]+)/g, "$1 won")
+    .replace(/€([\d,.]+)B\b/g, "$1 billion euros").replace(/€([\d,.]+)M\b/g, "$1 million euros").replace(/€([\d.]+)/g, "$1 euros")
+    .replace(/\$([\d,.]+)B\b/g, "$1 billion dollars").replace(/\$([\d,.]+)M\b/g, "$1 million dollars").replace(/\$([\d.]+)/g, "$1 dollars")
+    .replace(/([\d.]+)T\b/g, "$1 trillion").replace(/([\d.]+)B\b/g, "$1 billion").replace(/([\d,.]+)M\b/g, "$1 million").replace(/(\d[\d,]*)K\b/g, "$1 thousand")
+    .replace(/\bpp\b/g, "percentage points").replace(/\bYoY\b/g, "year over year").replace(/\bAWS\b/g, "A W S").replace(/\bGOV\b/g, "G O V")
+    .replace(/\bD&A\b/g, "depreciation and amortization").replace(/\bSBC\b/g, "stock-based compensation").replace(/\bQ([1-4])\b/g, "Q $1");
+}
+function buildSlides(c){
+  const f = v => money(c, v), gp = c.revenue - c.cogs, opexT = c.opex.reduce((a, o) => a + o[1], 0);
+  const sc = buildScenes(c), cashSec = (c.sections.find(s => s.title === "Cash flow & earnings") || {items: []}).items;
+  const hasCash = cashSec.length >= 3, spots = sc.slice(hasCash ? 5 : 4, -1), out = [];
+  const add = (kick, body, say, note) => out.push({kick, body, say, note: note || say});
+  add("", `<div class="sl-center"><p class="sl-tick">${c.ticker}</p><h3 class="sl-h">${esc(c.name)}</h3><p class="sl-sub">${c.form || "Form 10-K"} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div>`, sc[0].say);
+  add("At a glance", `<h3 class="sl-h">${esc(c.fy)} in four numbers</h3><div class="sl-kpis">${c.kpis.map(k => `<div class="sl-kpi"><span class="l">${esc(k.label)}</span><span class="v">${esc(k.value)}</span><span class="s">${stripPrior(k.sub) ? esc(stripPrior(k.sub)) + " · " : ""}<span class="${k.tone || "up"}">${esc(k.delta)}</span></span></div>`).join("")}</div>`,
+    "At a glance. " + c.kpis.map(k => sayify(`${k.label}: ${k.value}, ${k.delta}`)).join(". ") + ".",
+    c.kpis.map(k => `${k.label}: ${k.value} (${k.delta})`).join(" · "));
+  const m = Math.max(...c.sources.map(s => s[1]));
+  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="up">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
+    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track"><i style="width:${(v / m * 100).toFixed(1)}%"></i></div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
+  const parts = [[c.cogsLabel.replace("*", ""), c.cogs, "var(--node-neg)"]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? "var(--flow-neg)" : "color-mix(in srgb, var(--flow-neg) 60%, var(--surface))"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, "var(--node-pos)"]] : []);
+  const denomS = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
+  add("Where each dollar went", `<h3 class="sl-h">${c.opIncome > 0 ? `${pctOf(c, c.opIncome)} of revenue became operating income` : `Costs exceeded revenue: operating margin ${pctOf(c, c.opIncome)}`}</h3><div class="sl-stack">${parts.map(([n, v, col]) => `<i style="display:block;width:${(v / denomS * 100).toFixed(2)}%;background:${col}"></i>`).join("")}</div>
+    <div class="sl-legend">${parts.map(([n, v, col]) => `<div><i style="background:${col}"></i><p><span>${esc(n)}</span><b>${f(v)} · ${pctOf(c, v)}</b></p></div>`).join("")}</div>`, sc[2].say, sc[2].cap);
+  const rows = (items) => `<div class="tablewrap"><table><thead><tr><th></th><th>${c.fyPrior}</th><th>${c.fy}</th><th>Change</th></tr></thead><tbody>${items.map(([l, cur, prior, kind]) => { const y = yoy(cur, prior); return `<tr><td>${esc(l)}</td><td class="${prior < 0 ? "down" : ""}">${money(c, prior, kind)}</td><td>${money(c, cur, kind)}</td><td class="${y === null || y >= 0 ? "up" : "down"}">${y === null ? ((prior < 0 || cur < 0) ? fromLoss(c, prior, cur) : "n/m") : yoyStr(cur, prior)}</td></tr>`; }).join("")}</tbody></table></div>`;
+  add("Profitability", `<h3 class="sl-h">${c.netIncome < 0 ? "Net loss" : "Net income"} ${f(c.netIncome)}</h3>${rows([[c.gpLabel.replace("*", ""), gp, c.gpPrior], ["Operating income", c.opIncome, c.opIncomePrior], [c.netLabel, c.netIncome, c.netIncomePrior]])}`, sc[3].say, sc[3].cap);
+  if (c.segments) {
+    const segs = segItems(c), lines = segs.map(s => { const {mc, d} = segMargins(s), y2 = yoy(s.oi, s.oiPrior);
+      return `${s.name}: revenue ${money(c, s.rev)} (${yoyStr(s.rev, s.revPrior)}), operating income ${money(c, s.oi)} (${y2 === null ? fromLoss(c, s.oiPrior, s.oi) : yoyStr(s.oi, s.oiPrior)}), margin ${mc.toFixed(1)}% (${ppStr(d)}).`; });
+    add("Segment results", `<h3 class="sl-h">Operating income and margin by segment</h3><div class="tablewrap"><table><thead><tr><th>Segment</th><th>Revenue</th><th>YoY</th><th>Op. income</th><th>YoY</th><th>Margin</th><th>Change</th></tr></thead><tbody>${segs.map(s => { const {mc, d} = segMargins(s), y2 = yoy(s.oi, s.oiPrior);
+      return `<tr><td>${esc(s.name)}</td><td>${money(c, s.rev)}</td><td class="up">${yoyStr(s.rev, s.revPrior)}</td><td>${money(c, s.oi)}</td><td class="${y2 === null || y2 >= 0 ? "up" : "down"}">${y2 === null ? fromLoss(c, s.oiPrior, s.oi) : yoyStr(s.oi, s.oiPrior)}</td><td>${segPct(mc)}</td><td class="${d >= 0 ? "up" : "down"}">${ppStr(d)}</td></tr>`; }).join("")}</tbody></table></div><p class="sl-sub" style="font-size:20px">${esc(c.segments.note)}</p>`,
+      "Segment results. " + sayify(lines.join(" ")), lines.join(" "));
+  }
+  if (hasCash) add("Cash flow", `<h3 class="sl-h">Free cash flow ${f(cashSec[2].cur)}</h3>${rows(cashSec.map(i => [i.label, i.cur, i.prior, i.money]))}`, sc[4].say, sc[4].cap);
+  c.video.spotlights.forEach((sl, k) => add(sl.kicker, `<p class="sl-big">${esc(sl.big)}</p><p class="sl-sub" style="color:var(--accent);font-weight:600">${esc(sl.sub)}</p><div class="sl-lines">${sl.lines.map(l => `<p>${esc(l)}</p>`).join("")}</div>`, (spots[k] || sl).say, sl.cap));
+  add("What stood out", `<ul class="sl-list">${c.report.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What stood out. " + c.report.highlights.map(sayify).join(" "), c.report.highlights.join(" "));
+  add("What to watch", `<ul class="sl-list">${c.report.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What to watch. " + c.report.watch.map(sayify).join(" "), c.report.watch.join(" "));
+  add("Source", `<div class="sl-center"><h3 class="sl-h">${esc(c.name)} ${c.form || "Form 10-K"}</h3><p class="sl-sub">${esc(c.period)} · filed ${esc(c.filed)}</p><p class="sl-sub num">CIK ${c.cik}${c.accession ? ` · accession ${c.accession}` : ""}</p></div>`, sc[sc.length - 1].say, sc[sc.length - 1].cap);
+  return out;
+}
+const deck = {slides: [], i: 0, playing: false, token: 0, timer: 0, company: null};
+function fitSlide(){ const w = $("#stage").clientWidth; if (w) $("#slideInner").style.transform = `scale(${w / 1280})`; }
+try { new ResizeObserver(fitSlide).observe($("#stage")); } catch (e) { window.addEventListener("resize", fitSlide); }
+function showSlide(i){
+  deck.i = Math.max(0, Math.min(deck.slides.length - 1, i)); const s = deck.slides[deck.i], c = deck.company;
+  $("#slideInner").innerHTML = `${s.kick ? `<p class="sl-kick">${esc(s.kick)}</p>` : ""}${s.body}<div class="sl-foot"><span>${c.ticker} · ${c.fy} ${(c.form || "Form 10-K").replace("Form ", "")}</span><span>${deck.i + 1} / ${deck.slides.length}</span></div>`;
+  $("#scount").textContent = `${deck.i + 1} / ${deck.slides.length}`; $("#scount").setAttribute("aria-label", `Slide ${deck.i + 1} of ${deck.slides.length}`); $("#snote").textContent = s.note;
+  $("#sprog").style.width = ((deck.i + 1) / deck.slides.length * 100).toFixed(1) + "%";
+  $("#prevSlide").disabled = deck.i === 0; $("#nextSlide").disabled = deck.i === deck.slides.length - 1; fitSlide(); nvSlideChanged();
+}
+function speakSlide(){
+  const tok = ++deck.token, s = deck.slides[deck.i]; clearTimeout(deck.timer);
+  const advance = () => { if (!deck.playing || tok !== deck.token) return; if (deck.i < deck.slides.length - 1) { showSlide(deck.i + 1); speakSlide(); } else stopDeck(true); };
+  if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(speakable(s.say)); u.rate = 1.02; u.onend = () => setTimeout(advance, 600); u.onerror = ev => { if (ev.error !== "interrupted" && ev.error !== "canceled") setTimeout(advance, 600); }; speechSynthesis.speak(u); return; } catch (e) {} }
+  $("#sstatus").textContent = "Voice isn't available on this device, so slides advance on a timer."; deck.timer = setTimeout(advance, Math.max(5, s.say.split(" ").length / 2.6) * 1000);
+}
+function startDeck(){ if (player.playing) stop(false); deck.playing = true; setPP("#voSlide", true); speakSlide(); }
+function stopDeck(ended){ deck.playing = false; deck.token++; clearTimeout(deck.timer); try { speechSynthesis.cancel(); } catch (e) {} setPP("#voSlide", false, ended); if (ended) deck.restart = true; }
+function loadSlides(c){ if (deck.playing) stopDeck(false); deck.company = c; deck.slides = buildSlides(c); deck.restart = false; showSlide(0); setPP("#voSlide", false); }
+$("#voSlide").addEventListener("click", () => { if (deck.playing) { stopDeck(false); return; } if (deck.restart) { deck.restart = false; showSlide(0); } startDeck(); });
+const goSlide = d => { showSlide(deck.i + d); if (deck.playing) speakSlide(); };
+$("#prevSlide").addEventListener("click", () => goSlide(-1));
+$("#nextSlide").addEventListener("click", () => goSlide(1));
+$("#stage").addEventListener("keydown", e => { if (e.target.closest("button")) return; if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } if (e.key === " ") { e.preventDefault(); $("#voSlide").click(); } });
+
+/* ---------------- Shelf, routing ---------------- */
+const VIEWS = ["infographic", "slides", "video", "report", "feedback"];
+let state = {ticker: "AMZN", view: "infographic", media: "slides", period: ""};   // period: "" = annual report, else e.g. "q2-2026" 
+function renderSpines(){
+  const sel = $("#pick");
+  if (!sel.options.length) {
+    sel.innerHTML = `<option value="" disabled>Choose a company…</option>` + Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
+      .map(c => `<option value="${c.ticker}">${c.ticker} \u2014 ${esc(c.name)} (${c.fy})</option>`).join("");
+  }
+  sel.value = state.page ? "" : state.ticker;
+}
+function setView(v){
+  state.view = v;
+  const media = v === "slides" || v === "video";
+  if (media) state.media = v;
+  VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
+  ["infographic", "media", "report", "feedback"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  $("#mediaBar").hidden = !media;
+  ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
+  if (v !== "video" && player.playing) stop(false);
+  if (v !== "slides" && deck.playing) stopDeck(false);
+  if (v === "slides") fitSlide();
+  if (media && typeof nvPrepare === "function") nvPrepare(v);
+  if (fsActive() && !$("#view-" + v).contains(fsActive())) exitFs();
+}
+/* Full screen for slides and video. Uses the browser's real full screen where it exists; on iPhone,
+   which only allows that for <video>, the box is pinned over the whole page instead. Either way the
+   player keeps its 16:9 shape and grows to fill the screen, so turning a phone sideways enlarges it. */
+/* ---------------- iPhone / iPad full screen through the device's own video player ----------------
+   iOS only lets real <video> elements go full screen, and that full screen survives turning the phone.
+   So on iOS the slide or animation is streamed into a hidden <video>, which is what goes full screen.
+   The page's narration keeps playing; the player's own play/pause buttons control the slides or video. */
+var NV = null;
+function nvInit(){
+  const IOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!(IOS || window.__forceNativeFs)) return;
+  if (!("webkitEnterFullscreen" in HTMLVideoElement.prototype) || typeof HTMLCanvasElement.prototype.captureStream !== "function") return;
+  const el = document.createElement("video");
+  el.muted = true; el.playsInline = true; el.setAttribute("playsinline", ""); el.setAttribute("muted", ""); el.setAttribute("aria-hidden", "true");
+  el.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1";
+  document.body.appendChild(el);
+  const slideCv = document.createElement("canvas"); slideCv.width = 1280; slideCv.height = 720;
+  NV = {el, slideCv, kind: null, streams: {}, active: false, quietUntil: 0, slideBmp: null, slideJob: 0};
+  const isFs = () => el.webkitDisplayingFullscreen || document.fullscreenElement === el || document.webkitFullscreenElement === el;
+  const begin = () => { NV.active = true; NV.quietUntil = Date.now() + 600; };
+  const end = () => { NV.active = false; NV.quietUntil = Date.now() + 600; setTimeout(() => { el.play().catch(() => {}); }, 300); };
+  el.addEventListener("webkitbeginfullscreen", begin); el.addEventListener("webkitendfullscreen", end);
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (isFs()) begin(); else if (NV.active) end(); }));
+  // the player's own play/pause buttons drive the slides or video
+  el.addEventListener("pause", () => { if (!NV.active || Date.now() < NV.quietUntil || !isFs()) return;
+    if (NV.kind === "video" && player.playing) stop(false); if (NV.kind === "slides" && deck.playing) stopDeck(false); });
+  el.addEventListener("play", () => { if (!NV.active || Date.now() < NV.quietUntil) return;
+    if (NV.kind === "video" && !player.playing) play(); if (NV.kind === "slides" && !deck.playing) startDeck(); });
+}
+function nvStream(kind){
+  if (!NV.streams[kind]) NV.streams[kind] = (kind === "video" ? cv : NV.slideCv).captureStream(30);
+  return NV.streams[kind];
+}
+function nvPaintSlide(){ if (!NV || !NV.slideBmp) return; const g = NV.slideCv.getContext("2d"); g.drawImage(NV.slideBmp, 0, 0, 1280, 720); }
+async function nvRenderSlide(){
+  if (!NV) return; const job = ++NV.slideJob;
+  try {
+    await loadImgLib();
+    const src = $("#slideInner"), host = document.createElement("div");
+    host.style.cssText = "position:fixed;left:-20000px;top:0;width:1280px;height:720px;pointer-events:none";
+    const n = src.cloneNode(true); n.removeAttribute("id"); n.style.transform = "none"; n.style.position = "relative";
+    const bg = getComputedStyle($("#stage")).backgroundColor || "#fff";
+    n.style.background = bg; host.appendChild(n); document.body.appendChild(host);
+    try {
+      const fontEmbedCSS = await getFontEmbedCSS();
+      const c = await window.htmlToImage.toCanvas(n, {width: 1280, height: 720, pixelRatio: 1, backgroundColor: bg, cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})});
+      if (job !== NV.slideJob) return; NV.slideBmp = c; nvPaintSlide(); [80, 250].forEach(t => setTimeout(nvPaintSlide, t));
+    } finally { host.remove(); }
+  } catch (e) {}
+}
+// Called whenever the Media view, slide or company changes: keeps the hidden player showing the right picture.
+function nvPrepare(kind){
+  if (!NV || !kind) return;
+  if (NV.kind !== kind) { NV.kind = kind; NV.el.srcObject = nvStream(kind); }
+  NV.el.play().catch(() => {});
+  if (kind === "slides") nvRenderSlide(); else { render(); setTimeout(render, 120); }
+}
+function nvSlideChanged(){ if (NV && NV.kind === "slides" && state.view === "slides") nvRenderSlide(); }
+function nvEnter(kind){
+  if (!NV) return false;
+  if (NV.kind !== kind) nvPrepare(kind);
+  const el = NV.el; if (el.readyState < 1) return false;
+  try {
+    NV.quietUntil = Date.now() + 800; el.play().catch(() => {}); el.webkitEnterFullscreen();
+    // match the device player's play/pause button to the page: if the slides or video are paused, so is the player
+    const playing = kind === "video" ? player.playing : deck.playing;
+    if (!playing) setTimeout(() => { NV.quietUntil = Date.now() + 400; el.pause(); }, 120);
+    return true;
+  } catch (e) { return false; }
+}
+function nvFollow(kind, playing){
+  if (!NV || !NV.active || NV.kind !== kind) return;
+  NV.quietUntil = Date.now() + 500; if (playing) NV.el.play().catch(() => {}); else NV.el.pause();
+}
+let fakeFs = null, wantFs = null, ourExit = false, lastFlip = 0;
+let wasLand = innerWidth > innerHeight;
+const realFsEl = () => { const e = document.fullscreenElement || document.webkitFullscreenElement || null; return NV && e === NV.el ? null : e; };
+const fsActive = () => realFsEl() || fakeFs;
+function syncFs(){
+  const on = fsActive();
+  document.querySelectorAll(".fs-box").forEach(b => {
+    const is = b === on; b.classList.toggle("is-fs", is);
+    const btn = b.querySelector(".fs-btn"); const lab = is ? "Exit full screen" : "Full screen";
+    btn.setAttribute("aria-label", lab); btn.title = lab; btn.querySelector(".fs-lab").textContent = lab;
+  });
+  document.documentElement.classList.toggle("fs-lock", !!fakeFs);
+  if (typeof measureFs === "function") measureFs(); else fitSlide();
+}
+function enterFs(box){
+  wantFs = box; ourExit = false;
+  const req = box.requestFullscreen || box.webkitRequestFullscreen;
+  const fake = () => { fakeFs = box; syncFs(); };
+  if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+    try { const r = req.call(box); if (r && r.catch) r.catch(fake); } catch (e) { fake(); }
+  } else fake();
+  if (box.id === "fsSlides") setTimeout(() => $("#stage").focus({preventScroll: true}), 50);
+}
+function exitFs(){
+  wantFs = null; ourExit = true;
+  if (fakeFs) { fakeFs = null; syncFs(); return; }
+  const ex = document.exitFullscreen || document.webkitExitFullscreen;
+  if (realFsEl() && ex) { try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+}
+/* Leaving real full screen any other way (Esc, a system gesture) simply returns to the page. */
+function onFsChange(){
+  if (!realFsEl() && !fakeFs) wantFs = null;
+  if (realFsEl()) ourExit = false;
+  syncFs();
+}
+/* Full screen stays on when the phone is turned; only the exit button (or Esc) leaves it. */
+function noteFlip(){ const land = innerWidth > innerHeight; if (land !== wasLand) { wasLand = land; lastFlip = Date.now(); } }
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, onFsChange));
+/* Phones can refuse full screen while the device voice is speaking, so playback pauses for the switch
+   and picks up again once the screen has changed: the video from where it was, slides from the current slide. */
+function pauseForFs(){
+  if (player.playing) { stop(false); try { speechSynthesis.cancel(); } catch (e) {} player.spoken = true;
+    return () => { if (!player.playing) { play(); speak(player.scenes[player.i]); } }; }
+  if (deck.playing) { stopDeck(false); return () => { if (!deck.playing) startDeck(); }; }
+  return null;
+}
+[["fsSlidesBtn", "fsSlides"], ["fsVideoBtn", "fsVideo"]].forEach(([b, x]) =>
+  $("#" + b).addEventListener("click", () => {
+    if (!fsActive() && nvEnter(x === "fsVideo" ? "video" : "slides")) return;   // iPhone/iPad: the device's own player
+    const resume = pauseForFs();
+    fsActive() === $("#" + x) ? exitFs() : enterFs($("#" + x));
+    if (resume) setTimeout(resume, 700);
+  }));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && fakeFs) exitFs(); });
+/* iPhone Safari can keep the old screen size for a pinned full-screen box after the phone is rotated,
+   so the box is sized from the measured window instead, re-measured on every resize or rotation. */
+function measureFs(){
+  noteFlip();
+  const vv = window.visualViewport, w = Math.round(vv ? vv.width : innerWidth), h = Math.round(vv ? vv.height : innerHeight);
+  const r = document.documentElement.style; r.setProperty("--fs-w", w + "px"); r.setProperty("--fs-h", h + "px");
+  const box = fsActive();
+  if (box && fakeFs) { window.scrollTo(0, 0); box.classList.remove("is-fs"); void box.offsetWidth; box.classList.add("is-fs"); }
+  fitSlide();
+}
+const remeasure = () => { measureFs(); [120, 350, 700].forEach(t => setTimeout(measureFs, t)); };
+window.addEventListener("resize", measureFs);
+window.addEventListener("orientationchange", remeasure);
+try { screen.orientation.addEventListener("change", remeasure); } catch (e) {}
+try { visualViewport.addEventListener("resize", measureFs); } catch (e) {}
+measureFs();
+try { nvInit(); } catch (e) { NV = null; }
+let openSeq = 0;
+/* The tab of the most recently filed report: a quarter filed after the 10-K, else the 10-K ("").
+   The Q4 tab shares the 10-K's filing date, so the 10-K wins that tie. */
+function latestPeriod(c){
+  const f = c.filedDates || {}, k = f["10-K"] || ""; let best = "", bd = k;
+  (c.quarters || []).forEach(q => { const d = f[q] || ""; if (d > bd || (d === bd && d > k && best)) { best = pid(q); bd = d; } });
+  return best;
+}
+async function openCompany(t, view, period){
+  if (!LIBRARY[t]) return;
+  document.body.classList.remove("home");
+  const seq = ++openSeq;
+  if (!FULL.has(t)) {
+    $("#fname").textContent = `Loading ${t}…`;
+    try { await loadCompany(t); } catch (e) { if (seq === openSeq) { $("#fname").textContent = `Couldn't load ${t}. Try again.`; } return; }
+    if (seq !== openSeq) return;
+  }
+  const c = LIBRARY[t];
+  const qs = c.quarters || [];
+  if (period === undefined) period = view && !["infographic", "feedback"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
+  if (!qs.some(q => pid(q) === period)) period = "";
+  let shown = c;
+  if (period) {
+    try { const list = await loadQuarters(t); shown = list.find(q => pid(q.fy) === period); } catch (e) { shown = null; }
+    if (seq !== openSeq) return;
+    if (!shown) { shown = c; period = ""; }
+    else shown = Object.assign({quarter: true}, shown);
+  }
+  const fresh = state.ticker !== t || !$("#view-report").innerHTML;
+  state.ticker = t; state.period = period; state.shown = shown; hideNew();
+  try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
+  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span><button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  wlChanged();   // sets the star next to the name
+  $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(shown.period)}</span><span>Filed ${esc(shown.filed)}</span><span class="mono">CIK ${c.cik}</span>`;
+  renderPeriods(c);
+  $("#view-infographic").classList.toggle("is-qtr", !!period);
+  renderInfographic(shown);
+  /* The written report, slides and video exist for the annual report only */
+  if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });
+  renderSpines();
+  let v = view || state.view;
+  if (period && !["infographic", "feedback"].includes(v)) v = "infographic";
+  setView(v);
+}
+function renderPeriods(c){
+  const el = $("#periods"), qs = c.quarters || [];
+  if (!qs.length) { el.hidden = true; el.innerHTML = ""; return; }
+  const forms = QUARTERS[c.ticker] ? Object.fromEntries(QUARTERS[c.ticker].map(q => [q.fy, q.form])) : {};
+  /* Ordered by filing date, oldest first; a fourth quarter (from the 10-K) goes just before the 10-K filed the same day */
+  const fd = c.filedDates || {};
+  const short = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric"}); };
+  const btn = (id, top, sub, date) => `<button type="button" class="period${id === "" ? " annual" : ""}" role="tab" data-period="${id}" aria-selected="${id === state.period}" title="${esc(top + " · " + sub + (date ? " · filed " + short(date) : ""))}"><b>${esc(top)}</b><small>${sub === "Earnings release" ? `Earnings<span class="p-long"> release</span>` : esc(sub)}${date ? `<span class="p-long p-date"> · ${esc(mdy(date))}</span>` : ""}</small></button>`;
+  const entries = [{id: "", top: c.fy, sub: (c.form || "Form 10-K").replace(/^Form /, ""), date: fd["10-K"], k: 1}]
+    .concat(qs.map(q => ({id: pid(q), top: yr(q), sub: forms[q] ? formShort(forms[q]) : "Quarter", date: fd[q], k: 0})));
+  if (entries.every(x => x.date)) entries.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.k - b.k);
+  el.innerHTML = entries.map(x => btn(x.id, x.top, x.sub, x.date)).join("");
+  el.hidden = false;
+  el.querySelectorAll(".period").forEach(b => b.addEventListener("click", async () => {
+    if (b.dataset.period === state.period) return;
+    await openCompany(state.ticker, state.view, b.dataset.period); writeHash();
+  }));
+  /* Fill in each quarter's form (10-Q or earnings release) once the quarters file is in */
+  if (!QUARTERS[c.ticker]) loadQuarters(c.ticker).then(() => { if (state.ticker === c.ticker) renderPeriods(c); }).catch(() => {});
+}
+/* ---------------- New reports page (data/latest.json: each company's latest 10-K, 10-Q or earnings release) ---------------- */
+const NEW_DAYS = 7;
+let LATEST = null, UPCOMING = null;
+function loadUpcoming(){ if (!UPCOMING) UPCOMING = fetch("data/upcoming.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return UPCOMING; }
+/* Business days: Monday–Friday except NYSE holidays */
+const HOLIDAYS = new Set(["2026-01-01","2026-01-19","2026-02-16","2026-04-03","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-11-26","2026-12-25",
+  "2027-01-01","2027-01-18","2027-02-15","2027-03-26","2027-05-31","2027-06-18","2027-07-05","2027-09-06","2027-11-25","2027-12-24"]);
+const isoOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const todayISO = () => isoOf(new Date());
+const isBiz = iso => { const [y, m, d] = iso.split("-").map(Number); const w = new Date(y, m - 1, d).getDay(); return w > 0 && w < 6 && !HOLIDAYS.has(iso); };
+function stepBiz(iso, dir){ const [y, m, d] = iso.split("-").map(Number); const t = new Date(y, m - 1, d); do { t.setDate(t.getDate() + dir); } while (!isBiz(isoOf(t))); return isoOf(t); }
+/* New shows one day: today if anything was filed today, otherwise the last business day (or the latest day in the feed) */
+function newDay(items){
+  const t = todayISO();
+  if (items.some(x => x.date === t)) return {day: t, label: "Today"};
+  const lb = stepBiz(t, -1);
+  if (items.some(x => x.date === lb)) return {day: lb, label: "Last business day"};
+  const past = items.map(x => x.date).filter(d => d <= t).sort();
+  return past.length ? {day: past[past.length - 1], label: "Latest filings"} : null;
+}
+function loadLatest(){ if (!LATEST) LATEST = fetch("data/latest.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return LATEST; }
+const dayDiff = iso => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(); return Math.round((Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) - Date.UTC(y, m - 1, d)) / 864e5); };
+const dayName = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", {weekday: "short", month: "short", day: "numeric", year: "numeric"}); };
+const mdy = iso => { const [y, m, d] = iso.split("-"); return `${m}/${d}/${y.slice(2)}`; };   // 2026-05-08 -> 05/08/26
+const ago = n => n <= 0 ? "Today" : n === 1 ? "Yesterday" : `${n} days ago`;
+function nrButton(x, wl, opt = {}){
+  const fav = wl && wl.has(x.ticker);
+  const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
+  const er = x.form === "Earnings release", tag = er ? "ER" : x.form;
+  const when = {BMO: "before open", AMC: "after close"}[x.time] || "";
+  const tip = `${x.name}: ${x.label} ${er ? "earnings release" : x.form}${x.expected ? " expected" : ""}, ${dayName(x.date)}${when ? ", " + when : ""}${x.test ? " (test entry)" : ""}`;
+  const star = `<button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${fav ? "Remove " + esc(x.ticker) + " from" : "Add " + esc(x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button>`;
+  return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span>${opt.noType ? "" : `<span class="tag${er ? " er" : ""}">${esc(tag)}</span>`}${x.time && !opt.noTime ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
+}
+/* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
+/* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
+const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
+/* Then calendar-year labels ("Q3 2026") before fiscal-year ones ("Q1 FY2027"), each by year and quarter, then A–Z */
+const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); return m ? [m[2] ? 1 : 0, +m[3], m[1] ? +m[1] : 5] : [2, 0, 0]; };
+const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
+const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
+const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
+function dayList(items, wl, head, emptyText){
+  const sorted = items.slice().sort(byForm);
+  const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
+  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
+  let html = `<div class="nr-day"><h3>${head}</h3>`;
+  if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  for (const [f, title] of FORMS) {
+    const list = rest.filter(x => x.form === f);
+    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
+  }
+  const other = rest.filter(x => !FORMS.some(([f]) => f === x.form));
+  if (other.length) html += `<h4 class="nr-sec">Other filings</h4>${grid(other)}`;
+  return {html: html + `</div>`, bind: () => {}};
+}
+/* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
+const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading starts at 9:30 am ET, usually 6–9 am ET. The stock reacts at that morning's open."],
+               ["AMC", "After market close (AMC)", "Results out after trading ends at 4:00 pm ET, usually 4–5 pm ET. The stock reacts in after-hours trading and at the next morning's open."],
+               ["", "Time not announced", "The company hasn't said whether it reports before the open or after the close."]];
+function timeList(items, wl, head, emptyText){
+  const sorted = items.slice().sort(byForm);
+  const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
+  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
+  let html = `<div class="nr-day"><h3>${head}</h3>`;
+  if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine, {noType: true})}`;
+  for (const [k, title, desc] of TIMES) {
+    const list = rest.filter(x => (x.time || "") === k);
+    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
+  }
+  return {html: html + `</div>`, bind: () => {}};
+}
+/* Top 10 among the day's reports: horizontal bars, one metric at a time (pick from the dropdown) */
+const TOP = [
+  ["rev", "Revenue", "money", x => x.rev],
+  ["revYoY", "Revenue growth YoY", "growth", x => [x.rev, x.revPrior], "revenue"],
+  ["revQoQ", "Revenue growth QoQ", "growth", x => [x.rev, x.revPrevQ], "revenue"],
+  ["net", "Profit (net income)", "money", x => x.net],
+  ["netYoY", "Profit growth YoY", "growth", x => [x.net, x.netPrior], "net income"],
+  ["netQoQ", "Profit growth QoQ", "growth", x => [x.net, x.netPrevQ], "net income"],
+  ["eps", "EPS (diluted)", "eps", x => x.eps],
+  ["epsYoY", "EPS growth YoY", "growth", x => [x.eps, x.epsPrior], "EPS"],
+  ["epsQoQ", "EPS growth QoQ", "growth", x => [x.eps, x.epsPrevQ], "EPS"]];
+const topKeys = {};   // ranking per chart (New page "", Watchlist "W"); default: profit growth YoY
+const topKeyOf = sfx => topKeys[sfx] || "netYoY";
+/* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
+const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
+const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
+function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
+  const topKey = topKeyOf(sfx);
+  const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
+  const rows = [];
+  for (const x of items) {
+    const m = x.m; if (!m) continue;
+    if (kind === "growth") { const [c, b] = get(m); if (c == null || b == null || !(c > 0) || !(b > 0)) continue; rows.push({x, v: c / b, cur: c, base: b}); }
+    else { const v = get(m); if (v == null) continue; rows.push({x, v}); }
+  }
+  rows.sort((a, b) => b.v - a.v || a.x.ticker.localeCompare(b.x.ticker));
+  const top = rows.slice(0, 10);
+  const len = r => kind === "growth" ? Math.max(r.v - 1, 0) : Math.abs(r.v);             // growth bars measure the increase
+  const max = Math.max(...top.map(len), 1e-9);
+  const val = r => kind === "growth" ? fmtGrowth(r.v) : kind === "eps" ? `${r.v < 0 ? "−" : ""}$${Math.abs(r.v).toFixed(2)}` : fmtM(r.v);
+  const amt = v => what === "EPS" ? `$${v.toFixed(2)}` : fmtM(v);
+  const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
+  const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
+  const note = kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`;
+  return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">${heading}</h4>
+    <label class="sr-only" for="topPick${sfx}">Rank by</label><select id="topPick${sfx}" class="top-pick">${opts}</select></div>
+    ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
+      const fav = wl.has(r.x.ticker);
+      return `<li title="${esc(tip(r))}"><span class="t10-rank">${i + 1}</span><span class="t10-name"><a class="t10-tk" href="${href}" aria-label="${esc(tip(r))}">${esc(r.x.ticker)}</a><button type="button" class="nr-star" data-t="${esc(r.x.ticker)}" aria-pressed="${fav}" aria-label="${fav ? "Remove " + esc(r.x.ticker) + " from" : "Add " + esc(r.x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button></span>
+        <a class="t10-link" href="${href}" tabindex="-1" aria-hidden="true"><span class="t10-track"><span class="t10-bar${r.v < 0 ? " neg" : ""}" style="width:${(len(r) / max * 100).toFixed(1)}%"></span></span><span class="t10-v">${esc(val(r))}</span></a></li>`; }).join("")}</ol>`
+      : `<p class="sub">No company here has the figures for this ranking.</p>`}
+    <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
+}
+const WL_HEAD = "Top 10 <small class=\"t10-q\">Quarterly figures</small>";
+function bindTop(el, items, wl, sfx = "", note2, heading){
+  const pick = el.querySelector(".top-pick");
+  if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
+}
+/* Watchlist chart: each watched company's latest quarter, read from its quarter file */
+const QFIG = {};
+function figuresOf(q){
+  const bars = q.sections.filter(s => s.type === "bars").flatMap(s => s.items);
+  const eps = bars.find(i => i.money === "eps"), net = bars.find(i => i.label === "Net income" || i.label === "Net loss");
+  return {rev: q.revenue, revPrior: q.revenuePrior, revPrevQ: (q.prevQ || {}).revenue, net: q.netIncome, netPrior: q.netIncomePrior, netPrevQ: net ? net.prevQ : null,
+          eps: eps ? eps.cur : null, epsPrior: eps ? eps.prior : null, epsPrevQ: eps ? eps.prevQ : null, of: q.fy};
+}
+async function watchFigures(list){
+  const out = [];
+  await Promise.all(list.map(async t => {
+    if (!(t in QFIG)) {
+      QFIG[t] = null;
+      try { const r = await fetch(`data/quarters/${encodeURIComponent(t)}.json`); if (r.ok) {     // companies without quarter tabs have no file
+        const qs = (await r.json()).quarters, q = qs.slice().sort((a, b) => (a.filedDate || "").localeCompare(b.filedDate || "") || (a.end || "").localeCompare(b.end || "")).pop();
+        QFIG[t] = {ticker: t, name: q.name, period: q.fy.toLowerCase().replace(/\s+/g, "-"), m: figuresOf(q)}; } } catch (e) {}
+    }
+    if (QFIG[t]) out.push(QFIG[t]);
+  }));
+  return out;
+}
+/* New: one day at a time — today (or the latest filing day) by default, or any of the 8 business days before it */
+let RECENT = null, newSel = "", newOpen = false;
+function loadRecent(){ if (!RECENT) RECENT = fetch("data/recent.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : null).catch(() => null)
+  .then(r => r || loadLatest()); return RECENT; }
+async function showNew(day){
+  const [d, l] = await Promise.all([loadRecent(), loadLatest()]), wl = new Set(wlGet()), t = todayISO();
+  const all = d.items.concat(l.items.filter(x => !d.items.some(y => y.ticker === x.ticker && y.date === x.date)));   // newest entries win
+  const nd = newDay(all), days = [];
+  if (isBiz(t)) days.push(t);                                   // today, then the 8 business days before it with filings (skips SEC holidays such as Veterans Day)
+  for (let x = stepBiz(t, -1), k = 0; days.length < (isBiz(t) ? 9 : 8) && k < 20; x = stepBiz(x, -1), k++) if (all.some(y => y.date === x)) days.push(x);
+  if (nd && !days.includes(nd.day)) days.push(nd.day);
+  if (day) newSel = day; if (!days.includes(newSel)) newSel = nd ? nd.day : days[0];
+  const items = all.filter(x => x.date === newSel), isToday = newSel === t;
+  const opts = days.map(x => `<option value="${x}"${x === newSel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}</option>`).join("");
+  const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
+  const v = dayList(items, wl, head, "No reports filed this day");
+  const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
+  const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
+  const [top, list] = v.html.split("</h3>");
+  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
+    `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
+    `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
+  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
+  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
+  const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
+  showPage("new", "New reports");
+}
+/* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
+   then the next business day */
+async function upcomingDays(){
+  const [d, f] = await Promise.all([loadUpcoming(), loadLatest()]), t = todayISO();
+  /* already reported: filed today, or the feed already has this quarter (e.g. released earlier than the calendar says) */
+  const lastBy = Object.fromEntries(f.items.map(x => [x.ticker, x]));
+  const reported = x => { const l = lastBy[x.ticker]; return !!l && (l.date === t || l.label === x.label); };
+  const sched = day => d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker] && !reported(x));
+  const today = isBiz(t) ? sched(t) : [];
+  const next = stepBiz(t, 1);
+  return {d, t, today, next, nextItems: sched(next)};
+}
+async function showUpcoming(){
+  const {d, t, today, next, nextItems} = await upcomingDays(), wl = new Set(wlGet());
+  let html = "";
+  if (isBiz(t)) html += timeList(today, wl, `Reporting today <small>· ${esc(dayName(t))} · not filed yet</small>`, "Everyone scheduled for today has filed — see New").html;
+  html += timeList(nextItems, wl, dayDiff(next) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(next))}</small>` : `Reporting ${esc(dayName(next))}`, "No reports expected").html;
+  $("#upBody").innerHTML = html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
+  showPage("upcoming", "Upcoming reports");
+}
+/* One of the list pages (new reports, watchlist) instead of a company */
+function showPage(name, title){
+  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  document.body.classList.remove("home");
+  $("#filing").hidden = true; $("#missing").hidden = true;
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming";
+  ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
+  document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
+  state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
+}
+/* Home: just the search box and the company selector */
+function goHome(){
+  if (player.playing) stop(false); if (deck.playing) stopDeck(false);
+  ++openSeq; hideNew(); $("#filing").hidden = true; $("#missing").hidden = true;
+  renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
+  try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+}
+function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+
+/* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
+const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
+function wlGet(){
+  const m = document.cookie.match(/(?:^|;\s*)wl=([^;]*)/);
+  if (!m) return [];
+  try { return [...new Set(decodeURIComponent(m[1]).split(",").map(t => t.trim().toUpperCase()).filter(t => /^[A-Z0-9.\-]{1,10}$/.test(t)))]; } catch (e) { return []; }
+}
+function wlSet(list){
+  document.cookie = `wl=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+  wlChanged();
+}
+const wlHas = t => wlGet().includes(t);
+function wlToggle(t){ const l = wlGet(); wlSet(l.includes(t) ? l.filter(x => x !== t) : l.concat(t)); }
+function wlChanged(){
+  const n = wlGet().length, b = $("#wlCount"); b.textContent = n; b.hidden = !n;
+  const w = $("#starBtn"), on = wlHas(state.ticker);
+  if (w) { w.setAttribute("aria-pressed", on); w.textContent = on ? "★" : "☆"; w.title = on ? `Remove ${state.ticker} from your watchlist` : `Add ${state.ticker} to your watchlist`; w.setAttribute("aria-label", w.title); }
+  if (state.page === "watchlist") showWatchlist();
+  if (state.page === "new") showNew();
+  if (state.page === "upcoming") showUpcoming();
+}
+/* Watchlist: one row per company with its next report and earnings release date, soonest first */
+let wlSort = {key: "date", dir: 1}, wlSeq = 0;
+const daysUntil = iso => -dayDiff(iso);
+const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
+async function showWatchlist(){
+  const list = wlGet(), up = await loadUpcoming(), next = {};
+  for (const x of up.items) if (!next[x.ticker] || x.date < next[x.ticker].date) next[x.ticker] = x;
+  const rows = list.map(t => ({t, c: LIBRARY[t] || {short: t, name: t}, x: next[t]}));
+  const val = r => wlSort.key === "ticker" ? r.t : wlSort.key === "report" ? (r.x ? r.x.report : "~") : (r.x ? r.x.date : "9999");   // "date" and "in" sort alike
+  rows.sort((a, b) => { const va = val(a), vb = val(b); if ((va === "9999" || va === "~") !== (vb === "9999" || vb === "~")) return va === "9999" || va === "~" ? 1 : -1;
+    return (va < vb ? -1 : va > vb ? 1 : a.t.localeCompare(b.t)) * wlSort.dir; });
+  const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
+  const when = {BMO: "before open", AMC: "after close"};
+  $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
+    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", `<span class="s-long">Next report</span><span class="s-short">Report</span>`)}${th("date", `<span class="s-long">Earnings release</span><span class="s-short">Release</span>`)}${th("in", "In", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
+      rows.map(({t, c, x}) => { const href = "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
+        const n = x ? daysUntil(x.date) : null;
+        return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
+          <td>${x ? esc(x.report) : `<span class="muted">—</span>`}</td>
+          <td>${x ? `${x.estimated ? `<span class="est" title="Estimated: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated ? ` <span class="tag est-tag">est.</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
+          <td class="num">${n === null ? "" : `<b class="${n <= 1 ? "soon" : ""}"><span class="s-long">${inDays(n)}</span><span class="s-short">${n === 0 ? "Today" : n === 1 ? "Tmrw" : n > 0 ? n + "d" : inDays(n)}</span></b>`}</td>
+          <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
+    }</tbody></table></div>
+    <p class="sub">Dates from Nasdaq's earnings calendar; “~ … est.” is an estimate (last year's date for the same quarter + 52 weeks) until the company announces it. BMO = before the market opens, AMC = after it closes.${up.tickers ? ` Trial: dates for ${up.tickers.length} companies only.` : ""}${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+  if (list.length) {
+    const seq = ++wlSeq, figs = await watchFigures(list), miss = list.length - figs.length;
+    const note2 = (miss ? `${miss} watched ${miss === 1 ? "company has" : "companies have"} no quarterly figures yet. ` : "") + "Figures are for each company's latest quarter";
+    if (seq === wlSeq) { $("#wlBody").insertAdjacentHTML("afterbegin", topChart(figs, new Set(list), "W", note2, WL_HEAD)); bindTop($("#wlBody"), figs, new Set(list), "W", note2, WL_HEAD); }
+  }
+  $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
+  $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
+  const clr = $("#wlClear"); if (clr) clr.addEventListener("click", () => { if (confirm("Remove all companies from your watchlist?")) wlSet([]); });
+  showPage("watchlist", "Watchlist");
+}
+$("#wlForm").addEventListener("submit", e => { e.preventDefault();
+  const q = $("#wlInput").value.trim(), st = $("#wlStatus"); if (!q) return;
+  const hits = searchLibrary(q);
+  if (hits.length !== 1) { st.textContent = hits.length ? `More than one company matches “${q}”. Type the ticker.` : `“${q}” is not in the library.`; return; }
+  const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
+  if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
+$("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
+document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
+const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
+loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
+/* badge: today's not-yet-filed releases, or the next business day's when today's are done */
+const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length || u.nextItems.length, "upcoming"));
+
+/* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
+const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
+$("#fbForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("#fbMsg").value.trim(), st = $("#fbStatus"), btn = $("#fbSend");
+  const name = $("#fbName").value.trim(), email = $("#fbEmail").value.trim();
+  if (!msg) { st.textContent = "Please write a message first."; $("#fbMsg").focus(); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = "That email doesn't look right. Check it, or leave it blank."; $("#fbEmail").focus(); return; }
+  if ($("#fbHoney").value) { showFbThanks(); return; }   // a bot filled the hidden field
+  btn.disabled = true; st.textContent = "Sending…";
+  try {
+    const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
+      method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
+      body: JSON.stringify({name: name || "(not given)", email: email || "(not given)", ...(email ? {_replyto: email} : {}), message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
+        _subject: "10-K Analyzer feedback", _template: "table", _captcha: "false"})
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    showFbThanks();
+  } catch (err) {
+    st.textContent = "Your feedback couldn't be sent from here. Please try again in a moment" +
+      (location.hostname.endsWith("github.io") ? "." : ", or use the site at alexandermou.github.io/10k-analyzer.");
+  } finally { btn.disabled = false; }
+});
+function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbName").value = ""; $("#fbEmail").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
+$("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $("#fbForm").hidden = false; $("#fbMsg").focus(); });
+/* #crwv, #crwv-report, #crwv-q2-2026, #crwv-q2-2026-feedback */
+function writeHash(){ const c = LIBRARY[state.ticker] || {};
+  const h = state.ticker.toLowerCase() + (state.period ? "-" + state.period : latestPeriod(c) ? "-10k" : "") + (state.view === "infographic" ? "" : "-" + state.view); try { if (location.hash.slice(1) !== h) history.replaceState(null, "", "#" + h); } catch (e) {} }
+function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) return null; const parts = h.split("-"); const t = parts.shift() || "";
+  let p; if (/^q[1-4]$/.test(parts[0] || "") && /^(fy)?\d{4}$/.test(parts[1] || "")) p = parts.splice(0, 2).join("-");
+  else if (parts[0] === "10k") { parts.shift(); p = ""; }      // #msft-10k: the 10-K tab; #msft alone: the latest report
+  const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
+$("#pick").addEventListener("change", e => { openCompany(e.target.value).then(writeHash); });
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
+document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
+/* Search: tickers and company names already in the library */
+const ALIASES = {GOOGL: "GOOG", VSCO: "VSXY", RBC: "RY", TOYOF: "TM", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE", CENTA: "CENT", "CWEN.A": "CWEN", CWENA: "CWEN", UA: "UAA", INDV: "SUPN", ASGN: "EFOR", ATGE: "CVSA", AXL: "DCH", EXPI: "AGNT", FDP: "DMC", IAC: "PPLI", MSGS: "MSGK", SJW: "HTO", BHLB: "BBT", NYMT: "ADAM", CEIX: "CNR", ARCH: "CNR", LANC: "MZTI", NXT: "NXT", NXTR: "NXT", TPX: "SGI", NYCB: "FLG", PNM: "TXNM", MODG: "CALY", VIAD: "PRSU", TMST: "MTUS", BELFA: "BELFB", BATRA: "BATRK", LILA: "LILAK", GLIBA: "GLIBK", METCB: "METC", "BH.A": "BH", TXCP: "TCBI", RUSHB: "RUSHA", HOS: "HLX", "GEF.B": "GEF", "AGM.A": "AGM", AGMA: "AGM", ATROB: "ATRO", BATRB: "BATRK", "CRD.B": "CRD.A", CRDA: "CRD.A", CRDB: "CRD.A", DGICB: "DGICA", GLIBB: "GLIBK", "GTN.A": "GTN", GTNA: "GTN", "HVT.A": "HVT", HVTA: "HVT", IHRTB: "IHRT", KELYB: "KELYA", LILAB: "LILAK", MOVAA: "MOV", SENEB: "SENEA", HOVVB: "HOV", "MOG.B": "MOG.A", MOGA: "MOG.A", MOGB: "MOG.A", GEFB: "GEF", BHA: "BH", LC: "HAPN", MPLN: "CTEV", BBBY: "NXH", CMPO: "GPGI", MGPI: "CASK", TOI: "STLN", DOMO: "HUCK", MEG: "ONT", PX: "RPC", GCI: "TDAY", BIGC: "CMRC", SCVL: "SHOE", COMM: "VISN", ATUS: "OPTU", OMI: "ACH", AHH: "AHRT", GMRE: "XRN", BLDE: "SRTA", RMBL: "RDNW", MESA: "RJET", BITF: "KEEL", AMBC: "OSG", FREY: "TE", GLT: "MAGN", AMRK: "GOLD", CDXC: "NAGE", HMST: "MCHB", ABL: "ABX", PTSI: "PAMT", GLYC: "CBIO", AVTE: "JBIO", AADI: "WHWK", GLTO: "DMRA", SRM: "TRON", NVFY: "XMAX", THAR: "CNTN", MFH: "CD", NEHC: "NUAI", NR: "NPKI", OBNK: "OBK"};
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const STOP = new Set(["inc","corp","corporation","company","co","the","group","holdings","plc","incorporated","technologies","technology","n","v"]);
+function searchLibrary(q){
+  const raw = q.trim(); if (!raw) return [];
+  const tk = raw.split(/\s+[\u2014-]\s+/)[0].toUpperCase().replace(/[^A-Z.]/g, "");
+  if (LIBRARY[tk]) return [LIBRARY[tk]];
+  if (ALIASES[tk] && LIBRARY[ALIASES[tk]]) return [LIBRARY[ALIASES[tk]]];
+  const nq = norm(raw); if (!nq) return [];
+  const NAME_ALIASES = {"google":"GOOG","facebook":"META","instagram":"META","jp morgan":"JPM","chase":"JPM","j j":"JNJ","johnson and johnson":"JNJ","p g":"PG","procter and gamble":"PG","exxon mobil":"XOM","sam s club":"WMT","aws":"AMZN","chatgpt":null};
+  if (NAME_ALIASES[nq] && LIBRARY[NAME_ALIASES[nq]]) return [LIBRARY[NAME_ALIASES[nq]]];
+  const all = Object.values(LIBRARY);
+  const exact = all.filter(c => norm(c.name) === nq || norm(c.short) === nq);
+  if (exact.length) return exact;
+  const words = nq.split(" ").filter(w => !STOP.has(w));
+  if (!words.length) return [];
+  const hay = c => " " + norm(c.name + " " + c.short) + " ";
+  const starts = all.filter(c => words.every(w => hay(c).includes(" " + w)));
+  return starts.sort((a, b) => a.ticker.localeCompare(b.ticker));
+}
+function fillDatalist(){
+  $("#libList").innerHTML = Object.values(LIBRARY).sort((a, b) => a.ticker.localeCompare(b.ticker))
+    .map(c => `<option value="${c.ticker} \u2014 ${esc(c.name)}"></option>`).join("");
+}
+$("#searchForm").addEventListener("submit", e => { e.preventDefault();
+  const q = $("#ticker").value.trim(); if (!q) return;
+  const hits = searchLibrary(q);
+  if (hits.length === 1) { openCompany(hits[0].ticker).then(writeHash); $("#ticker").value = ""; return; }
+  $("#matchRow").innerHTML = "";
+  if (hits.length > 1) {
+    $("#missingText").textContent = `More than one company matches \u201c${q}\u201d. Pick one:`;
+    hits.slice(0, 8).forEach(c => { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost";
+      b.textContent = `${c.ticker} \u2014 ${c.short}`; b.addEventListener("click", () => { openCompany(c.ticker).then(writeHash); $("#ticker").value = ""; }); $("#matchRow").appendChild(b); });
+    $("#matchRow").hidden = false;
+  } else {
+    $("#missingText").textContent = `\u201c${q}\u201d is not available in the library.`;
+    $("#matchRow").hidden = true;
+  }
+  $("#missing").hidden = false; });
+/* Enter always searches, even while the suggestion list is open; picking a suggestion searches right away */
+function enterSubmits(input, form){
+  const go = () => { if (input.value.trim()) (form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", {cancelable: true}))); };
+  input.addEventListener("keydown", e => { if ((e.key === "Enter" || e.keyCode === 13) && !e.isComposing) { e.preventDefault(); go(); } });
+  input.addEventListener("input", e => { if (e.inputType === "insertReplacementText" || (!e.inputType && / \u2014 /.test(input.value))) go(); });
+}
+enterSubmits($("#ticker"), $("#searchForm"));
+enterSubmits($("#wlInput"), $("#wlForm"));
+$("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
+(async () => {
+  try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
+  fillDatalist();
+  wlChanged(); upBadge();
+  if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
+  if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
+  if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
+  const start = readHash();
+  if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
+  /* Default: home (search box and company selector only) */
+  goHome();
+})();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
+</script>
+
+</body></html>
