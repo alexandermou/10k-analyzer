@@ -971,7 +971,23 @@ const footYear = (c, foot) => (!foot || /\bvs\b/.test(foot)) ? foot : foot.repla
 /* Tiles with a change badge drop the prior-year value; the badge says YoY */
 const stripPrior = sub => { if (!sub) return ""; const m = sub.match(/^vs [^·]+?(?:\s·\s(.*))?$/); return m ? (m[1] || "") : sub; };
 const yoyDelta = d => { if (!d || /YoY/.test(d)) return d; if (d === "flat") return "flat YoY"; if (/ dilution$/.test(d)) return d.replace(" dilution", " YoY (dilution)"); return /^[+−-]?[\d.,]+(%| pp|×)$/.test(d) ? d + " YoY" : d; };
+/* "$12.3B" / "450M" / "17%" -> [number, kind] (kind: "%" or "$") */
+function parseVal(x){
+  const m = String(x || "").trim().match(/^([−-])?(\$)?([\d,.]+)\s*([TBMK%])?$/); if (!m) return null;
+  const v = parseFloat(m[3].replace(/,/g, "")) * ({T: 1e6, B: 1e3, M: 1, K: 1e-3}[m[4]] || 1) * (m[1] ? -1 : 1);
+  return isFinite(v) ? [v, m[4] === "%" ? "%" : "$"] : null;
+}
+/* A tile that states the prior year only in words ("vs 18%") gets a YoY chip computed from it */
+function tileYoY(t){
+  if (t.delta || !t.sub) return t;
+  const m = t.sub.match(/^vs ([^\s·]+)(?:\s+in FY\d{4})?$/), a = parseVal(t.value), b = m && parseVal(m[1]);
+  if (!a || !b || a[1] !== b[1]) return t;
+  if (a[1] === "%") { const d = a[0] - b[0]; return {...t, sub: "", delta: (Math.abs(d) < 0.05 ? "0.0" : (d > 0 ? "+" : "−") + Math.abs(d).toFixed(1)) + " pp", tone: t.tone || "flat"}; }
+  if (b[0] > 0 && a[0] > 0) { const y = a[0] / b[0] - 1; return {...t, sub: "", delta: (y >= 0 ? "+" : "−") + Math.abs(y * 100).toFixed(1) + "%", tone: t.tone || (y >= 0 ? "up" : "down")}; }
+  return t;
+}
 function tileCard(t, top, c, bs){
+  t = tileYoY(t);
   /* Same layout as every KPI card: name and change chips on top, the value, notes, then the 5-quarter sparkline */
   const q = t.qoq && c.quarter ? qoqChip(t.qoq[0], t.qoq[1], t.qDir || "up", t.label) : null;
   const chips = (t.delta ? `<span class="chip ${t.tone || "flat"}">${esc(yoyDelta(t.delta))}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
