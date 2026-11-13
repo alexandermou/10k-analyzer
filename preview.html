@@ -236,6 +236,17 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sp-pt{fill:none;stroke:var(--navy);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}.sp-pt.last{stroke-width:8}
 .sp-pt-in{fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .sp-axis{display:flex;justify-content:space-between;margin-top:4px}
+.trend-grid{grid-template-columns:minmax(0,1fr)!important}
+.sp-axis-full{display:none}
+@media (min-width:641px){
+  .spark.full svg{height:110px}
+  .spark.full .sp-axis{display:none}
+  .sp-axis-full{display:block;position:relative;height:40px;margin-top:8px}
+  .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-family:var(--f-mono);font-size:13px;color:var(--ink);white-space:nowrap}
+  .sp-axis-full span:first-child{transform:none;align-items:flex-start}
+  .sp-axis-full span:last-child{transform:translateX(-100%);align-items:flex-end}
+  .sp-axis-full b{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--muted)}
+}
 .sp-axis span{font-size:11.5px;color:var(--muted)}
 .sp-card .big small{font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
 .spark span{font-size:11.5px;line-height:1.35;color:var(--muted);white-space:nowrap}
@@ -902,6 +913,22 @@ function barCard(c, it){
     ${sparkline(c, it)}
   </div>`;
 }
+/* Quarterly revenue and EPS: the same card as every KPI, wider on desktop */
+function trendCard(c, sec){
+  const its = sec.items, n = its.length, kind = sec.type === "eps" ? "eps" : undefined;
+  if (!n) return "";
+  const v = its.map(q => q.v), L = its.map(q => q.q), cur = v[n - 1];
+  const pr = its.find(q => q.prior), prior = pr ? pr.v : n >= 5 ? v[n - 5] : null, prevQ = n >= 2 ? v[n - 2] : null;
+  const it = {label: sec.title, cur, prior, spark: v, sparkL: L, fmt: x => money(c, x, kind)};
+  const y = prior === null ? null : chipFor({cur, prior}), q = prevQ === null ? null : qoqChip(cur, prevQ, "up", sec.title);
+  const chips = (y ? `<span class="chip ${y.cls}">${esc(/YoY$/.test(y.t) ? y.t : y.t + " YoY")}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
+  return `<div class="sec"><div class="grid trend-grid"><div class="card sp-card trend-card">
+    <div class="barhead"><p>${esc(sec.title)}</p><div class="chips">${chips}</div></div>
+    <p class="big${cur < 0 ? " down" : ""}">${money(c, cur, kind)} <small>${esc(L[n - 1])}</small></p>
+    ${sec.callout ? `<p class="sub">${sec.callout}</p>` : ""}
+    ${sparkline(c, it, "full")}
+  </div></div></div>`;
+}
 /* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last five quarters */
 function sparkCard(c, it, label, chips, period){
   return `<div class="card sp-card">
@@ -968,7 +995,7 @@ function sparkFmt(v, k){
 }
 const sq = l => String(l).replace(/FY20(\d\d)\b/, "FY$1").replace(/ 20(\d\d)$/, " \u2019$1");   // "Q1 FY2026" -> "Q1 FY26", "Q3 2025" -> "Q3 ’25"
 function sparkline(c, it, wide){
-  const v = it.spark, q = c.sparkQ;
+  const v = it.spark, q = it.sparkL || c.sparkQ, full = wide === "full";
   if (!v || !q || v.length !== q.length) return "";
   const W = wide ? 300 : 120, H = wide ? 64 : 30, P = wide ? 6 : 4, k = it.sparkK, known = v.filter(x => x !== null);
   let lo = Math.min(...known), hi = Math.max(...known);
@@ -980,10 +1007,14 @@ function sparkline(c, it, wide){
   const last = v.length - 1;
   const dot = (x, y, last) => `<path d="M${x} ${y}l0 0" class="sp-pt${last ? " last" : ""}"/>` + (last ? "" : `<path d="M${x} ${y}l0 0" class="sp-pt-in"/>`);
   const dots = wide ? v.map((x, i) => x === null ? "" : dot(X(i).toFixed(1), Y(x).toFixed(1), i === last)).join("") : v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${i === last ? 3.2 : 2}" class="${i === last ? "sp-last" : "sp-dot"}"/>`).join("");
-  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(sparkFmt(x, k))}</title></rect>`).join("");
-  const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${sparkFmt(x, k)}`).join(", ");
+  const F = it.fmt || (x => sparkFmt(x, k));
+  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
+  const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
-  if (wide) return `<div class="spark wide">${svg}<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>5 quarters</span><span>${esc(sq(q[last]))}</span></div></div>`;
+  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>5 quarters</span><span>${esc(sq(q[last]))}</span></div>`;
+  /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
+  const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%"><b>${esc(sq(q[i]))}</b>${esc(F(x))}</span>`).join("")}</div>` : "";
+  if (wide) return `<div class="spark wide${full ? " full" : ""}">${svg}${axis}${axisFull}</div>`;
   return `<div class="spark">${svg}<span>5 quarters<br>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
 }
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
@@ -992,6 +1023,7 @@ function renderSection(c, sec){
   if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : ""}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
   if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
   if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
+  if (sec.type === "eps" || sec.type === "quarters") return trendCard(c, sec);
   if (sec.type === "eps") {
     /* Earnings per share by quarter: a line over the same quarters as the revenue chart, with a zero line */
     const its = sec.items, n = its.length, vs = its.map(q => q.v);
