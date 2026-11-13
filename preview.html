@@ -51,6 +51,7 @@ button,input{font:inherit}
 .btn{height:48px;padding:0 18px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font-weight:600;cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn:disabled{opacity:.5;cursor:default}
+.search-btn{display:inline-flex;align-items:center;justify-content:center;width:52px;padding:0}
 .picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .picker label{font-weight:600;font-size:14px;color:var(--muted)}
 /* New reports: a page of buttons for companies with a recent 10-K, 10-Q or earnings release */
@@ -91,7 +92,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .linkbtn{border:0;background:transparent;padding:4px 0;color:var(--accent);font:inherit;font-size:15px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .linkbtn:hover{text-decoration-thickness:2px}.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 /* Top 10 chart on the New page */
-.top10-head h4 .t10-q{font-size:14px;font-weight:400;color:var(--muted)}
+.top10-head h4 .t10-q{display:block;margin-top:2px;font-size:14px;font-weight:400;color:var(--muted)}
 .top10{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px 12px;margin:10px 0 6px;max-width:760px}
 .top10-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}.top10-head h4{font-size:16px;font-weight:700;margin:0}
 .top10-head select{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
@@ -429,9 +430,18 @@ body.home .brand,body.home .views,body.home #filing{display:none}
 body.home .wrap{min-height:calc(100svh - 120px);justify-content:center}
 body.home .shelf{width:100%;max-width:560px;margin:0 auto}
 body.home .picker select{max-width:none}
+.tagline{display:none}
+body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16px;color:var(--muted)}
 .brand h1 a{color:inherit;text-decoration:none}
+/* Home: New / Upcoming / Watchlist links in the top right corner */
+.homelinks{display:none}
+body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);right:clamp(16px,4vw,40px);z-index:2}
+.homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
+.homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<nav class="homelinks" aria-label="Report lists"><a href="#new">New</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -439,11 +449,12 @@ body.home .picker select{max-width:none}
       <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
       <p>Annual reports, read and drawn. Figures from each company's latest annual filing with the SEC.</p>
     </div>
+    <p class="tagline">Visualize annual 10K &amp; quarterly 10Q reports.</p>
     <form class="search" id="searchForm">
       <label for="ticker">Search the library</label>
-      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or company, e.g. AMZN or Apple" maxlength="60">
+      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. AMZN or Apple" maxlength="60">
       <datalist id="libList"></datalist>
-      <button class="btn" type="submit">Search</button>
+      <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
     <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <div class="missing" id="missing" hidden role="status">
@@ -1756,11 +1767,13 @@ const TOP = [
   ["eps", "EPS (diluted)", "eps", x => x.eps],
   ["epsYoY", "EPS growth YoY", "growth", x => [x.eps, x.epsPrior], "EPS"],
   ["epsQoQ", "EPS growth QoQ", "growth", x => [x.eps, x.epsPrevQ], "EPS"]];
-let topKey = "netYoY";   // default ranking: profit growth YoY
+const topKeys = {};   // ranking per chart (New page "", Watchlist "W"); default: profit growth YoY
+const topKeyOf = sfx => topKeys[sfx] || "netYoY";
 /* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
 const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
 function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
+  const topKey = topKeyOf(sfx);
   const [key, title, kind, get, what] = TOP.find(t => t[0] === topKey);
   const rows = [];
   for (const x of items) {
@@ -1786,9 +1799,10 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
       : `<p class="sub">No company here has the figures for this ranking.</p>`}
     <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
+const WL_HEAD = "Top 10 <small class=\"t10-q\">Quarterly figures</small>";
 function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
-  if (pick) pick.addEventListener("change", () => { topKey = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
+  if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
 }
 /* Watchlist chart: each watched company's latest quarter, read from its quarter file */
 const QFIG = {};
@@ -1830,10 +1844,10 @@ async function showNew(day){
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>");
-  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>") +
+  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
-  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">· quarterly figures</small>");
+  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
   $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "New reports");
@@ -1902,7 +1916,6 @@ function wlChanged(){
 let wlSort = {key: "date", dir: 1}, wlSeq = 0;
 const daysUntil = iso => -dayDiff(iso);
 const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
-const WL_HEAD = "Top 10 <small class=\"t10-q\">· quarterly figures</small>";
 async function showWatchlist(){
   const list = wlGet(), up = await loadUpcoming(), next = {};
   for (const x of up.items) if (!next[x.ticker] || x.date < next[x.ticker].date) next[x.ticker] = x;
