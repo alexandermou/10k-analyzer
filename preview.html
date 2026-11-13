@@ -231,7 +231,10 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .spark{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
 .spark svg{flex:none;overflow:visible}
 .spark.wide{display:block;padding-top:12px}
-.spark.wide svg{display:block;width:100%;height:auto}
+.spark.wide svg{display:block;width:100%;height:56px;overflow:visible}
+.spark.wide .sp-line,.spark.wide .sp-zero{vector-effect:non-scaling-stroke}
+.sp-pt{fill:none;stroke:var(--navy);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}.sp-pt.last{stroke-width:8}
+.sp-pt-in{fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .sp-axis{display:flex;justify-content:space-between;margin-top:4px}
 .sp-axis span{font-size:11.5px;color:var(--muted)}
 .sp-card .big small{font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
@@ -942,12 +945,16 @@ const footYear = (c, foot) => (!foot || /\bvs\b/.test(foot)) ? foot : foot.repla
 const stripPrior = sub => { if (!sub) return ""; const m = sub.match(/^vs [^·]+?(?:\s·\s(.*))?$/); return m ? (m[1] || "") : sub; };
 const yoyDelta = d => { if (!d || /YoY/.test(d)) return d; if (d === "flat") return "flat YoY"; if (/ dilution$/.test(d)) return d.replace(" dilution", " YoY (dilution)"); return /^[+−-]?[\d.,]+(%| pp|×)$/.test(d) ? d + " YoY" : d; };
 function tileCard(t, top, c, bs){
-  return `<div class="card${top ? " tile-top" : ""}">
-    <p class="lbl">${esc(t.label)}</p>
-    <p class="big">${esc(t.value)}</p>
-    <p class="sub">${[esc(t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs)), t.delta ? `<span class="${t.tone}">${esc(yoyDelta(t.delta))}</span>` : "", (q => q ? `<span class="${q.cls}">${esc(q.t)}</span>` : "")(t.qoq && c.quarter ? qoqChip(t.qoq[0], t.qoq[1], t.qDir || "up", t.label) : null)].filter(Boolean).join(" · ")}</p>
+  /* Same layout as every KPI card: name and change chips on top, the value, notes, then the 5-quarter sparkline */
+  const q = t.qoq && c.quarter ? qoqChip(t.qoq[0], t.qoq[1], t.qDir || "up", t.label) : null;
+  const chips = (t.delta ? `<span class="chip ${t.tone || "flat"}">${esc(yoyDelta(t.delta))}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
+  const sub = t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs);
+  return `<div class="card sp-card${top ? " tile-top" : ""}">
+    <div class="barhead"><p>${esc(t.label)}</p>${chips ? `<div class="chips">${chips}</div>` : ""}</div>
+    <p class="big">${esc(t.value)}${t.spark && c.sparkQ ? ` <small>${esc(yr(c.fy))}</small>` : ""}</p>
+    ${sub ? `<p class="sub">${esc(sub)}</p>` : ""}
     ${t.foot ? `<p class="sub">${esc(t.foot)}</p>` : ""}
-    ${sparkline(c, t)}
+    ${sparkline(c, t, true)}
   </div>`;
 }
 /* Sparkline: the KPI over the last five quarters (values in millions, per share, shares in millions or percent) */
@@ -971,10 +978,11 @@ function sparkline(c, it, wide){
   v.forEach((x, i) => { if (x === null) { pen = false; return; } d += (pen ? "L" : "M") + X(i).toFixed(1) + " " + Y(x).toFixed(1); pen = true; });
   const zero = lo < 0 && hi > 0 ? `<line x1="${P}" x2="${W - P}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" class="sp-zero"/>` : "";
   const last = v.length - 1;
-  const dots = v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${i === last ? 3.2 : 2}" class="${i === last ? "sp-last" : "sp-dot"}"/>`).join("");
+  const dot = (x, y, last) => `<path d="M${x} ${y}l0 0" class="sp-pt${last ? " last" : ""}"/>` + (last ? "" : `<path d="M${x} ${y}l0 0" class="sp-pt-in"/>`);
+  const dots = wide ? v.map((x, i) => x === null ? "" : dot(X(i).toFixed(1), Y(x).toFixed(1), i === last)).join("") : v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${i === last ? 3.2 : 2}" class="${i === last ? "sp-last" : "sp-dot"}"/>`).join("");
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(sparkFmt(x, k))}</title></rect>`).join("");
   const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${sparkFmt(x, k)}`).join(", ");
-  const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="xMidYMid meet"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
+  const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
   if (wide) return `<div class="spark wide">${svg}<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>5 quarters</span><span>${esc(sq(q[last]))}</span></div></div>`;
   return `<div class="spark">${svg}<span>5 quarters<br>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
 }
