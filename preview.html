@@ -1046,6 +1046,7 @@ function sparkline(c, it, wide){
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
   /* 10-K tab: the card is the full year, the line is quarters — say so */
   const src = it.sparkSrc === "er" ? `<span class="sp-note" title="${annual ? "Fiscal-year figures" : "Quarterly figures"} from the company's earnings releases (8-K Exhibit 99.1), not from tagged filing data">From earnings releases</span>`
+    : it.sparkSrc === "recast" ? `<span class="sp-note" title="Quarterly figures as recast by the company on its new segment basis; see the footnotes">Recast, new segments</span>`
     : it.sparkSrc === "transcript" ? `<span class="sp-note" title="Quarterly figures from earnings call transcripts">From call transcripts</span>` : "";
   const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${src || approx}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
