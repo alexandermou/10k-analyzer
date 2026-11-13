@@ -238,6 +238,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sp-pt{fill:none;stroke:var(--navy);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}.sp-pt.last{stroke-width:8}
 .sp-pt-in{fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .sp-axis{display:flex;justify-content:space-between;margin-top:4px}
+.sp-axis .sp-note{font-style:italic}
 .trend-grid{grid-template-columns:minmax(0,1fr)!important}
 .sp-axis-full{display:none}
 @container (min-width:560px){
@@ -1031,7 +1032,8 @@ function sparkline(c, it, wide){
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
   const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
-  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>${esc(sq(q[last]))}</span></div>`;
+  const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
+  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${approx}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
   const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%"><b>${esc(sq(q[i]))}</b>${esc(F(x))}</span>`).join("")}</div>` : "";
   if (wide) return `<div class="spark wide${full ? " full" : ""}">${svg}${axis}${axisFull}</div>`;
@@ -1120,10 +1122,10 @@ function segBig(c, which){
     : c.segments.items;
   const pq = which === "total" && c.quarter && c.prevQ ? c.prevQ : null;
   const qc = (cur, prev) => { const q = qoqChip(cur, prev, "up", ""); return q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : ""; };
-  const T = s => s.total && c.sparkTot && c.sparkQ ? c.sparkTot : null;
-  const tsp = (s, key) => { const t = T(s); if (!t || !t.rev || !t.op) return "";
-    const v = key === "om" ? t.rev.map((r, i) => r > 0 && t.op[i] !== null ? Math.round(t.op[i] / r * 1000) / 10 : null) : t[key];
-    return v.filter(x => x !== null).length >= 4 ? sparkline(c, {spark: v, sparkK: key === "om" ? "pct" : undefined}, true) : ""; };
+  const T = s => !c.sparkQ ? null : s.total ? c.sparkTot : s.spark;     // segments: from the filings' segment tables
+  const tsp = (s, key) => { const t = T(s); if (!t) return "";
+    const v = key === "om" ? (t.rev && t.op ? t.rev.map((r, i) => r > 0 && t.op[i] !== null ? Math.round(t.op[i] / r * 1000) / 10 : null) : null) : t[key];
+    return v && v.filter(x => x !== null).length >= 4 ? sparkline(c, {spark: v, sparkK: key === "om" ? "pct" : undefined}, true) : ""; };
   return list.map(s => { const {mc, mp, d} = segMargins(s);
     /* Quarter tabs: YoY chip (capitalized, labelled) stacked above the QoQ chip */
     const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
