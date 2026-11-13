@@ -1020,6 +1020,7 @@ function sparkFmt(v, k){
   const neg = v < 0 ? "−" : "", a = Math.abs(v);
   if (k === "eps") return neg + "$" + a.toFixed(2);
   if (k === "pct") return neg + a.toFixed(1) + "%";
+  if (k === "approx") return "≈" + neg + "$" + Math.round(a / 1000) + "B";   // annual figures the company states only as "surpassed $X" and a growth rate
   if (k === "sh") return neg + Math.round(a).toLocaleString("en-US") + "M";
   return neg + "$" + (a >= 1e6 ? (a / 1e6).toFixed(2) + "T" : a >= 1000 ? (a / 1000).toFixed(1) + "B" : a >= 10 ? Math.round(a) + "M" : a.toFixed(1) + "M");
 }
@@ -1039,11 +1040,12 @@ function sparkline(c, it, wide){
   const dots = wide ? v.map((x, i) => x === null ? "" : dot(X(i).toFixed(1), Y(x).toFixed(1), i === last)).join("") : v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${i === last ? 3.2 : 2}" class="${i === last ? "sp-last" : "sp-dot"}"/>`).join("");
   const F = it.fmt || (x => sparkFmt(x, k));
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
-  const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
+  const annual = /^FY/.test(q[0]);
+  const desc = `${annual ? "Fiscal years" : "Last five quarters"}, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
   /* 10-K tab: the card is the full year, the line is quarters — say so */
-  const src = it.sparkSrc === "er" ? `<span class="sp-note" title="Quarterly figures from the company's earnings releases (8-K Exhibit 99.1), not from tagged filing data">From earnings releases</span>`
+  const src = it.sparkSrc === "er" ? `<span class="sp-note" title="${annual ? "Fiscal-year figures" : "Quarterly figures"} from the company's earnings releases (8-K Exhibit 99.1), not from tagged filing data">From earnings releases</span>`
     : it.sparkSrc === "transcript" ? `<span class="sp-note" title="Quarterly figures from earnings call transcripts">From call transcripts</span>` : "";
   const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${src || approx}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
