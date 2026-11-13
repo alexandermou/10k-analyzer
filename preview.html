@@ -231,15 +231,16 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .spark{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
 .spark svg{flex:none;overflow:visible}
 .spark.wide{display:block;padding-top:12px}
-.spark.wide svg{display:block;width:100%;height:56px;overflow:visible}
+.sp-card,.seg-metric{container-type:inline-size}
+.spark.wide svg{display:block;width:100%;height:clamp(28px,22cqw,110px);overflow:visible}
+@container (max-width:170px){.spark .sp-axis{display:none}}
 .spark.wide .sp-line,.spark.wide .sp-zero{vector-effect:non-scaling-stroke}
 .sp-pt{fill:none;stroke:var(--navy);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}.sp-pt.last{stroke-width:8}
 .sp-pt-in{fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .sp-axis{display:flex;justify-content:space-between;margin-top:4px}
 .trend-grid{grid-template-columns:minmax(0,1fr)!important}
 .sp-axis-full{display:none}
-@media (min-width:641px){
-  .spark.full svg{height:110px}
+@container (min-width:560px){
   .spark.full .sp-axis{display:none}
   .sp-axis-full{display:block;position:relative;height:40px;margin-top:8px}
   .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-family:var(--f-mono);font-size:13px;color:var(--ink);white-space:nowrap}
@@ -248,6 +249,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
   .sp-axis-full b{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--muted)}
 }
 .sp-axis span{font-size:11.5px;color:var(--muted)}
+.seg-card.total .spark{border-top-color:rgba(255,255,255,.22)}
+.seg-card.total .sp-line{stroke:#fff}.seg-card.total .sp-pt{stroke:#fff}.seg-card.total .sp-pt-in{stroke:var(--navy)}
+.seg-card.total .sp-axis span{color:rgba(255,255,255,.7)}.seg-card.total .sp-zero{stroke:rgba(255,255,255,.6)}
 .sp-card .big small{font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
 .spark span{font-size:11.5px;line-height:1.35;color:var(--muted);white-space:nowrap}
 .sp-line{fill:none;stroke:var(--navy);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
@@ -1027,11 +1031,11 @@ function sparkline(c, it, wide){
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
   const desc = `Last five quarters, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
-  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>5 quarters</span><span>${esc(sq(q[last]))}</span></div>`;
+  const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span><span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
   const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%"><b>${esc(sq(q[i]))}</b>${esc(F(x))}</span>`).join("")}</div>` : "";
   if (wide) return `<div class="spark wide${full ? " full" : ""}">${svg}${axis}${axisFull}</div>`;
-  return `<div class="spark">${svg}<span>5 quarters<br>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
+  return `<div class="spark">${svg}<span>${esc(sq(q[0]))} – ${esc(sq(q[last]))}</span></div>`;
 }
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
 function renderSection(c, sec){
@@ -1116,15 +1120,19 @@ function segBig(c, which){
     : c.segments.items;
   const pq = which === "total" && c.quarter && c.prevQ ? c.prevQ : null;
   const qc = (cur, prev) => { const q = qoqChip(cur, prev, "up", ""); return q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : ""; };
+  const T = s => s.total && c.sparkTot && c.sparkQ ? c.sparkTot : null;
+  const tsp = (s, key) => { const t = T(s); if (!t || !t.rev || !t.op) return "";
+    const v = key === "om" ? t.rev.map((r, i) => r > 0 && t.op[i] !== null ? Math.round(t.op[i] / r * 1000) / 10 : null) : t[key];
+    return v.filter(x => x !== null).length >= 4 ? sparkline(c, {spark: v, sparkK: key === "om" ? "pct" : undefined}, true) : ""; };
   return list.map(s => { const {mc, mp, d} = segMargins(s);
     /* Quarter tabs: YoY chip (capitalized, labelled) stacked above the QoQ chip */
     const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
     const V = h => pq ? `<span class="vchips">${h}</span>` : h;
     const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
     return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
-      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div></div>
-      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div></div></div>
+      <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div>${tsp(s, "rev")}</div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div>${tsp(s, "op")}</div>
+      <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div>${tsp(s, "om")}</div></div>
     </div>`; }).join("");
 }
 function segCards(c){
@@ -1138,7 +1146,7 @@ function segCards(c){
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
-    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}${c.quarter && c.prevQ ? ` (YoY) and ${esc(c.prevQ.fy)} (QoQ)` : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
