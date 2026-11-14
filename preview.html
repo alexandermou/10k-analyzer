@@ -1293,7 +1293,8 @@ function drawSparkToCanvas(svg, w, h){
   d.replace(/([ML])\s*([-\d.]+)[ ,]([-\d.]+)/g, (m, cmd, x, y) => { const X = +x * sx, Y = +y * sy; cmd === "M" ? g.moveTo(X, Y) : g.lineTo(X, Y); pts.push([X, Y]); return m; });
   g.stroke();
   const n = svg.querySelectorAll(".sp-pt, .sp-dot, .sp-last").length ? pts : [];
-  n.forEach(([X, Y], i) => { const last = i === n.length - 1; g.beginPath(); g.arc(X, Y, last ? 4 : 3, 0, Math.PI * 2);
+  const hl = !!svg.querySelector(".sp-pt.last, .sp-last");      // the on-screen chart decides: the 10-K tab highlights no point
+  n.forEach(([X, Y], i) => { const last = hl && i === n.length - 1; g.beginPath(); g.arc(X, Y, last ? 4 : 3, 0, Math.PI * 2);
     g.fillStyle = last ? col : bg; g.fill(); if (!last) { g.lineWidth = 1.5; g.stroke(); } });
   return cv;
 }
