@@ -492,6 +492,16 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
 .homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.ipo-list{display:flex;flex-direction:column;gap:8px}
+.ipo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
+.ipo-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.ipo-name{font-weight:600;color:var(--ink);text-decoration:none}
+.ipo-name:hover{color:var(--accent);text-decoration:underline}
+.ipo-sym{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+.ipo-main{font-family:var(--f-mono);font-size:15px}
+.ipo-meta{font-size:13px;color:var(--muted)}
+.ipo-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--n-bg);color:var(--n-fg);margin-left:6px;vertical-align:1px}
+.ipo-est{color:var(--accent)}
 .sitefoot{display:none}
 body.faqmode .shelf{display:none}
 body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
@@ -509,7 +519,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></nav>
-<nav class="homelinks" aria-label="Report lists"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
+<nav class="homelinks" aria-label="Report lists"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#ipo">IPOs</a><a href="#watchlist">★ Watchlist</a></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -524,7 +534,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <datalist id="libList"></datalist>
       <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
-    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#latest">Latest <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
+    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#latest">Latest <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="ipoBtn" href="#ipo">IPOs</a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
@@ -538,6 +548,10 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
     <div class="np-head"><h2 id="npTitle">Latest</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
     <div id="npBody"></div>
+  </section>
+  <section class="newpage" id="ipoPage" hidden aria-labelledby="ipoTitle">
+    <div class="np-head"><h2 id="ipoTitle">IPOs</h2><p class="sub">Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).</p></div>
+    <div id="ipoBody"></div>
   </section>
   <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
     <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
@@ -563,6 +577,9 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>When we can't draw a line from the filed figures, the card says why instead of staying blank. Common reasons: the company files annual reports only, the metric is reported once a year, it isn't in the half-year figures, or the quarterly figures in the filings don't add up to the year.</p></details>
       <details><summary>How are the Upcoming dates worked out?</summary>
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p></details>
+      <details><summary>Where does the IPO list come from?</summary>
+        <p>The SEC has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
+        <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
         <p>On business days we check the SEC for new filings before the market opens, through the day and after the close, and new reports appear on the Latest page. Every night the whole library is rebuilt from the SEC's data.</p></details>
       <details><summary>Why isn't a company in the library?</summary>
@@ -2121,13 +2138,53 @@ async function showUpcoming(day){
   $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => $("#upDayPick").focus()));
   showPage("upcoming", "Upcoming reports");
 }
+/* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
+let ipoData = null, ipoSpac = false;
+const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
+const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
+async function showIpo(){
+  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
+  const d = ipoData, all = (d.ipos || []).filter(x => ipoSpac || !x.spac), nSpac = (d.ipos || []).filter(x => x.spac).length;
+  const row = x => {
+    const sym = [x.symbol, x.exchange].filter(Boolean).join(" · ");
+    let main = "", meta = [];
+    if (x.stage === "priced") {
+      main = x.price ? `$${x.price.toFixed(2)}${x.shares ? ` × ${x.shares.toLocaleString("en-US")} = ${ipoUsd(x.price * x.shares)}` : ""}`
+        : x.noProspectus ? "Effective; no final prospectus on EDGAR" : x.prosForm === "424B3" ? "Prospectus filed (424B3), no offering price" : "Final prospectus filed; price not read";
+      meta.push(`${x.price ? "Priced" : "Effective"} ${ipoDay(x.priced)}`); if (x.range) meta.push(`range was $${x.range[0]}–$${x.range[1]}`);
+    } else {
+      if (x.range) main = `Range $${x.range[0].toFixed(2)}–$${x.range[1].toFixed(2)}`;
+      if (x.stage === "cleared") meta.push(`SEC cleared ${ipoDay(x.cleared)}: pricing imminent`);
+      else if (x.expected) meta.push(`<span class="ipo-est">Expected ${x.expectedPast ? "any day (estimate passed " + ipoDay(x.expected) + ")" : "≈ " + ipoDay(x.expected)} · our estimate</span>`);
+      if (x.rangeSet) meta.push(`range filed ${ipoDay(x.rangeSet)}`);
+      if (x.stage === "filed") { main = main || "No price range yet"; meta.push(`${x.form} filed ${ipoDay(x.filed)}`, `latest filing ${ipoDay(x.lastFiling)}`); }
+    }
+    const tags = (x.spac ? `<span class="ipo-tag">SPAC</span>` : "") + (x.foreign ? `<span class="ipo-tag">Foreign</span>` : "");
+    return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div></div>`;
+  };
+  const S = [["cleared", "Cleared by the SEC", "Registration declared effective; the final prospectus usually follows the next business day."],
+    ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
+    ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
+    ["filed", "Filed, no price range yet", "Public registration filed; no price range in the filings yet."]];
+  let html = `<div class="np-filter" role="group" aria-label="SPACs"><button type="button" data-spac="0" aria-pressed="${!ipoSpac}">Companies</button><button type="button" data-spac="1" aria-pressed="${ipoSpac}">Include SPACs (${nSpac})</button></div>`;
+  for (const [k, title, desc] of S) {
+    const list = all.filter(x => x.stage === k);
+    if (!list.length) continue;
+    html += `<div class="nr-day"><h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p><div class="ipo-list">${list.map(row).join("")}</div></div>`;
+  }
+  if (!all.length) html += `<p class="sub">No IPO filings found.</p>`;
+  html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Company names link to their SEC filings.</p>`;
+  $("#ipoBody").innerHTML = html;
+  $("#ipoBody").querySelectorAll("[data-spac]").forEach(b => b.addEventListener("click", () => { ipoSpac = b.dataset.spac === "1"; showIpo(); }));
+  showPage("ipo", "IPOs");
+}
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   document.body.classList.remove("home", "company"); document.body.classList.toggle("faqmode", name === "faq");
   $("#filing").hidden = true; $("#missing").hidden = true;
-  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq";
-  ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#ipoPage").hidden = name !== "ipo";
+  ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
@@ -2140,7 +2197,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2296,7 +2353,7 @@ enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
 $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); window.scrollTo(0, 0); });
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -2306,6 +2363,7 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   if (location.hash.toLowerCase() === "#faq") { showFaq(); return; }
+  if (["#ipo", "#ipos"].includes(location.hash.toLowerCase())) { await showIpo(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
   /* Default: home (search box and company selector only) */
