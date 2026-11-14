@@ -954,7 +954,7 @@ function sparkCard(c, it, label, chips, period){
     <div class="barhead"><p>${esc(label)}</p><div class="chips">${chips}</div></div>
     <p class="big${it.cur < 0 ? " down" : ""}">${money(c, it.cur, it.money)} <small>${esc(period)}</small></p>
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
-    ${sparkline(c, it, true) || `<p class="sp-why">No chart because ${c.quarter ? "earlier quarters of this line aren't" : "the periods for this line aren't"} in the filings' tagged data</p>`}
+    ${sparkline(c, it, true) || `<p class="sp-why">No chart because ${c.quarter ? "earlier quarters of this metric aren't" : "the periods for this metric aren't"} in the filings' tagged data</p>`}
   </div>`;
 }
 /* Quarter tabs: this quarter and the previous one, with a YoY and a QoQ chip */
