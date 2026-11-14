@@ -481,7 +481,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="homelinks" aria-label="Report lists"><a href="#new">New</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
+<nav class="homelinks" aria-label="Report lists"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -496,7 +496,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
       <datalist id="libList"></datalist>
       <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
-    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#new">New <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
+    <div class="picker"><label for="pick" class="sr-only">Company</label><select id="pick" name="pick"></select><nav class="views" aria-label="Report lists"><a class="vbtn" id="newBtn" href="#latest">Latest <b id="newCount" hidden></b></a><a class="vbtn" id="upBtn" href="#upcoming">Upcoming <b id="upCount" hidden></b></a><a class="vbtn" id="wlBtn" href="#watchlist">★ Watchlist <b id="wlCount" hidden></b></a></nav></div>
     <div class="missing" id="missing" hidden role="status">
       <p id="missingText"></p>
       <div class="row" id="matchRow"></div>
@@ -508,7 +508,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
-    <div class="np-head"><h2 id="npTitle">New</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
+    <div class="np-head"><h2 id="npTitle">Latest</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
@@ -2025,7 +2025,7 @@ async function showNew(day){
   bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
   $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
-  showPage("new", "New reports");
+  showPage("new", "Latest reports");
 }
 /* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
    then the next business day */
@@ -2042,7 +2042,7 @@ async function upcomingDays(){
 async function showUpcoming(){
   const {d, t, today, next, nextItems} = await upcomingDays(), wl = new Set(wlGet());
   let html = "";
-  if (isBiz(t)) html += timeList(today, wl, `Reporting today <small>· ${esc(dayName(t))} · not filed yet</small>`, "Everyone scheduled for today has filed — see New").html;
+  if (isBiz(t)) html += timeList(today, wl, `Reporting today <small>· ${esc(dayName(t))} · not filed yet</small>`, "Everyone scheduled for today has filed — see Latest").html;
   html += timeList(nextItems, wl, dayDiff(next) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(next))}</small>` : `Reporting ${esc(dayName(next))}`, "No reports expected").html;
   $("#upBody").innerHTML = html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
   showPage("upcoming", "Upcoming reports");
@@ -2218,13 +2218,13 @@ function enterSubmits(input, form){
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
   fillDatalist();
   wlChanged(); upBadge();
-  if (location.hash.toLowerCase() === "#new") { await showNew(); return; }
+  if (["#latest", "#new"].includes(location.hash.toLowerCase())) { await showNew(); return; }   // #new: old links
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   const start = readHash();
