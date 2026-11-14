@@ -608,16 +608,9 @@ async function loadIndex(){
   (await res.json()).forEach(c => { LIBRARY[c.ticker] = c; });
 }
 const pending = {};
-/* Test: preview.html?sec opens annual pages rebuilt straight from SEC filings (data/sec/companies/), where one exists */
-const SEC_TEST = (() => { try { return new URLSearchParams(location.search).has("sec"); } catch (e) { return false; } })();
-if (SEC_TEST) document.addEventListener("DOMContentLoaded", () => { const b = document.createElement("p");
-  b.textContent = "Test: annual pages built from SEC filings only (no StockAnalysis) for JNJ, ADM, AZO, ATO, AJG, ABCL, BKR, ANF, ARW, BLKB, ALGM, BIO, APLE, ACHR, AMN";
-  b.style.cssText = "margin:0;padding:6px 12px;background:#fff3cd;color:#664d03;font-size:13px;text-align:center"; document.body.prepend(b); });
 function loadCompany(t){
   if (FULL.has(t)) return Promise.resolve(LIBRARY[t]);
-  const get = p => fetch(p).then(r => { if (!r.ok) throw new Error("company"); return r.json(); });
-  if (!pending[t]) pending[t] = (SEC_TEST ? get(`data/sec/companies/${encodeURIComponent(t)}.json`).catch(() => get(`data/companies/${encodeURIComponent(t)}.json`))
-                                          : get(`data/companies/${encodeURIComponent(t)}.json`))
+  if (!pending[t]) pending[t] = fetch(`data/companies/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("company"); return r.json(); })
     .then(c => { LIBRARY[t] = c; FULL.add(t); return c; }).finally(() => { delete pending[t]; });
   return pending[t];
 }
@@ -627,9 +620,7 @@ function loadCompany(t){
 const QUARTERS = {}, qPending = {};
 function loadQuarters(t){
   if (QUARTERS[t]) return Promise.resolve(QUARTERS[t]);
-  const getQ = p => fetch(p).then(r => { if (!r.ok) throw new Error("quarters"); return r.json(); });
-  if (!qPending[t]) qPending[t] = (SEC_TEST ? getQ(`data/sec/quarters/${encodeURIComponent(t)}.json`).catch(() => getQ(`data/quarters/${encodeURIComponent(t)}.json`))
-                                            : getQ(`data/quarters/${encodeURIComponent(t)}.json`))
+  if (!qPending[t]) qPending[t] = fetch(`data/quarters/${encodeURIComponent(t)}.json`).then(r => { if (!r.ok) throw new Error("quarters"); return r.json(); })
     .then(d => { QUARTERS[t] = d.quarters; return d.quarters; }).finally(() => { delete qPending[t]; });
   return qPending[t];
 }

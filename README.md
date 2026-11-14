@@ -10,4 +10,4 @@ Each company's latest annual report (10-K / 20-F / 40-F) as an infographic, slid
 - Maintenance scripts live in a separate private repository.
 
 The site is static. Pushing to `main` redeploys it to GitHub Pages through `.github/workflows/pages.yml`
-(Settings → Pages → Source: GitHub Actions). Figures come from company filings with the SEC and StockAnalysis; see each company's footnotes.
+(Settings → Pages → Source: GitHub Actions). Figures come from company filings with the SEC (EDGAR XBRL data and the filings themselves); see each company's footnotes.
