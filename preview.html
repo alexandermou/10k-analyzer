@@ -479,6 +479,13 @@ body.home .picker select{max-width:none}
 body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16px;color:var(--muted)}
 .brand h1 a{color:inherit;text-decoration:none}
 /* Home: New / Upcoming / Watchlist links in the top right corner */
+.topicons{display:none}
+body:not(.home) .topicons{display:flex;gap:6px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:max(12px,env(safe-area-inset-right,0px));z-index:2}
+body:not(.home) .brand{padding-right:88px}
+.topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
+.topicons a:hover{color:var(--accent);border-color:var(--accent)}
+.topicons a[aria-current]{color:var(--accent)}
+body.company .views{display:none}
 .homelinks{display:none}
 body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);right:clamp(16px,4vw,40px);z-index:2}
 .homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
@@ -486,8 +493,6 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 .sitefoot{display:none}
 body.faqmode .shelf{display:none}
-.faq-back{font-size:14px;color:var(--muted);text-decoration:none;align-self:flex-start}
-.faq-back:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
 .sitefoot a{color:var(--muted);text-decoration:none;font-size:14px;padding:6px 2px}
 .sitefoot a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
@@ -502,6 +507,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<nav class="topicons" aria-label="Site"><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a></nav>
 <nav class="homelinks" aria-label="Report lists"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
 
 <div class="wrap">
@@ -533,7 +539,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
-    <div class="np-head"><a class="faq-back" href="./" id="faqBack">← 10-K Analyzer</a><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
+    <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
     <div class="faq">
       <details open><summary>Where does the data come from?</summary>
         <p>Directly from the SEC. Every figure is read from the filings companies submit to the SEC's EDGAR system: annual reports (10-K, 20-F, 40-F), quarterly reports (10-Q), and earnings releases (Form 8-K, Item 2.02). We read the tagged (XBRL) data in those filings and the statements they render.</p>
@@ -1884,7 +1890,7 @@ async function openCompany(t, view, period){
     else shown = Object.assign({quarter: true}, shown);
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
-  state.ticker = t; state.period = period; state.shown = shown; hideNew();
+  state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span><button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   wlChanged();   // sets the star next to the name
@@ -2117,11 +2123,12 @@ async function showUpcoming(day){
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
-  document.body.classList.remove("home"); document.body.classList.toggle("faqmode", name === "faq");
+  document.body.classList.remove("home", "company"); document.body.classList.toggle("faqmode", name === "faq");
   $("#filing").hidden = true; $("#missing").hidden = true;
   $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq";
   ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
+  $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
 }
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
@@ -2132,7 +2139,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ document.body.classList.remove("faqmode"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2286,7 +2293,7 @@ function enterSubmits(input, form){
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
-$("#faqBack").addEventListener("click", e => { e.preventDefault(); goHome(); });
+$("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); window.scrollTo(0, 0); });
 window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
