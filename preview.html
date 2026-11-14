@@ -2139,7 +2139,7 @@ async function showUpcoming(day){
   showPage("upcoming", "Upcoming reports");
 }
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
-let ipoData = null, ipoSpac = false;
+let ipoData = null, ipoSpac = false, ipoStage = "";
 const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
 const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
 async function showIpo(){
@@ -2159,23 +2159,26 @@ async function showIpo(){
       if (x.rangeSet) meta.push(`range filed ${ipoDay(x.rangeSet)}`);
       if (x.stage === "filed") { main = main || "No price range yet"; meta.push(`${x.form} filed ${ipoDay(x.filed)}`, `latest filing ${ipoDay(x.lastFiling)}`); }
     }
-    const tags = (x.spac ? `<span class="ipo-tag">SPAC</span>` : "") + (x.foreign ? `<span class="ipo-tag">Foreign</span>` : "");
+    const tags = (x.spac ? `<span class="ipo-tag">SPAC</span>` : "") + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div></div>`;
   };
-  const S = [["cleared", "Cleared by the SEC", "Registration declared effective; the final prospectus usually follows the next business day."],
+  /* stages in the order a company gets closer to listing; priced ones last */
+  const S = [["cleared", "Cleared by the SEC", "Registration declared effective; pricing is imminent and the final prospectus usually follows the next business day."],
     ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
-    ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
-    ["filed", "Filed, no price range yet", "Public registration filed; no price range in the filings yet."]];
-  let html = `<div class="np-filter" role="group" aria-label="SPACs"><button type="button" data-spac="0" aria-pressed="${!ipoSpac}">Companies</button><button type="button" data-spac="1" aria-pressed="${ipoSpac}">Include SPACs (${nSpac})</button></div>`;
-  for (const [k, title, desc] of S) {
-    const list = all.filter(x => x.stage === k);
-    if (!list.length) continue;
-    html += `<div class="nr-day"><h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p><div class="ipo-list">${list.map(row).join("")}</div></div>`;
-  }
+    ["filed", "Filed, waiting", "Public registration filed; no price range in the filings yet."],
+    ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."]];
+  const n = k => all.filter(x => x.stage === k).length;
+  if (!S.some(([k]) => k === ipoStage)) ipoStage = (S.find(([k]) => n(k)) || S[0])[0];
+  const opts = S.map(([k, t], i) => `<option value="${k}"${k === ipoStage ? " selected" : ""}>${i + 1}. ${t} (${n(k)})</option>`).join("");
+  let html = `<div class="nr-day"><h3><label for="ipoPick">Stage</label> <select id="ipoPick" class="day-pick">${opts}</select></h3>`;
+  html += `<div class="np-filter" role="group" aria-label="SPACs" style="margin:6px 0 4px"><button type="button" data-spac="0" aria-pressed="${!ipoSpac}">Companies</button><button type="button" data-spac="1" aria-pressed="${ipoSpac}">Include SPACs (${nSpac})</button></div>`;
+  const [, , desc] = S.find(([k]) => k === ipoStage), list = all.filter(x => x.stage === ipoStage);
+  html += `<p class="nr-time">${desc}</p>` + (list.length ? `<div class="ipo-list">${list.map(row).join("")}</div>` : `<p class="sub">None right now.</p>`) + `</div>`;
   if (!all.length) html += `<p class="sub">No IPO filings found.</p>`;
   html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Company names link to their SEC filings.</p>`;
   $("#ipoBody").innerHTML = html;
   $("#ipoBody").querySelectorAll("[data-spac]").forEach(b => b.addEventListener("click", () => { ipoSpac = b.dataset.spac === "1"; showIpo(); }));
+  $("#ipoPick").addEventListener("change", e => { ipoStage = e.target.value; showIpo().then(() => $("#ipoPick").focus()); });
   showPage("ipo", "IPOs");
 }
 /* One of the list pages (new reports, watchlist) instead of a company */
