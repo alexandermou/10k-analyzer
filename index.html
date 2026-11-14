@@ -1393,6 +1393,8 @@ document.addEventListener("keydown", e => {
   if (e.key !== "Escape" || $("#imgOverlay").hidden) return;
   if ($("#imgOverlay").classList.contains("img-fs")) setImgFs(false); else $("#ovClose").click();
 });
+/* A click or tap on the dark area around the picture closes it, like the close button */
+$("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
 $("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
 
 /* ---------------- Video ---------------- */
