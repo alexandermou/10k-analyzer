@@ -414,6 +414,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 
 /* Infographic download */
 .info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
@@ -1166,7 +1167,7 @@ function segCards(c){
     </tbody></table></div></div>`; }).join("");
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
+  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && c.sparkQ ? ` · the figures are for the full year; sparklines show the last five quarters (${esc(c.sparkQ[0])} – ${esc(c.sparkQ[c.sparkQ.length - 1])})` : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
