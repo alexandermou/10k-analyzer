@@ -2181,7 +2181,7 @@ async function showIpo(){
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
-  document.body.classList.remove("home", "company"); document.body.classList.toggle("faqmode", name === "faq");
+  document.body.classList.remove("home", "company"); document.body.classList.add("faqmode");   // list pages and FAQ: no search box or selector
   $("#filing").hidden = true; $("#missing").hidden = true;
   $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#ipoPage").hidden = name !== "ipo";
   ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
