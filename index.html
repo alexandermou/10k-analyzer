@@ -414,6 +414,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 
 /* Infographic download */
 .info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
@@ -593,7 +594,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 </div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box">
-    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic image</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen</p></div>
+    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic image</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
       <div class="ov-acts"><button class="ov-ic primary" type="button" id="ovSave" aria-label="Save image" title="Save image"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
     <img id="ovImg" alt="Infographic image">
   </div>
@@ -1166,7 +1167,7 @@ function segCards(c){
     </tbody></table></div></div>`; }).join("");
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn" type="button" id="dlInfo">Download infographic (PNG)</button><span class="status" id="infoStatus" role="status"></span></div>
+  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && c.sparkQ ? ` · the figures are for the full year; sparklines show the last five quarters (${esc(c.sparkQ[0])} – ${esc(c.sparkQ[c.sparkQ.length - 1])})` : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
@@ -1336,7 +1337,7 @@ function drawSvgToCanvas(svg, W, H){
 }
 function showImage(url){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false;
-  $("#ovStatus").innerHTML = "Double-tap: full screen";
+  $("#ovStatus").innerHTML = "Double-tap: full screen or back";
   $("#ovShare").hidden = !canShareImage();
   $("#ovSave").focus();
 }
