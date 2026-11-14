@@ -504,7 +504,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
   </section>
 
   <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
-    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Earnings releases (ER) scheduled for today that haven't been filed yet — each moves to New once filed — and those due the next business day, from Nasdaq's earnings calendar. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Our forecast earnings-release (ER) dates for the next 10 business days: last year's earnings release for the same quarter (its SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date, so treat these as forecasts, not announced dates. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
@@ -1860,7 +1860,7 @@ function renderPeriods(c){
 /* ---------------- New reports page (data/latest.json: each company's latest 10-K, 10-Q or earnings release) ---------------- */
 const NEW_DAYS = 7;
 let LATEST = null, UPCOMING = null;
-function loadUpcoming(){ if (!UPCOMING) UPCOMING = fetch("data/upcoming.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return UPCOMING; }
+function loadUpcoming(){ if (!UPCOMING) UPCOMING = fetch("data/forecast.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {items: []}).catch(() => ({items: []})); return UPCOMING; }
 /* Business days: Monday–Friday except NYSE holidays */
 const HOLIDAYS = new Set(["2026-01-01","2026-01-19","2026-02-16","2026-04-03","2026-05-25","2026-06-19","2026-07-03","2026-09-07","2026-11-26","2026-12-25",
   "2027-01-01","2027-01-18","2027-02-15","2027-03-26","2027-05-31","2027-06-18","2027-07-05","2027-09-06","2027-11-25","2027-12-24"]);
@@ -1917,6 +1917,7 @@ function dayList(items, wl, head, emptyText){
 /* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
 const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading starts at 9:30 am ET, usually 6–9 am ET. The stock reacts at that morning's open."],
                ["AMC", "After market close (AMC)", "Results out after trading ends at 4:00 pm ET, usually 4–5 pm ET. The stock reacts in after-hours trading and at the next morning's open."],
+               ["DMH", "During market hours", "Last year's release came out while the market was open (9:30 am – 4:00 pm ET)."],
                ["", "Time not announced", "The company hasn't said whether it reports before the open or after the close."]];
 function timeList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
@@ -2031,20 +2032,23 @@ async function showNew(day){
    then the next business day */
 async function upcomingDays(){
   const [d, f] = await Promise.all([loadUpcoming(), loadLatest()]), t = todayISO();
-  /* already reported: filed today, or the feed already has this quarter (e.g. released earlier than the calendar says) */
+  /* already reported: the Latest feed has this quarter */
   const lastBy = Object.fromEntries(f.items.map(x => [x.ticker, x]));
-  const reported = x => { const l = lastBy[x.ticker]; return !!l && (l.date === t || l.label === x.label); };
-  const sched = day => d.items.filter(x => x.date === day && !x.estimated && LIBRARY[x.ticker] && !reported(x));
-  const today = isBiz(t) ? sched(t) : [];
-  const next = stepBiz(t, 1);
-  return {d, t, today, next, nextItems: sched(next)};
+  const reported = x => { const l = lastBy[x.ticker]; return !!l && !!x.label && l.label === x.label; };
+  const sched = day => d.items.filter(x => x.date === day && LIBRARY[x.ticker] && !reported(x));
+  const days = []; for (let x = stepBiz(t, 1), k = 0; days.length < 10 && k < 30; x = stepBiz(x, 1), k++) days.push(x);   // tomorrow + 9 business days
+  return {d, t, today: [], next: days[0], nextItems: sched(days[0]), days, sched};
 }
-async function showUpcoming(){
-  const {d, t, today, next, nextItems} = await upcomingDays(), wl = new Set(wlGet());
-  let html = "";
-  if (isBiz(t)) html += timeList(today, wl, `Reporting today <small>· ${esc(dayName(t))} · not filed yet</small>`, "Everyone scheduled for today has filed — see Latest").html;
-  html += timeList(nextItems, wl, dayDiff(next) === -1 ? `Reporting tomorrow <small>· ${esc(dayName(next))}</small>` : `Reporting ${esc(dayName(next))}`, "No reports expected").html;
-  $("#upBody").innerHTML = html + (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
+let upSel = "";
+async function showUpcoming(day){
+  const {d, t, days, sched} = await upcomingDays(), wl = new Set(wlGet());
+  if (day) upSel = day; if (!days.includes(upSel)) upSel = days[0];
+  const opts = days.map(x => `<option value="${x}"${x === upSel ? " selected" : ""}>${dayDiff(x) === -1 ? "Tomorrow · " : ""}${esc(dayName(x))} (${sched(x).length})</option>`).join("");
+  const head = `<label for="upDayPick">Our forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
+  $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
+    `<p class="sub">Forecast from SEC filings: last year's Form 8-K (Item 2.02) date + 52 weeks${d.generated ? ` · updated ${esc(mdy(d.generated))}` : ""}.</p>` +
+    (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
+  $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => $("#upDayPick").focus()));
   showPage("upcoming", "Upcoming reports");
 }
 /* One of the list pages (new reports, watchlist) instead of a company */
@@ -2099,14 +2103,14 @@ async function showWatchlist(){
   rows.sort((a, b) => { const va = val(a), vb = val(b); if ((va === "9999" || va === "~") !== (vb === "9999" || vb === "~")) return va === "9999" || va === "~" ? 1 : -1;
     return (va < vb ? -1 : va > vb ? 1 : a.t.localeCompare(b.t)) * wlSort.dir; });
   const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
-  const when = {BMO: "before open", AMC: "after close"};
+  const when = {BMO: "before open", AMC: "after close", DMH: "during market hours"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
     `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", `<span class="s-long">Next report</span><span class="s-short">Report</span>`)}${th("date", `<span class="s-long">Earnings release</span><span class="s-short">Release</span>`)}${th("in", "In", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
       rows.map(({t, c, x}) => { const href = "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
           <td>${x ? esc(x.report) : `<span class="muted">—</span>`}</td>
-          <td>${x ? `${x.estimated ? `<span class="est" title="Estimated: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated ? ` <span class="tag est-tag">est.</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
+          <td>${x ? `${x.estimated || x.forecast ? `<span class="est" title="Our forecast: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated || x.forecast ? ` <span class="tag est-tag">forecast</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
           <td class="num">${n === null ? "" : `<b class="${n <= 1 ? "soon" : ""}"><span class="s-long">${inDays(n)}</span><span class="s-short">${n === 0 ? "Today" : n === 1 ? "Tmrw" : n > 0 ? n + "d" : inDays(n)}</span></b>`}</td>
           <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
     }</tbody></table></div>
