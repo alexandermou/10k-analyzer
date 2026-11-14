@@ -272,6 +272,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .barhead p{line-height:1.3}
 .card>.bars{margin-top:auto}
 .two-line .barhead p{min-height:2.6em}
+.sec{container:sec / inline-size}
+@container sec (min-width:454px){.two-line-wide .barhead p{min-height:2.6em}}
 .barhead p{font-weight:700;font-size:16px}
 .bars{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:8px 10px;align-items:center;font-size:13px}
 .bars span{color:var(--muted)}
@@ -1062,8 +1064,10 @@ function sparkline(c, it, wide){
 }
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
 function renderSection(c, sec){
-  if (sec.type === "tiles") return `<div class="sec">${head(sec)}<div class="grid">${sec.tiles.map(t => tileCard(t, sec.top, c, sec.title === "Balance sheet")).join("")}</div></div>`;
-  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : ""}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
+  /* a long card title wraps to two lines: give every title in the row two lines so the numbers line up (only when cards sit side by side) */
+  const tl = list => list.some(x => String(x.label || "").length > 14) ? " two-line-wide" : "";
+  if (sec.type === "tiles") return `<div class="sec">${head(sec)}<div class="grid${tl(sec.tiles)}">${sec.tiles.map(t => tileCard(t, sec.top, c, sec.title === "Balance sheet")).join("")}</div></div>`;
+  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : tl(sec.items)}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
   if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
   if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
   if (sec.type === "eps" || sec.type === "quarters") return trendCard(c, sec);
