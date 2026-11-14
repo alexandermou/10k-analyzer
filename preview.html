@@ -484,6 +484,19 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .homelinks a{color:var(--ink);text-decoration:none;font-size:15px;padding:6px 2px}
 .homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.sitefoot{display:none}
+body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
+.sitefoot a{color:var(--muted);text-decoration:none;font-size:14px;padding:6px 2px}
+.sitefoot a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.faq{display:flex;flex-direction:column;gap:12px;max-width:760px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.faq summary{cursor:pointer;font-weight:600;font-size:16px;list-style-position:outside;margin-left:2px}
+.faq details[open] summary{margin-bottom:10px}
+.faq details p,.faq details li{color:var(--ink);font-size:15px;line-height:1.55}
+.faq details p+p,.faq details ul+p,.faq details p+ul{margin-top:10px}
+.faq ul{margin:0;padding-left:20px}
+.faq a{color:var(--navy)}
+.faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <nav class="homelinks" aria-label="Report lists"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#watchlist">★ Watchlist</a></nav>
@@ -515,6 +528,40 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
     <div class="np-head"><h2 id="npTitle">Latest</h2><p class="sub" id="npSub">Companies with a 10-K, 10-Q or earnings release (ER) filed today, or on the last business day if none yet today. Pick an earlier day from the list to see its Daily Top 10.</p></div>
     <div id="npBody"></div>
+  </section>
+  <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
+    <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
+    <div class="faq">
+      <details open><summary>Where does the data come from?</summary>
+        <p>Directly from the SEC. Every figure is read from the filings companies submit to the SEC's EDGAR system: annual reports (10-K, 20-F, 40-F), quarterly reports (10-Q), and earnings releases (Form 8-K, Item 2.02). We read the tagged (XBRL) data in those filings and the statements they render.</p>
+        <p>We don't use third-party data providers, and we never estimate or fill in a number that wasn't filed. If a figure isn't in the filings, it isn't on the site.</p></details>
+      <details><summary>Is a 10-K mandatory?</summary>
+        <p>Yes. Every US company that reports to the SEC must file a 10-K once a year. It covers the full fiscal year and its financial statements are audited.</p></details>
+      <details><summary>Is a 10-Q mandatory?</summary>
+        <p>Today, yes. Since 1970, US public companies have filed a 10-Q for each of the first three quarters of their fiscal year; the fourth quarter is covered by the 10-K.</p>
+        <p>That may change. On May 5, 2026, the SEC proposed letting companies file one half-year report on a new Form 10-S instead of three 10-Qs, chosen each year by a checkbox on the 10-K. Companies that don't opt in would keep filing 10-Qs. At the time of writing (November 2026) it is still a proposal, not a final rule.</p>
+        <p class="src">Source: <a href="https://www.sec.gov/newsroom/press-releases/2026-42-sec-proposes-amendments-permit-optional-semiannual-reporting-public-companies" target="_blank" rel="noopener">SEC press release 2026-42</a></p></details>
+      <details><summary>How are foreign companies different?</summary>
+        <p>Foreign companies listed in the US (foreign private issuers) don't file 10-Ks or 10-Qs. They file an annual report on Form 20-F (Form 40-F for many Canadian companies), and their interim results, if any, are furnished on Form 6-K.</p>
+        <p>SEC rules already allow them to report every half-year instead of every quarter, and many only file annual results in tagged form. That's why some of them have half-year charts or no interim charts at all.</p></details>
+      <details><summary>What do the small line charts show?</summary>
+        <ul><li>On a quarterly report: the last five quarters.</li>
+        <li>On an annual report: the last five quarters leading up to the year end, so you can see the trend inside the year.</li>
+        <li>For half-year filers: the last three half-years, marked "Half-year filer".</li></ul>
+        <p>A line is only drawn when the quarters or half-years add up to the annual figure in the filing.</p></details>
+      <details><summary>Why do some cards say "No chart because…"?</summary>
+        <p>When we can't draw a line from the filed figures, the card says why instead of staying blank. Common reasons: the company files annual reports only, the metric is reported once a year, it isn't in the half-year figures, or the quarterly figures in the filings don't add up to the year.</p></details>
+      <details><summary>How are the Upcoming dates worked out?</summary>
+        <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p></details>
+      <details><summary>How often is the site updated?</summary>
+        <p>On business days we check the SEC for new filings before the market opens, through the day and after the close, and new reports appear on the Latest page. Every night the whole library is rebuilt from the SEC's data.</p></details>
+      <details><summary>Why isn't a company in the library?</summary>
+        <p>Some filings can't be read cleanly enough to check that the figures add up. We'd rather leave a company out than show numbers that might be wrong. Use the feedback form on any company page to ask for one.</p></details>
+      <details><summary>Where is my watchlist saved?</summary>
+        <p>In a cookie in your browser only. Nothing is sent to us, and it won't follow you to another browser or device.</p></details>
+      <details><summary>Is this investment advice?</summary>
+        <p>No. The site shows what companies filed with the SEC, drawn as charts. It isn't a recommendation to buy or sell anything.</p></details>
+    </div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
     <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here, or search for a company and click the ☆ next to its name.</p></div>
@@ -596,6 +643,7 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
     </div>
   </section>
 </div>
+<footer class="sitefoot" aria-label="Site"><a href="#faq">FAQ</a></footer>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box">
     <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
@@ -2068,11 +2116,12 @@ function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   document.body.classList.remove("home");
   $("#filing").hidden = true; $("#missing").hidden = true;
-  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming";
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq";
   ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
 }
+function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
 function goHome(){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
@@ -2080,7 +2129,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2234,7 +2283,7 @@ function enterSubmits(input, form){
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -2243,6 +2292,7 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (["#latest", "#new"].includes(location.hash.toLowerCase())) { await showNew(); return; }   // #new: old links
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
+  if (location.hash.toLowerCase() === "#faq") { showFaq(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
   /* Default: home (search box and company selector only) */
