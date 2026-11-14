@@ -483,6 +483,7 @@ body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16p
 body:not(.home) .brand{padding-right:88px}
 .topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
 body.home .topicons{display:none}
+body:not(.haswl) #wlIcon,body:not(.haswl) #wlBtn,body:not(.haswl) .homelinks a[href="#watchlist"]{display:none!important}
 .topicons a:hover{color:var(--accent);border-color:var(--accent)}
 .topicons a[aria-current]{color:var(--accent)}
 body.company .views{display:none}
@@ -2156,6 +2157,7 @@ const wlHas = t => wlGet().includes(t);
 function wlToggle(t){ const l = wlGet(); wlSet(l.includes(t) ? l.filter(x => x !== t) : l.concat(t)); }
 function wlChanged(){
   const n = wlGet().length, b = $("#wlCount"); b.textContent = n; b.hidden = !n;
+  document.body.classList.toggle("haswl", n > 0);   // no watchlist links until something is on it
   const w = $("#starBtn"), on = wlHas(state.ticker);
   if (w) { w.setAttribute("aria-pressed", on); w.textContent = on ? "★" : "☆"; w.title = on ? `Remove ${state.ticker} from your watchlist` : `Add ${state.ticker} to your watchlist`; w.setAttribute("aria-label", w.title); }
   if (state.page === "watchlist") showWatchlist();
