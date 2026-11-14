@@ -485,6 +485,9 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .homelinks a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .homelinks a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 .sitefoot{display:none}
+body.faqmode .shelf{display:none}
+.faq-back{font-size:14px;color:var(--muted);text-decoration:none;align-self:flex-start}
+.faq-back:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
 .sitefoot a{color:var(--muted);text-decoration:none;font-size:14px;padding:6px 2px}
 .sitefoot a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
@@ -530,7 +533,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
-    <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
+    <div class="np-head"><a class="faq-back" href="./" id="faqBack">← 10-K Analyzer</a><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
     <div class="faq">
       <details open><summary>Where does the data come from?</summary>
         <p>Directly from the SEC. Every figure is read from the filings companies submit to the SEC's EDGAR system: annual reports (10-K, 20-F, 40-F), quarterly reports (10-Q), and earnings releases (Form 8-K, Item 2.02). We read the tagged (XBRL) data in those filings and the statements they render.</p>
@@ -2114,7 +2117,7 @@ async function showUpcoming(day){
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
-  document.body.classList.remove("home");
+  document.body.classList.remove("home"); document.body.classList.toggle("faqmode", name === "faq");
   $("#filing").hidden = true; $("#missing").hidden = true;
   $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq";
   ["up", "new", "wl"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist"})[k] === name));
@@ -2129,7 +2132,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ document.body.classList.remove("faqmode"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2283,6 +2286,7 @@ function enterSubmits(input, form){
 enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
+$("#faqBack").addEventListener("click", e => { e.preventDefault(); goHome(); });
 window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
