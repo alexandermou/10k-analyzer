@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Competition in the visual content, creative services and digital marketing support industries could adversely affect our revenues and profitability</li><li>We may depend on independent contractors and third-party service providers</li><li>We may be subject to intellectual property claims in connection with the content we create or use</li><li>Our use of artificial intelligence-based creative tools may expose us to intellectual property, confidentiality, and operational risks</li><li>Sufficient revenue may not be generated to achieve or sustain profitability</li><li>We depend on a small number of customers, and the expiration or loss of our remaining active customer engagement could materially reduce our revenue</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: ELT Design Holdings Ltd's <a href="https://www.sec.gov/Archives/edgar/data/2088223/000208822326000004/elt_s1.htm" target="_blank" rel="noopener">Form S-1, filed with the SEC on Nov 13, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

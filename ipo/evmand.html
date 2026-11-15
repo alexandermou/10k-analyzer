@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>A self-underwritten, best-efforts offering at $0.06 a share, sold by the company&#x27;s directors with no minimum and no escrow.</li><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Depends on a single product launched only in July 2026.</li><li>Search-engine algorithm changes could make the tool less useful.</li><li>Free trials could be abused, hurting paid sign-ups.</li><li>May not raise enough money to carry out its plan.</li></ol><p class="note">In plain English, from the filing&#x27;s risk factors.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Evmand Corp's <a href="https://www.sec.gov/Archives/edgar/data/2136571/000213657126000007/forms1_a2.htm" target="_blank" rel="noopener">Form S-1/A, filed with the SEC on Oct 16, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

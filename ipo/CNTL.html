@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -141,6 +148,7 @@ body.shot .chart svg{height:200px}
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Insiders keep control: about 100% of the voting power after the offering.</li></ul></section>
   <section class="card wide"><h2>The numbers</h2><div class="tw shot-only"><table><thead><tr><th>$</th><th>FY2025</th><th>FY2024</th><th>YoY</th><th>H1 2026</th><th>H1 2025</th><th>Change</th></tr></thead><tbody><tr><td>Revenue</td><td>132.2M</td><td>95.1M</td><td class="g">+39.0%</td><td>85.2M</td><td>60.1M</td><td class="g">+41.9%</td></tr><tr><td>Net result</td><td>(4.3M)</td><td>(12.1M)</td><td class="g">−64.4%</td><td>10.2M</td><td>(503.0K)</td><td class="">n/m</td></tr></tbody></table></div><div class="pair tables"><div><div class="tw "><table><thead><tr><th>$</th><th>FY2025</th><th>FY2024</th><th>YoY</th></tr></thead><tbody><tr><td>Revenue</td><td>132.2M</td><td>95.1M</td><td class="g">+39.0%</td></tr><tr><td>Net result</td><td>(4.3M)</td><td>(12.1M)</td><td class="g">−64.4%</td></tr></tbody></table></div></div><div><div class="tw "><table><thead><tr><th>$</th><th>H1 2026</th><th>H1 2025</th><th>Change</th></tr></thead><tbody><tr><td>Revenue</td><td>85.2M</td><td>60.1M</td><td class="g">+41.9%</td></tr><tr><td>Net result</td><td>10.2M</td><td>(503.0K)</td><td class="">n/m</td></tr></tbody></table></div></div></div>
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier and show the change in size; green is better for the company, red worse; n/m where the sign flips.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>We depend entirely on sales of our prodisc products for our revenue</li><li>We have a limited history of commercializing certain of our products and have experienced periods of significant business changes in a short time…</li><li>We have a history of net losses, we anticipate increasing expenses in the future, and we may not be able to maintain profitability</li><li>Our business plan relies on certain assumptions about the market for our implant systems, however, the size…</li><li>We operate in a highly competitive business environment, and if we are unable to compete successfully against our existing or potential competitors…</li><li>Our long-term growth depends on our ability to market, sell and improve our existing products and technologies…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Centinel Spine Holdco, Inc.'s <a href="https://www.sec.gov/Archives/edgar/data/2132065/000110465926114375/tm2613312-6_s1.htm" target="_blank" rel="noopener">Form S-1, filed with the SEC on Oct 7, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

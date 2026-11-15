@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -141,6 +148,7 @@ body.shot .chart svg{height:200px}
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Insiders keep control: about 80.54% of the voting power after the offering.</li></ul></section>
   <section class="card wide"><h2>The numbers</h2><div class="tw "><table><thead><tr><th>$</th><th>FY2026</th><th>FY2025</th><th>FY2024</th><th>YoY</th></tr></thead><tbody><tr><td>Revenue</td><td>323.9M</td><td>373.3M</td><td>413.1M</td><td class="b">−13.2%</td></tr><tr><td>Operating result</td><td>19.0M</td><td>13.5M</td><td>18.4M</td><td class="g">+40.7%</td></tr><tr><td>Net result</td><td>16.9M</td><td>11.3M</td><td>13.7M</td><td class="g">+50.2%</td></tr></tbody></table></div>
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier and show the change in size; green is better for the company, red worse; n/m where the sign flips.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>We have a limited operating history which makes evaluating our business and future prospects difficult</li><li>Our business strategy may not be successfully implemented, which could negatively impact our financial results and stock price</li><li>Our future growth is largely dependent upon our ability to develop new technologies that achieve market acceptance…</li><li>We have experienced and may in the future experience significant delays in the design, manufacturing of our products</li><li>We have limited ability to accurately make plans for our production, which may result in carrying excess and obsolete raw material inventory</li><li>Failures or delays in the design, validation, and implementation of complex tooling for new…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>Sales Channel Expansion: Expand manufacturing footprint to support strategic accounts</li><li>Enhancing Management Capabilities</li><li>Technological Advancement Initiatives</li><li>Optimizing Services for Tesla</li></ol><p class="note">The filing&#x27;s own strategy headings, shortened.</p></section>
   <p class="src">Source: Simwon America Corp.'s <a href="https://www.sec.gov/Archives/edgar/data/1698506/000121390026116984/ea0270032-21.htm" target="_blank" rel="noopener">Form S-1/A, filed with the SEC on Nov 6, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

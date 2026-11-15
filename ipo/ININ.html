@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>We operate two distinct lines of business with different economics and risk profiles</li><li>We depend significantly on the procurement of finished products, and various factors may result in an inadequate supply…</li><li>Our operations are dependent on the availability and price of products such as fasteners, engineering components, solar modules and inverters</li><li>Our reliance on third-party subcontractors to perform substantial EPC work without clear agreements on scope, quality standards, indemnification…</li><li>We are reliant on limited suppliers to meet the growing demands of our customers</li><li>A significant portion of our revenue was generated from a limited number of customers</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>Further strengthen our market position in Singapore</li><li>Downstream expansion into the engineering, procurement and construction section</li><li>Increase our geographical presence</li></ol><p class="note">The filing&#x27;s own strategy headings, shortened.</p></section>
   <p class="src">Source: Sin Lian Seng Construction's <a href="https://www.sec.gov/Archives/edgar/data/2097388/000149315226034511/formf-1a.htm" target="_blank" rel="noopener">Form F-1/A, filed with the SEC on Jul 24, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

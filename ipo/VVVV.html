@@ -113,6 +113,13 @@ body.shot .chart svg{height:200px}
 .ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -256,6 +263,8 @@ body.shot .chart svg{height:200px}
     <p class="note">H/H: first half 2026 vs first half 2025. YoY: fiscal 2025 vs fiscal 2024. Both are the change in the size of each line, worked out from the filed figures; green means better for the company (more revenue, lower costs or losses), red means worse. FY2024 and FY2025 audited; half-years unaudited. Gross margins for FY2024 (32.0%) and H1 2025 (51.4%) in the charts are worked out from these lines.</p>
   </section>
 
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Sales depend on dentists and patients knowing about and accepting Curodont.</li><li>Relies on distributors, especially Henry Schein, and a few key customers.</li><li>Must keep expanding its sales and marketing to grow.</li><li>Depends on outside manufacturers and suppliers.</li><li>Its market may be smaller than it estimates.</li><li>Depends on its senior management and key staff.</li></ol><p class="note">In plain English, from the filing's risk factors.</p></section>
+  <section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>Keep building its direct sales, clinical education and marketing teams.</li><li>Raise awareness among dentists, patients and insurers.</li><li>Use AI cavity-detection tools to find more treatable cavities.</li><li>Expand into more countries.</li><li>Use its Curodont technology to add new products.</li></ol><p class="note">In plain English, from the filing's growth strategies.</p></section>
   <p class="src">Source: every figure is from vVARDIS's <a href="https://www.sec.gov/Archives/edgar/data/1907709/000114036126043309/ny20076472x16_f1a.htm" target="_blank" rel="noopener">Form F-1/A, Amendment No. 2, filed with the SEC on November 12, 2026</a> (preliminary prospectus). The final price will be in the 424B4 prospectus. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

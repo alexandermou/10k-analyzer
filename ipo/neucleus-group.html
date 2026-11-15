@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -141,6 +148,7 @@ body.shot .chart svg{height:200px}
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Insiders keep control: about 50% of the voting power after the offering.</li></ul></section>
   <section class="card wide"><h2>The numbers</h2><div class="tw "><table><thead><tr><th>MYR</th><th>FY2025</th><th>FY2024</th><th>YoY</th></tr></thead><tbody><tr><td>Revenue</td><td>3.1M</td><td>274.1K</td><td class="g">+1030.4%</td></tr><tr><td>Net result</td><td>937.7K</td><td>53.5K</td><td class="g">+1652.4%</td></tr></tbody></table></div>
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier and show the change in size; green is better for the company, red worse; n/m where the sign flips.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>We have produced limited revenue</li><li>We are dependent on our Directors and business unit heads for continued success and growth of our business</li><li>We may fail to maintain and grow our customer base or keep our customers engaged through our services</li><li>We may not accurately predict the adoption of our scientific parental consultation services, or any resulting impact on our revenues…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Neucleus Group Ltd's <a href="https://www.sec.gov/Archives/edgar/data/2093976/000149315226033344/formf-1a.htm" target="_blank" rel="noopener">Form F-1/A, filed with the SEC on Jul 15, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>We have a history of losses and may not generate revenue from our operations or achieve or maintain profitability if our development…</li><li>We require significant additional capital to fund our business, which may not be available on acceptable terms or at all</li><li>Our exploration activities require substantial capital, and actual costs and timelines may significantly exceed our estimates</li><li>We have no history of producing heavy mineral sands or rare earth elements from our mineral properties and there can be no assurance…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Chilwa Minerals Ltd's <a href="https://www.sec.gov/Archives/edgar/data/2113605/000121390026106090/ea0307489-424b1_chilwa.htm" target="_blank" rel="noopener">Form 424B1, filed with the SEC on Oct 2, 2026</a>  (final prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

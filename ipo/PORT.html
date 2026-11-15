@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>No operating business yet: the figures that matter come later, with the merger target it picks.</li><li>Shareholders can usually redeem their shares for the cash in trust when a merger is put to a vote.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Our public shareholders may not be afforded an opportunity to vote on our proposed initial business combination, and even if we hold a vote…</li><li>Your only opportunity to effect your investment decision regarding a potential business combination may be limited to the exercise of your right to…</li><li>The ability of our public shareholders to redeem their shares for cash may make our financial condition unattractive to potential business…</li><li>The requirement that we complete our initial business combination within the completion window may give potential target businesses leverage over us…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">A SPAC has no business strategy of its own until it picks a company to merge with.</p></section>
   <p class="src">Source: Southport Acquisition Corp. II's <a href="https://www.sec.gov/Archives/edgar/data/2148436/000118518526004535/southacq2424b4093026.htm" target="_blank" rel="noopener">Form 424B4, filed with the SEC on Oct 2, 2026</a>  (final prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

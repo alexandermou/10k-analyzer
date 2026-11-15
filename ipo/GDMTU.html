@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -138,6 +145,7 @@ body.shot .chart svg{height:200px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>No operating business yet: the figures that matter come later, with the merger target it picks.</li><li>Shareholders can usually redeem their shares for the cash in trust when a merger is put to a vote.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Our public shareholders may not be afforded an opportunity to vote on our proposed initial business combination…</li><li>Your only opportunity to affect the investment decision regarding a potential business combination may be limited to the exercise of your right to…</li><li>The ability of our public shareholders to exercise redemption rights with respect to a large number of our shares may not allow us to complete the…</li><li>The requirement that we complete our initial business combination within 15 months from the closing of this offering may give potential target…</li><li>You will not have any rights or interests in funds from the trust account, except under certain limited circumstances</li><li>We may seek acquisition opportunities in industries or sectors which may be outside of our management’s area of expertise</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>Financial Services: The financial services industry is undergoing a structural shift as technology reshapes how capital, payments…</li><li>Artificial Intelligence: AI has moved rapidly from experimentation to mainstream enterprise adoption</li><li>Robotics: According to GlobalData, the global robotics market is forecast to grow from $90.2 billion in 2024 to $205.5 billion by 2030…</li></ol><p class="note">The filing&#x27;s own strategy headings, shortened.</p></section>
   <p class="src">Source: Gold Mountain Acquisition Corp.'s <a href="https://www.sec.gov/Archives/edgar/data/2105318/000149315226042376/forms-1a.htm" target="_blank" rel="noopener">Form S-1/A, filed with the SEC on Sep 11, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>

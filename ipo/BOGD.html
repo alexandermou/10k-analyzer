@@ -116,6 +116,13 @@ body.shot .chart svg{height:200px}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
 .risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -140,6 +147,7 @@ body.shot .chart svg{height:200px}
     <p class="note">Share of voting power held by the founders or controlling holders after the offering, as stated in the filing.</p></section>
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li><li>Insiders keep control: about 50% of the voting power after the offering.</li></ul></section>
   
+  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>If we are unable to effectively maintain the quality of our loan portfolio, our business, financial condition…</li><li>Our funding is primarily short-term and depositors may not roll-over deposited funds upon maturity</li><li>Failure to implement and maintain an effective system of financial reporting and internal controls may materially…</li><li>Our Controlling Shareholder and related parties may exercise influence over certain of our affairs and may have interests which differ from ours</li><li>We have engaged in transactions with related parties, may continue to do so in the future…</li><li>Our allowances for doubtful accounts may prove inadequate</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>SME Finance: With 30.4% of our loan portfolio being SMEs by loan amount, we strive to support local businesses in various industries</li><li>Eco-Green Financing: As an advocate of sustainability, Bogd Bank intends to continue to finance impactful green projects with impact</li><li>Empowering Women: 40% of Bogd Bank’s SME clients are women-led businesses</li><li>Rural Development: Bogd Bank aims to expand its presence in rural areas of Mongolia to improve access to banking services…</li></ol><p class="note">The filing&#x27;s own strategy headings, shortened.</p></section>
   <p class="src">Source: Bogd FT Ltd's <a href="https://www.sec.gov/Archives/edgar/data/2113733/000121390026116779/ea0310415-f1a1_bogdft.htm" target="_blank" rel="noopener">Form F-1/A, filed with the SEC on Nov 6, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   <div class="brand"><span>10-K Analyzer by Alexander</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>
