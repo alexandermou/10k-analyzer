@@ -494,7 +494,9 @@ body.home .tl-latest:hover{color:var(--accent);text-decoration:underline;text-un
 .hm-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hm-panel{position:absolute;top:48px;right:0;min-width:210px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column;z-index:20}
 .hm-panel[hidden]{display:none}
-.topicons .hm-panel a{display:block;width:auto;height:auto;border:0;background:none;padding:12px 14px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:16px;font-weight:500;white-space:nowrap}
+.hm-n{font:600 12px var(--f-mono);min-width:22px;padding:2px 7px;border-radius:999px;background:var(--n-bg);color:var(--n-fg);text-align:center}
+.hm-n[hidden]{display:none}
+.topicons .hm-panel a{display:flex;justify-content:space-between;align-items:center;gap:16px;width:auto;height:auto;border:0;background:none;padding:12px 14px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:16px;font-weight:500;white-space:nowrap}
 .topicons .hm-panel a:hover,.topicons .hm-panel a:focus-visible{background:var(--sunk,rgba(0,0,0,.05));color:var(--accent);outline:none}
 body:not(.haswl) #wlIcon,body:not(.haswl) #wlBtn,body:not(.haswl) .homelinks a[href="#watchlist"]{display:none!important}
 .topicons a:hover{color:var(--accent);border-color:var(--accent)}
@@ -544,7 +546,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest</a><a href="#upcoming">Upcoming</a><a href="#ipo">IPOs</a><a href="#watchlist">★ Watchlist</a><a href="#faq">FAQ</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPOs<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a></nav></div></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -2279,6 +2281,7 @@ const wlHas = t => wlGet().includes(t);
 function wlToggle(t){ const l = wlGet(); wlSet(l.includes(t) ? l.filter(x => x !== t) : l.concat(t)); }
 function wlChanged(){
   const n = wlGet().length, b = $("#wlCount"); b.textContent = n; b.hidden = !n;
+  { const m = $("#mWl"); if (m) { m.textContent = n; m.hidden = !n; m.setAttribute("aria-label", `${n} on your watchlist`); } }
   document.body.classList.toggle("haswl", n > 0);   // no watchlist links until something is on it
   const w = $("#starBtn"), on = wlHas(state.ticker);
   if (w) { w.setAttribute("aria-pressed", on); w.textContent = on ? "★" : "☆"; w.title = on ? `Remove ${state.ticker} from your watchlist` : `Add ${state.ticker} to your watchlist`; w.setAttribute("aria-label", w.title); }
@@ -2329,7 +2332,10 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
 document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
-const badge = (id, n, word) => { const b = $(id); if (!n) { b.hidden = true; return; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); };
+const MENU_N = {"#newCount": "#mNew", "#upCount": "#mUp"};
+const badge = (id, n, word) => { for (const x of [id, MENU_N[id]].filter(Boolean)) { const b = $(x); if (!b) continue; if (!n) { b.hidden = true; continue; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); } };
+/* menu count for IPOs: companies on the IPO list (all stages, SPACs included) */
+fetch("data/ipo.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : null).then(d => { if (d && d.ipos) badge("#mIpo", d.ipos.length, "IPOs"); }).catch(() => {});
 loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
 /* badge: today's not-yet-filed releases, or the next business day's when today's are done */
 const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length || u.nextItems.length, "upcoming"));
