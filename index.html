@@ -432,6 +432,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov-ic:active{transform:scale(.95)}
 .ov-box:focus{outline:none}
 .ov-ic:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ov-exitfs{display:none}
+.ov.img-fs .ov-exitfs{display:grid;place-items:center;position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);z-index:1002;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(10,15,22,.6);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .ov.img-fs .ov-head{display:none}
 #ovImg{touch-action:manipulation;cursor:zoom-in;-webkit-user-select:none;user-select:none}
 .ov.img-fs{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#05080d;z-index:1001}
@@ -511,6 +513,15 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .ipo-links a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .ipo-dot{color:var(--muted);font-weight:400}
 .ipo-est{color:var(--accent)}
+.rs-card{padding:18px 20px}
+.rs-h{font-size:22px;margin:0}
+.rs-list{margin:12px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45;font-size:15px}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+.rs-note{margin:12px 0 0;font-size:13px}
+@media (min-width:900px){.rs-list{display:block;columns:2;column-gap:32px}.rs-list li{break-inside:avoid;margin-bottom:10px}}
 .sitefoot{display:none}
 body.faqmode .shelf{display:none}
 body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px)}
@@ -684,6 +695,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   <div class="ov-box" tabindex="-1">
     <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
       <div class="ov-acts"><button class="ov-ic" type="button" id="ovSave" aria-label="Save image" title="Save image"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v11"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+    <button class="ov-exitfs" type="button" id="ovExitFs" aria-label="Exit full screen" title="Exit full screen"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
     <img id="ovImg" alt="Infographic">
   </div>
 </div>
@@ -1258,6 +1270,16 @@ function segCards(c){
       <tr class="key"><td>${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</td><td>${segPct(mc)}</td><td>${segPct(mp)}</td><td><span class="chip ${d >= 0 ? "up" : "down"}">${ppStr(d)}</span></td></tr>
     </tbody></table></div></div>`; }).join("");
 }
+/* Risks and Strategy: the 10-K's own risk-factor and strategy headings, shortened to one line each (build_risk_strategy.py) */
+function rsCards(c){
+  if (!("risks" in c) && !("strategy" in c)) return "";
+  const src = c.rsFrom || {}, form = src.form || "10-K";
+  const card = (kind, title, items, none) => `<div class="card rs-card"><h3 class="rs-h">${title}</h3>${items && items.length
+    ? `<ol class="rs-list rs-${kind}">${items.map(x => `<li>${esc(x)}</li>`).join("")}</ol><p class="sub rs-note">From the ${esc(form)}'s own ${kind === "risks" ? "risk-factor" : "strategy"} headings, shortened.</p>`
+    : `<p class="sub rs-note">${none}</p>`}</div>`;
+  return card("risks", "Risks", c.risks, `The ${esc(form)} doesn't set out its risks in a list we could read.`) +
+         card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
+}
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
@@ -1268,6 +1290,7 @@ function renderInfographic(c){
       <div class="sankey">${sankey(c)}</div>
     </div>
     ${c.sections.map(sec => renderSection(c, sec)).join("")}
+    ${c.quarter ? "" : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(c.period)}; filed ${esc(c.filed)}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
   $("#dlInfo").addEventListener("click", downloadInfographic);
@@ -1317,6 +1340,8 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".seg-card.wide .seg-val .chip").forEach(x => { x.style.fontSize = "13px"; x.style.padding = "3px 10px"; x.style.whiteSpace = "nowrap"; });
     n.querySelectorAll(".seg-card.wide .lbl").forEach(x => { x.style.fontSize = "14px"; });
     n.querySelectorAll(".barhead .sub").forEach(x => { x.textContent = x.textContent.replace(" · scroll sideways on a phone", ""); });
+    n.querySelectorAll(".rs-list").forEach(x => { x.style.display = "block"; x.style.columns = "2"; x.style.columnGap = "32px"; });
+    n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
     h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer by Alexander</p>`;
@@ -1462,6 +1487,7 @@ function setImgFs(on){
   }
 }
 const toggleImgFs = () => setImgFs(!$("#imgOverlay").classList.contains("img-fs"));
+$("#ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); });   // the exit button sits outside the picture, so it never ends up in a saved image
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
   if (!ovFsReal() && $("#imgOverlay").classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement)) {
     // left real full screen with the system gesture or Esc: drop the full-screen look too, unless we never had real full screen
