@@ -72,6 +72,14 @@ th{color:var(--muted);font-weight:600;font-family:var(--f-body)}
 details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:10px}
 .src{font-size:13px;color:var(--muted)}
 .src a{color:var(--navy)}
+.top .icons{display:flex;gap:6px}
+.top a.toplink{width:auto;height:auto;display:inline;border:0;background:none;border-radius:0;color:var(--navy);font-weight:600;font-size:16px;text-decoration:none;padding:8px 2px}
+.top a.toplink:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+body:not(.haswl) #wlIcon{display:none}
+.star-btn{display:inline-flex;align-items:center;justify-content:center;width:1.1em;height:1.1em;margin-left:.2em;vertical-align:-.08em;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.85em;line-height:1;cursor:pointer;padding:0}
+.star-btn:hover{color:var(--accent);background:var(--accent-soft)}.star-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.star-btn[aria-pressed="true"]{color:var(--accent)}
+body.shot .star-btn{display:none}
 .tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .btn{height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font:600 15px var(--f-body);cursor:pointer}
 .btn:disabled{opacity:.6}
@@ -109,12 +117,13 @@ body.shot .chart svg{height:200px}
 <body>
 <div class="wrap">
   <div class="top">
-    <span class="kicker">IPO filing, visualized</span>
-    <a href="../preview.html#ipo" aria-label="Back to IPOs" title="IPOs"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a>
+    <a class="toplink" href="../preview.html#ipo">IPOs</a>
+    <span class="icons"><a href="../preview.html#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="../preview.html" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></span>
   </div>
 
   <header>
-    <h1>vVARDIS Holding AG</h1>
+    <span class="kicker">IPO filing, visualized</span>
+    <h1>vVARDIS Holding AG<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
     <p class="sub">Drill-free treatment for early-stage tooth decay · Zug, Switzerland</p>
     <div class="chips"><span class="chip">VVVV · NYSE</span><span class="chip">Switzerland</span><span class="chip">F-1 · foreign private issuer</span><span class="chip go">SEC cleared Nov 12, 2026</span></div>
   </header>
@@ -318,6 +327,17 @@ $("ovImg").addEventListener("dblclick", e => { e.preventDefault(); if (Date.now(
 $("ovClose").addEventListener("click", () => { setImgFs(false); $("ovImg").removeAttribute("src"); ov.hidden = true; $("dlInfo").focus(); });
 ov.addEventListener("click", e => { if (e.target === e.currentTarget) $("ovClose").click(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape" || ov.hidden) return; if (ov.classList.contains("img-fs")) setImgFs(false); else $("ovClose").click(); });
+
+/* Watchlist star: the same cookie the main site uses (path = the site folder, one level up) */
+const TICKER = "VVVV", WL_PATH = location.pathname.replace(/ipo\/[^/]*$/, "") || "/";
+function wlGet(){ const m = document.cookie.match(/(?:^|;\s*)wl=([^;]*)/); if (!m) return [];
+  try { return [...new Set(decodeURIComponent(m[1]).split(",").map(t => t.trim().toUpperCase()).filter(t => /^[A-Z0-9.\-]{1,10}$/.test(t)))]; } catch (e) { return []; } }
+function wlSet(list){ document.cookie = `wl=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; wlShow(); }
+function wlShow(){ const on = wlGet().includes(TICKER), b = $("starBtn");
+  b.setAttribute("aria-pressed", on); b.textContent = on ? "★" : "☆"; b.title = on ? `Remove ${TICKER} from your watchlist` : `Add ${TICKER} to your watchlist`; b.setAttribute("aria-label", b.title);
+  document.body.classList.toggle("haswl", wlGet().length > 0); }
+$("starBtn").addEventListener("click", () => { const l = wlGet(); wlSet(l.includes(TICKER) ? l.filter(t => t !== TICKER) : l.concat(TICKER)); });
+wlShow();
 if (new URLSearchParams(location.search).has("shot")) document.body.classList.add("shot");
 </script>
 </body>

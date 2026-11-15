@@ -2140,6 +2140,8 @@ async function showUpcoming(day){
 }
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
 let ipoData = null, ipoStage = "";
+/* IPO filings with their own visual-summary page; also lets them sit on the watchlist */
+const IPO_PAGES = {VVVV: {name: "vVARDIS Holding AG", short: "vVARDIS", href: "ipo/VVVV.html"}};
 const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
 const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
 async function showIpo(){
@@ -2161,8 +2163,8 @@ async function showIpo(){
     }
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
-    const vis = ({VVVV: "ipo/VVVV.html"})[x.symbol];   // filings we've drawn as a visual summary
-    if (vis) meta.push(`<a href="${vis}">Visual summary of the filing →</a>`);
+    const vis = IPO_PAGES[x.symbol];   // filings we've drawn as a visual summary
+    if (vis) meta.push(`<a href="${vis.href}">Visual summary of the filing →</a>`);
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div></div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
@@ -2235,7 +2237,7 @@ const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} 
 async function showWatchlist(){
   const list = wlGet(), up = await loadUpcoming(), next = {};
   for (const x of up.items) if (!next[x.ticker] || x.date < next[x.ticker].date) next[x.ticker] = x;
-  const rows = list.map(t => ({t, c: LIBRARY[t] || {short: t, name: t}, x: next[t]}));
+  const rows = list.map(t => ({t, c: LIBRARY[t] || IPO_PAGES[t] || {short: t, name: t}, x: next[t]}));
   const val = r => wlSort.key === "ticker" ? r.t : wlSort.key === "report" ? (r.x ? r.x.report : "~") : (r.x ? r.x.date : "9999");   // "date" and "in" sort alike
   rows.sort((a, b) => { const va = val(a), vb = val(b); if ((va === "9999" || va === "~") !== (vb === "9999" || vb === "~")) return va === "9999" || va === "~" ? 1 : -1;
     return (va < vb ? -1 : va > vb ? 1 : a.t.localeCompare(b.t)) * wlSort.dir; });
@@ -2243,10 +2245,10 @@ async function showWatchlist(){
   const when = {BMO: "before open", AMC: "after close", DMH: "during market hours"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
     `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", `<span class="s-long">Next report</span><span class="s-short">Report</span>`)}${th("date", `<span class="s-long">Earnings release</span><span class="s-short">Release</span>`)}${th("in", "In", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
-      rows.map(({t, c, x}) => { const href = "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
+      rows.map(({t, c, x}) => { const ipo = !LIBRARY[t] && IPO_PAGES[t], href = ipo ? ipo.href : "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
-          <td>${x ? esc(x.report) : `<span class="muted">—</span>`}</td>
+          <td>${x ? esc(x.report) : ipo ? "IPO" : `<span class="muted">—</span>`}</td>
           <td>${x ? `${x.estimated || x.forecast ? `<span class="est" title="Our forecast: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated || x.forecast ? ` <span class="tag est-tag">forecast</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
           <td class="num">${n === null ? "" : `<b class="${n <= 1 ? "soon" : ""}"><span class="s-long">${inDays(n)}</span><span class="s-short">${n === 0 ? "Today" : n === 1 ? "Tmrw" : n > 0 ? n + "d" : inDays(n)}</span></b>`}</td>
           <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
