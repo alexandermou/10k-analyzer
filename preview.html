@@ -582,10 +582,10 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="ipoBody"></div>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
-    <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public company to add. We check the ticker against the SEC's list first.</p></div>
+    <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public companies to add, up to 10 at a time. We check the ticker against the SEC's list first.</p></div>
     <form class="addform" id="addForm" novalidate>
-      <label for="addTicker">Ticker</label>
-      <input id="addTicker" type="text" maxlength="12" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="e.g. NVDA">
+      <label for="addTicker">Tickers (up to 10)</label>
+      <input id="addTicker" type="text" maxlength="100" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="e.g. NVDA, AMD, PLTR">
       <p class="addhint" id="addHint" role="status"></p>
       <label for="addEmail">Email, to tell you when it's added</label>
       <input id="addEmail" type="email" maxlength="120" autocomplete="email">
@@ -593,7 +593,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <button class="btn" id="addSend" type="submit">Send request</button>
       <p class="addstat" id="addStatus" role="status"></p>
     </form>
-    <div class="addthanks" id="addThanks" hidden tabindex="-1"><h3>Thanks, got it.</h3><p id="addThanksText">We will add it in some time.</p><button class="btn ghost" type="button" id="addAgain">Request another</button></div>
+    <div class="addthanks" id="addThanks" hidden tabindex="-1"><h3>Thanks, got it.</h3><p id="addThanksText">We will add them in some time.</p><p id="addSkipped"></p><button class="btn ghost" type="button" id="addAgain">Request another</button></div>
   </section>
   <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
     <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
@@ -2460,8 +2460,9 @@ $("#searchForm").addEventListener("submit", e => { e.preventDefault();
 /* Is it a real public-company ticker (or name)? Checked against the SEC's list, loaded only when a search misses */
 let SEC = null;
 const secKey = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, "");
+async function loadSec(){ if (!SEC) { try { SEC = await fetch("data/sec_tickers.json").then(r => r.ok ? r.json() : []); } catch (e) { SEC = []; } } return SEC; }
 async function secLookup(q){
-  if (!SEC) { try { SEC = await fetch("data/sec_tickers.json").then(r => r.ok ? r.json() : []); } catch (e) { SEC = []; } }
+  await loadSec();
   const tk = secKey(q.split(/\s+[\u2014-]\s+/)[0]);
   const byT = SEC.find(r => secKey(r[0]) === tk);
   if (byT) return [byT[0], titleCase(byT[1])];
@@ -2475,28 +2476,41 @@ function resetAdd(){ $("#addThanks").hidden = true; $("#addForm").hidden = false
 $("#addAgain").addEventListener("click", () => { $("#addTicker").value = ""; resetAdd(); $("#addTicker").focus(); });
 $("#addForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const st = $("#addStatus"), btn = $("#addSend"), q = $("#addTicker").value.trim(), email = $("#addEmail").value.trim();
+  const st = $("#addStatus"), btn = $("#addSend"), email = $("#addEmail").value.trim();
+  const toks = [...new Set($("#addTicker").value.toUpperCase().split(/[\s,;]+/).filter(Boolean))];
   $("#addHint").textContent = "";
-  if (!q) { st.textContent = "Please enter a ticker."; $("#addTicker").focus(); return; }
+  if (!toks.length) { st.textContent = "Please enter a ticker."; $("#addTicker").focus(); return; }
+  if (toks.length > 10) { st.textContent = `Up to 10 tickers at a time. You entered ${toks.length}.`; $("#addTicker").focus(); return; }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = "That email doesn't look right. Check it, or leave it blank."; $("#addEmail").focus(); return; }
-  if ($("#addHoney").value) { showAddThanks("x"); return; }
+  if ($("#addHoney").value) { showAddThanks([], []); return; }
   btn.disabled = true; st.textContent = "Checking\u2026";
   try {
-    const m = await secLookup(q);
-    if (!m) { st.textContent = `\u201c${q}\u201d isn\u2019t a public company ticker we can find. Check the spelling.`; return; }
-    if (LIBRARY[m[0]] || LIBRARY[ALIASES[m[0]]]) { st.textContent = ""; $("#addHint").textContent = `${m[0]} is already in the library. Search for it on the home page.`; return; }
+    await loadSec();
+    const ok = [], have = [], bad = [];
+    for (const t of toks) {
+      const r = SEC.find(x => secKey(x[0]) === secKey(t));
+      if (!r) bad.push(t);
+      else if (LIBRARY[r[0]] || LIBRARY[ALIASES[r[0]]]) have.push(r[0]);
+      else ok.push([r[0], titleCase(r[1])]);
+    }
+    if (!ok.length) {
+      st.textContent = "";
+      $("#addHint").textContent = [have.length ? `Already in the library: ${have.join(", ")}.` : "", bad.length ? `Not found at the SEC: ${bad.join(", ")}. Check the spelling.` : ""].filter(Boolean).join(" ");
+      return;
+    }
     st.textContent = "Sending\u2026";
+    const list = ok.map(o => `${o[0]} (${o[1]})`).join(", ");
     const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
       method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
-      body: JSON.stringify({ticker: m[0], company: m[1], email: email || "(not given)", ...(email ? {_replyto: email} : {}), page: location.href.split("#")[0], sent: new Date().toISOString(),
-        subject: `Add ticker: ${m[0]}`, _subject: `Add ticker: ${m[0]} (${m[1]})`, _template: "table", _captcha: "false"})
+      body: JSON.stringify({tickers: list, count: ok.length, email: email || "(not given)", ...(email ? {_replyto: email} : {}), page: location.href.split("#")[0], sent: new Date().toISOString(),
+        subject: `Add ticker${ok.length > 1 ? "s" : ""}: ${ok.map(o => o[0]).join(", ")}`, _subject: `Add ticker${ok.length > 1 ? "s" : ""}: ${ok.map(o => o[0]).join(", ")}`, _template: "table", _captcha: "false"})
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
-    showAddThanks(m[0]);
+    showAddThanks(ok.map(o => o[0]), [have.length ? `Already in the library: ${have.join(", ")}.` : "", bad.length ? `Not found at the SEC, so skipped: ${bad.join(", ")}.` : ""].filter(Boolean));
   } catch (err) { st.textContent = "Your request couldn't be sent from here. Please try again in a moment."; }
   finally { btn.disabled = false; }
 });
-function showAddThanks(t){ $("#addForm").hidden = true; $("#addStatus").textContent = ""; $("#addEmail").value = ""; $("#addThanksText").textContent = `${t === "x" ? "Your ticker" : t} is on our list. We will add it in some time.`; const e = $("#addThanks"); e.hidden = false; e.focus(); }
+function showAddThanks(added, notes){ $("#addForm").hidden = true; $("#addStatus").textContent = ""; $("#addEmail").value = ""; $("#addThanksText").textContent = `${added.length ? added.join(", ") : "Your request"} ${added.length > 1 ? "are" : "is"} on our list. We will add ${added.length > 1 ? "them" : "it"} in some time.`; $("#addSkipped").textContent = (notes || []).join(" "); const e = $("#addThanks"); e.hidden = false; e.focus(); }
 /* Enter always searches, even while the suggestion list is open; picking a suggestion searches right away */
 function enterSubmits(input, form){
   const go = () => { if (input.value.trim()) (form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", {cancelable: true}))); };
