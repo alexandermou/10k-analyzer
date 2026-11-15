@@ -502,9 +502,10 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .ipo-main{font-family:var(--f-mono);font-size:15px}
 .ipo-meta{font-size:13px;color:var(--muted)}
 .ipo-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--n-bg);color:var(--n-fg);margin-left:6px;vertical-align:1px}
-.ipo-links{display:flex;gap:18px;margin-top:4px;font-size:14px;font-weight:600}
+.ipo-links{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:14px;font-weight:600}
 .ipo-links a{color:var(--navy);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
 .ipo-links a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.ipo-dot{color:var(--muted);font-weight:400}
 .ipo-est{color:var(--accent)}
 .sitefoot{display:none}
 body.faqmode .shelf{display:none}
@@ -2168,7 +2169,7 @@ async function showIpo(){
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
     const vis = IPO_PAGES[x.symbol];   // filings we've drawn as a visual summary, with its infographic
-    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><a href="${vis.img}" class="ipo-info" data-t="${esc(x.symbol)}">Infographic</a></div>` : "";
+    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><span class="ipo-dot" aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(x.symbol)}">Infographic</a></div>` : "";
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div>${links}</div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
