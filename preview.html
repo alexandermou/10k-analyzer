@@ -1,4 +1,14 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.addform{display:flex;flex-direction:column;gap:8px;max-width:420px}.addform label{font-weight:600;margin-top:6px}.addform input[type=text],.addform input[type=email]{padding:10px 12px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}.addform .btn{align-self:flex-start;margin-top:10px}.addhint,.addstat{min-height:1.3em;margin:0;font-size:.92em;opacity:.85}.addthanks{max-width:420px}.addthanks:focus{outline:none}.missing .row.ask{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.grid>.card:not(.trend-card){position:relative;touch-action:manipulation}
+.cx-btn{position:absolute;right:5px;bottom:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.7;border-radius:5px}
+.cx-btn::before{content:"";position:absolute;inset:-10px}
+.cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
+.cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.86);display:flex;overflow:auto;padding:56px 16px 24px}
+.cx-ov[hidden]{display:none}
+.cx-stage{margin:auto;flex:none}
+.cx-stage>.card{box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.cx-close{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cx-close:hover,.cx-close:focus-visible{background:rgba(255,255,255,.3)}
 </style></head><body>
 <title>10-K Analyzer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -213,7 +223,10 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 
 /* Shared blocks */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.grid{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+/* Every card is the same size: 4 per row on wide screens, 2 on medium, 1 on phones, even when a row is not full */
+@container sec (min-width:440px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container sec (min-width:800px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
 .sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
@@ -397,7 +410,6 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .progress{height:4px;background:var(--sunk);border-radius:2px;overflow:hidden}
 .progress div{height:100%;width:0;background:var(--accent)}
 /* Segment results */
-.seg-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
 .seg-card.total{background:var(--node-rev);border-color:var(--node-rev);color:var(--on-node)}
 .seg-card.total .lbl{color:var(--on-node-soft)}
 .seg-card.total .seg-metric{border-top-color:rgba(255,255,255,.22)}
@@ -405,11 +417,6 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .seg-card{gap:14px;border-top:4px solid var(--accent)}
 .seg-metric{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}
 .seg-metrics{display:flex;flex-direction:column;gap:14px}
-.seg-card.wide{grid-column:1/-1}
-.seg-card.wide .seg-metric{border-top:0;padding-top:0}
-.seg-card.wide{border-top-width:1px}
-.seg-card.wide .seg-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
-@media (max-width:640px){.seg-card.wide .seg-metrics{gap:10px}.seg-card.wide .seg-val{gap:4px}.seg-card.wide .seg-val b{font-size:18px;letter-spacing:-.03em}.seg-card.wide .seg-val .chip{font-size:10.5px;padding:2px 6px;white-space:normal}.seg-card.wide .lbl{font-size:12px}}
 .seg-val{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .seg-val b{font-family:var(--f-mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums}
 .seg-val .chip{font-size:13px}
@@ -714,6 +721,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
   </section>
 </div>
+<div class="cx-ov" id="cxOv" hidden role="dialog" aria-modal="true" aria-label="Enlarged card"><button type="button" class="cx-close" id="cxClose" aria-label="Close" title="Close">&times;</button><div class="cx-stage" id="cxStage"></div></div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box" tabindex="-1">
     <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
@@ -1285,7 +1293,7 @@ function segBig(c, which){
     const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
     const V = h => pq ? `<span class="vchips">${h}</span>` : h;
     const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
-    return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
+    return `<div class="card seg-card${s.total ? " total" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
       <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div>${tsp(s, "rev")}</div>
       <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div>${tsp(s, "op")}</div>
       <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div>${tsp(s, "om")}</div></div>
@@ -1361,7 +1369,7 @@ async function makeInfographicBlob(c){
   document.body.appendChild(host);
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const n = $("#infoBody").cloneNode(true); n.removeAttribute("id");
+    const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
     n.style.width = "1160px"; n.style.padding = "32px"; n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
     n.querySelectorAll(".seg-card.wide .seg-metrics").forEach(x => { x.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))"; x.style.gap = "28px"; });
     n.querySelectorAll(".seg-card.wide .seg-val").forEach(x => { x.style.gap = "10px"; });
@@ -2364,6 +2372,34 @@ fetch("data/ipo.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : null).th
 loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.items.filter(x => x.date === nd.day).length : 0, "new"); });
 /* badge: today's not-yet-filed releases, or the next business day's when today's are done */
 const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length || u.nextItems.length, "upcoming"));
+
+/* Enlarge a card: double-tap (or double-click) it, or tap the small corner icon */
+(function(){
+  const SEL = "#view-infographic .grid>.card:not(.trend-card), #view-report .grid>.card:not(.trend-card)";
+  const ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
+  const ov = $("#cxOv"), stage = $("#cxStage"); let from = null;
+  function decorate(){ document.querySelectorAll(SEL).forEach(c => { if (c.querySelector(":scope>.cx-btn")) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "cx-btn"; b.title = "Enlarge"; b.setAttribute("aria-label", "Enlarge this card"); b.innerHTML = ICON; c.appendChild(b); }); }
+  let raf = 0; new MutationObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(decorate); }).observe($("#filing"), {childList: true, subtree: true}); decorate();
+  function open(card){
+    const w = card.getBoundingClientRect().width, avail = Math.min(innerWidth - 32, 880), z = Math.max(1, Math.min(3, avail / w));
+    const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
+    stage.style.width = w + "px"; stage.style.zoom = z; stage.replaceChildren(k);
+    from = document.activeElement; ov.hidden = false; document.body.style.overflow = "hidden"; ov.scrollTop = 0; $("#cxClose").focus({preventScroll: true});
+  }
+  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); document.body.style.overflow = ""; if (from && from.focus) from.focus({preventScroll: true}); }
+  $("#cxClose").addEventListener("click", close);
+  ov.addEventListener("click", e => { if (!e.target.closest(".cx-stage") && !e.target.closest(".cx-close")) close(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+  document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); open(b.closest(".card")); } });
+  let last = null;
+  document.addEventListener("pointerup", e => {
+    const card = e.target.closest && e.target.closest(SEL); if (!card || e.target.closest("a,button,input,select,summary")) { last = null; return; }
+    const now = Date.now();
+    if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); open(card); }
+    else last = {card, t: now, x: e.clientX, y: e.clientY};
+  });
+})();
 
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
