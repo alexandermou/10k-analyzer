@@ -59,8 +59,10 @@ h2{font-family:var(--f-display);font-size:22px;margin:0 0 4px}
 .risks{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
 .risks li{border-left:3px solid var(--accent);padding:2px 0 2px 12px}
 .risks b{display:block}
-.tw{overflow-x:auto;margin:0 -8px}
+.tw{overflow-x:auto;margin:0 -6px}
+.tables{gap:8px 24px}
 table{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}
+td.g{color:var(--pos)}td.b{color:var(--neg)}
 th,td{text-align:right;padding:6px 6px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--f-mono)}
 th:first-child,td:first-child{text-align:left;font-family:var(--f-body)}
 th{color:var(--muted);font-weight:600;font-family:var(--f-body)}
@@ -197,20 +199,35 @@ body.shot .chart svg{height:200px}
 
   <section class="card wide">
     <h2>The numbers</h2>
+<div class="pair tables">
     <div class="tw"><table>
-      <thead><tr><th>$000s</th><th>H1 2026</th><th>H1 2025</th><th>FY2025</th><th>FY2024</th></tr></thead>
+      <thead><tr><th>First half, $000s</th><th>H1 2026</th><th>H1 2025</th><th>H/H</th></tr></thead>
       <tbody>
-        <tr><td>Net revenue</td><td>28,558</td><td>9,088</td><td>30,209</td><td>12,157</td></tr>
-        <tr><td>Cost of goods sold</td><td>(3,885)</td><td>(4,417)</td><td>(7,792)</td><td>(8,269)</td></tr>
-        <tr><td>R&amp;D</td><td>(7,159)</td><td>(2,002)</td><td>(4,575)</td><td>(2,641)</td></tr>
-        <tr><td>SG&amp;A</td><td>(35,064)</td><td>(26,750)</td><td>(59,925)</td><td>(32,213)</td></tr>
-        <tr><td>Loss from operations</td><td>(17,550)</td><td>(24,081)</td><td>(42,084)</td><td>(30,966)</td></tr>
-        <tr><td>Interest expense</td><td>(9,015)</td><td>(4,061)</td><td>(11,753)</td><td>(3,942)</td></tr>
-        <tr><td>Net loss</td><td>(27,807)</td><td>(32,057)</td><td>(56,447)</td><td>(34,737)</td></tr>
-        <tr><td>Operating cash flow</td><td>(16,317)</td><td>(22,755)</td><td>(16,333)</td><td>(23,797)</td></tr>
+        <tr><td>Net revenue</td><td>28,558</td><td>9,088</td><td class="g">+214.2%</td></tr>
+        <tr><td>Cost of goods sold</td><td>(3,885)</td><td>(4,417)</td><td class="g">−12.0%</td></tr>
+        <tr><td>R&amp;D</td><td>(7,159)</td><td>(2,002)</td><td class="b">+257.6%</td></tr>
+        <tr><td>SG&amp;A</td><td>(35,064)</td><td>(26,750)</td><td class="b">+31.1%</td></tr>
+        <tr><td>Loss from operations</td><td>(17,550)</td><td>(24,081)</td><td class="g">−27.1%</td></tr>
+        <tr><td>Interest expense</td><td>(9,015)</td><td>(4,061)</td><td class="b">+122.0%</td></tr>
+        <tr><td>Net loss</td><td>(27,807)</td><td>(32,057)</td><td class="g">−13.3%</td></tr>
+        <tr><td>Operating cash flow</td><td>(16,317)</td><td>(22,755)</td><td class="g">−28.3%</td></tr>
       </tbody>
     </table></div>
-    <p class="note">FY2024 and FY2025 audited; half-years unaudited. Gross margins for FY2024 (32.0%) and H1 2025 (51.4%) in the charts are worked out from these lines.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Full year, $000s</th><th>FY2025</th><th>FY2024</th><th>YoY</th></tr></thead>
+      <tbody>
+        <tr><td>Net revenue</td><td>30,209</td><td>12,157</td><td class="g">+148.5%</td></tr>
+        <tr><td>Cost of goods sold</td><td>(7,792)</td><td>(8,269)</td><td class="g">−5.8%</td></tr>
+        <tr><td>R&amp;D</td><td>(4,575)</td><td>(2,641)</td><td class="b">+73.2%</td></tr>
+        <tr><td>SG&amp;A</td><td>(59,925)</td><td>(32,213)</td><td class="b">+86.0%</td></tr>
+        <tr><td>Loss from operations</td><td>(42,084)</td><td>(30,966)</td><td class="b">+35.9%</td></tr>
+        <tr><td>Interest expense</td><td>(11,753)</td><td>(3,942)</td><td class="b">+198.1%</td></tr>
+        <tr><td>Net loss</td><td>(56,447)</td><td>(34,737)</td><td class="b">+62.5%</td></tr>
+        <tr><td>Operating cash flow</td><td>(16,333)</td><td>(23,797)</td><td class="g">−31.4%</td></tr>
+      </tbody>
+    </table></div>
+    </div>
+    <p class="note">H/H: first half 2026 vs first half 2025. YoY: FY2025 vs FY2024. Both are the change in the size of each line, worked out from the filed figures; green means better for the company (more revenue, lower costs or losses), red means worse. FY2024 and FY2025 audited; half-years unaudited. Gross margins for FY2024 (32.0%) and H1 2025 (51.4%) in the charts are worked out from these lines.</p>
   </section>
 
   <p class="src">Source: every figure is from vVARDIS's <a href="https://www.sec.gov/Archives/edgar/data/1907709/000114036126043309/ny20076472x16_f1a.htm" target="_blank" rel="noopener">Form F-1/A, Amendment No. 2, filed with the SEC on November 12, 2026</a> (preliminary prospectus). The final price will be in the 424B4 prospectus. Not investment advice.</p>
