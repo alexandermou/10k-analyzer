@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>10-K Analyzer by Alexander</title>
+<title>10-K Analyzer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -551,7 +551,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
-      <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a> <small style="font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0">by Alexander</small></h1>
+      <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a></h1>
       <p>Annual reports, read and drawn. Figures from each company's latest annual filing with the SEC.</p>
     </div>
     <p class="tagline">Visualize public company financials.</p>
@@ -1350,7 +1350,7 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer by Alexander</p>`;
+    h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer</p>`;
     n.prepend(h);
     host.appendChild(n);
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
@@ -2254,7 +2254,7 @@ function showPage(name, title){
   ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
-  state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer by Alexander`;
+  state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer`;
 }
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
@@ -2264,7 +2264,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer by Alexander"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
