@@ -2236,7 +2236,7 @@ document.addEventListener("click", async e => {
     lastImg = {blob: await r.blob(), name: v.imgName};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
     lastImgUrl = URL.createObjectURL(lastImg.blob);
-    showImage(lastImgUrl, `${v.short} · Infographic`);
+    showImage(lastImgUrl);
   } catch (err) { location.href = v.img; }
 });
 /* One of the list pages (new reports, watchlist) instead of a company */
