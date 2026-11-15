@@ -1,4 +1,4 @@
-# 10-K Analyzer by Alexander
+# 10-K Analyzer
 
 Each company's latest annual report (10-K / 20-F / 40-F) as an infographic, slides with voice-over, an animated video and a written report.
 
