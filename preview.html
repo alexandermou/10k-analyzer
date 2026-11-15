@@ -1,4 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.addform{display:flex;flex-direction:column;gap:8px;max-width:420px}.addform label{font-weight:600;margin-top:6px}.addform input[type=text],.addform input[type=email]{padding:10px 12px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}.addform .btn{align-self:flex-start;margin-top:10px}.addhint,.addstat{min-height:1.3em;margin:0;font-size:.92em;opacity:.85}.addthanks{max-width:420px}.addthanks:focus{outline:none}.missing .row.ask{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+</style></head><body>
 <title>10-K Analyzer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -546,7 +547,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPOs<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPOs<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a></nav></div></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -579,6 +580,20 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   <section class="newpage" id="ipoPage" hidden aria-labelledby="ipoTitle">
     <div class="np-head"><h2 id="ipoTitle">IPOs</h2><p class="sub">Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).</p></div>
     <div id="ipoBody"></div>
+  </section>
+  <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
+    <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public company to add. We check the ticker against the SEC's list first.</p></div>
+    <form class="addform" id="addForm" novalidate>
+      <label for="addTicker">Ticker</label>
+      <input id="addTicker" type="text" maxlength="12" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="e.g. NVDA">
+      <p class="addhint" id="addHint" role="status"></p>
+      <label for="addEmail">Email, to tell you when it's added</label>
+      <input id="addEmail" type="email" maxlength="120" autocomplete="email">
+      <input id="addHoney" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
+      <button class="btn" id="addSend" type="submit">Send request</button>
+      <p class="addstat" id="addStatus" role="status"></p>
+    </form>
+    <div class="addthanks" id="addThanks" hidden tabindex="-1"><h3>Thanks, got it.</h3><p id="addThanksText">We will add it in some time.</p><button class="btn ghost" type="button" id="addAgain">Request another</button></div>
   </section>
   <section class="newpage" id="faqPage" hidden aria-labelledby="faqTitle">
     <div class="np-head"><h2 id="faqTitle">FAQ</h2><p class="sub">Where the figures come from, and why some charts look the way they do.</p></div>
@@ -2259,12 +2274,13 @@ function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   document.body.classList.remove("home", "company"); document.body.classList.add("faqmode");   // list pages and FAQ: no search box or selector
   $("#filing").hidden = true; $("#missing").hidden = true;
-  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#ipoPage").hidden = name !== "ipo";
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#addPage").hidden = name !== "add"; $("#ipoPage").hidden = name !== "ipo";
   ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer`;
 }
+function showAdd(t){ showPage("add", "Add tickers"); if (t != null) $("#addTicker").value = t; resetAdd(); window.scrollTo(0, 0); }
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
 function goHome(){
@@ -2273,7 +2289,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#addPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2426,10 +2442,61 @@ $("#searchForm").addEventListener("submit", e => { e.preventDefault();
       b.textContent = `${c.ticker} \u2014 ${c.short}`; b.addEventListener("click", () => { openCompany(c.ticker).then(writeHash); $("#ticker").value = ""; }); $("#matchRow").appendChild(b); });
     $("#matchRow").hidden = false;
   } else {
-    $("#missingText").textContent = `\u201c${q}\u201d is not available in the library.`;
+    $("#missingText").textContent = `Checking \u201c${q}\u201d\u2026`;
     $("#matchRow").hidden = true;
+    secLookup(q).then(m => {
+      if ($("#ticker").value.trim() !== q) return;   // searched again meanwhile
+      if (!m) { $("#missingText").textContent = `\u201c${q}\u201d isn\u2019t a public company ticker we can find. Check the spelling.`; $("#matchRow").hidden = true; return; }
+      $("#missingText").textContent = `${m[0]} (${m[1]}) isn\u2019t in our library yet. Do you want us to add it?`;
+      $("#matchRow").innerHTML = "";
+      const y = document.createElement("button"); y.type = "button"; y.className = "btn"; y.textContent = "Yes, add it";
+      y.addEventListener("click", () => { $("#ticker").value = ""; $("#missing").hidden = true; location.hash = "#add-tickers"; showAdd(m[0]); });
+      const n = document.createElement("button"); n.type = "button"; n.className = "btn ghost"; n.textContent = "No thanks";
+      n.addEventListener("click", () => { $("#missing").hidden = true; });
+      $("#matchRow").className = "row ask"; $("#matchRow").append(y, n); $("#matchRow").hidden = false;
+    });
   }
   $("#missing").hidden = false; });
+/* Is it a real public-company ticker (or name)? Checked against the SEC's list, loaded only when a search misses */
+let SEC = null;
+const secKey = s => String(s).toUpperCase().replace(/[^A-Z0-9]/g, "");
+async function secLookup(q){
+  if (!SEC) { try { SEC = await fetch("data/sec_tickers.json").then(r => r.ok ? r.json() : []); } catch (e) { SEC = []; } }
+  const tk = secKey(q.split(/\s+[\u2014-]\s+/)[0]);
+  const byT = SEC.find(r => secKey(r[0]) === tk);
+  if (byT) return [byT[0], titleCase(byT[1])];
+  const nq = norm(q); if (nq.length < 3) return null;
+  const hit = SEC.filter(r => norm(r[1]) === nq || norm(r[1]).replace(/ (inc|corp|corporation|co|plc|ltd)$/, "") === nq);
+  return hit.length === 1 ? [hit[0][0], titleCase(hit[0][1])] : null;
+}
+const titleCase = n => /[a-z]/.test(n) ? n : n.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+/* Add tickers page: validate against the SEC list, then email the request */
+function resetAdd(){ $("#addThanks").hidden = true; $("#addForm").hidden = false; $("#addStatus").textContent = ""; $("#addHint").textContent = ""; }
+$("#addAgain").addEventListener("click", () => { $("#addTicker").value = ""; resetAdd(); $("#addTicker").focus(); });
+$("#addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const st = $("#addStatus"), btn = $("#addSend"), q = $("#addTicker").value.trim(), email = $("#addEmail").value.trim();
+  $("#addHint").textContent = "";
+  if (!q) { st.textContent = "Please enter a ticker."; $("#addTicker").focus(); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = "That email doesn't look right. Check it, or leave it blank."; $("#addEmail").focus(); return; }
+  if ($("#addHoney").value) { showAddThanks("x"); return; }
+  btn.disabled = true; st.textContent = "Checking\u2026";
+  try {
+    const m = await secLookup(q);
+    if (!m) { st.textContent = `\u201c${q}\u201d isn\u2019t a public company ticker we can find. Check the spelling.`; return; }
+    if (LIBRARY[m[0]] || LIBRARY[ALIASES[m[0]]]) { st.textContent = ""; $("#addHint").textContent = `${m[0]} is already in the library. Search for it on the home page.`; return; }
+    st.textContent = "Sending\u2026";
+    const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
+      method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
+      body: JSON.stringify({ticker: m[0], company: m[1], email: email || "(not given)", ...(email ? {_replyto: email} : {}), page: location.href.split("#")[0], sent: new Date().toISOString(),
+        subject: `Add ticker: ${m[0]}`, _subject: `Add ticker: ${m[0]} (${m[1]})`, _template: "table", _captcha: "false"})
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    showAddThanks(m[0]);
+  } catch (err) { st.textContent = "Your request couldn't be sent from here. Please try again in a moment."; }
+  finally { btn.disabled = false; }
+});
+function showAddThanks(t){ $("#addForm").hidden = true; $("#addStatus").textContent = ""; $("#addEmail").value = ""; $("#addThanksText").textContent = `${t === "x" ? "Your ticker" : t} is on our list. We will add it in some time.`; const e = $("#addThanks"); e.hidden = false; e.focus(); }
 /* Enter always searches, even while the suggestion list is open; picking a suggestion searches right away */
 function enterSubmits(input, form){
   const go = () => { if (input.value.trim()) (form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", {cancelable: true}))); };
@@ -2451,7 +2518,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   window.addEventListener("hashchange", () => set(false));
 })();
 
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -2460,7 +2527,7 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (["#latest", "#new"].includes(location.hash.toLowerCase())) { await showNew(); return; }   // #new: old links
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
-  if (location.hash.toLowerCase() === "#faq") { showFaq(); return; }
+  if (location.hash.toLowerCase() === "#faq") { showFaq(); return; } if (location.hash.toLowerCase() === "#add-tickers") { showAdd(); return; }
   if (["#ipo", "#ipos"].includes(location.hash.toLowerCase())) { await showIpo(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
