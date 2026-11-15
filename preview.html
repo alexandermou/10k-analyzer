@@ -180,8 +180,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fb-field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .fb-opt{font-weight:400;color:var(--muted)}
 .fb-hint{margin:-4px 0 0;font-size:13px;color:var(--muted)}
-#fbName,#fbEmail{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
-#fbName:focus,#fbEmail:focus{outline:2px solid var(--accent);outline-offset:1px}
+#fbName,#fbEmail,#fbSubj{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px}
+#fbName:focus,#fbEmail:focus,#fbSubj:focus{outline:2px solid var(--accent);outline-offset:1px}
 #fbMsg{width:100%;min-height:150px;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:16px;line-height:1.5}
 #fbMsg:focus{outline:2px solid var(--accent);outline-offset:1px}
 .fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -644,12 +644,14 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
           <h2 class="fb-h">Send feedback</h2>
           <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
           <div class="fb-two">
-            <div class="fb-field"><label class="fb-lbl" for="fbName">Name <span class="fb-opt">(optional)</span></label>
+            <div class="fb-field"><label class="fb-lbl" for="fbName">Name</label>
               <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
-            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email <span class="fb-opt">(optional)</span></label>
+            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email</label>
               <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
           </div>
           <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
+          <div class="fb-field"><label class="fb-lbl" for="fbSubj">Subject</label>
+            <input type="text" id="fbSubj" name="subject" maxlength="200"></div>
           <label class="fb-lbl" for="fbMsg">Your message</label>
           <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
           <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
@@ -1956,6 +1958,7 @@ async function openCompany(t, view, period){
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
   state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
+  setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span><button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   wlChanged();   // sets the star next to the name
@@ -2360,7 +2363,7 @@ $("#fbForm").addEventListener("submit", async e => {
     const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
       method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
       body: JSON.stringify({name: name || "(not given)", email: email || "(not given)", ...(email ? {_replyto: email} : {}), message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
-        _subject: "10-K Analyzer feedback", _template: "table", _captcha: "false"})
+        subject: $("#fbSubj").value.trim(), _subject: $("#fbSubj").value.trim() || "10-K Analyzer feedback", _template: "table", _captcha: "false"})
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
     showFbThanks();
@@ -2369,7 +2372,13 @@ $("#fbForm").addEventListener("submit", async e => {
       (location.hostname.endsWith("github.io") ? "." : ", or use the site at alexandermou.github.io/10k-analyzer.");
   } finally { btn.disabled = false; }
 });
-function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbName").value = ""; $("#fbEmail").value = ""; $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
+/* feedback subject follows the tab being viewed, e.g. "Regarding AAPL Q4 2026 Report" */
+function setFbSubject(){
+  const f = $("#fbSubj"), c = state.shown; if (!f || !c) return;
+  const per = String(c.fy || "").replace(/^(Q\d) FY(\d{4})$/, "$1 $2");
+  f.value = `Regarding ${c.ticker || state.ticker}${per ? " " + per : ""} Report`;
+}
+function showFbThanks(){ $("#fbForm").hidden = true; $("#fbMsg").value = ""; $("#fbName").value = ""; $("#fbEmail").value = ""; setFbSubject(); $("#fbStatus").textContent = ""; const t = $("#fbThanks"); t.hidden = false; t.focus(); }
 $("#fbAgain").addEventListener("click", () => { $("#fbThanks").hidden = true; $("#fbForm").hidden = false; $("#fbMsg").focus(); });
 /* #crwv, #crwv-report, #crwv-q2-2026, #crwv-q2-2026-feedback */
 function writeHash(){ const c = LIBRARY[state.ticker] || {};
