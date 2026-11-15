@@ -1422,8 +1422,8 @@ function drawSvgToCanvas(svg, W, H){
   });
   return cvs;
 }
-function showImage(url){
-  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false;
+function showImage(url, title){
+  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = "Double-tap: full screen or back";
   $("#ovShare").hidden = !canShareImage();
   $("#ovSave").focus();
@@ -2167,7 +2167,7 @@ async function showIpo(){
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
     const vis = IPO_PAGES[x.symbol];   // filings we've drawn as a visual summary, with its infographic
-    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><a href="${vis.img}" download="${esc(vis.imgName)}">Infographic<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : "";
+    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><a href="${vis.img}" class="ipo-info" data-t="${esc(x.symbol)}">Infographic<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : "";
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div>${links}</div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
@@ -2190,6 +2190,18 @@ async function showIpo(){
   $("#ipoPick").addEventListener("change", e => { ipoStage = e.target.value; showIpo().then(() => $("#ipoPick").focus()); });
   showPage("ipo", "IPOs");
 }
+/* IPO card "Infographic" link: the same viewer as the company infographics (save, share, close) */
+document.addEventListener("click", async e => {
+  const a = e.target.closest(".ipo-info"); if (!a) return;
+  e.preventDefault(); const v = IPO_PAGES[a.dataset.t]; if (!v) return;
+  try {
+    const r = await fetch(v.img, {cache: "no-cache"}); if (!r.ok) throw 0;
+    lastImg = {blob: await r.blob(), name: v.imgName};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
+    lastImgUrl = URL.createObjectURL(lastImg.blob);
+    showImage(lastImgUrl, `${v.short} · Infographic`);
+  } catch (err) { location.href = v.img; }
+});
 /* One of the list pages (new reports, watchlist) instead of a company */
 function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
