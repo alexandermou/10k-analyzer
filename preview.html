@@ -2161,6 +2161,8 @@ async function showIpo(){
     }
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
+    const vis = ({VVVV: "ipo/VVVV.html"})[x.symbol];   // filings we've drawn as a visual summary
+    if (vis) meta.push(`<a href="${vis}">Visual summary of the filing →</a>`);
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div></div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
