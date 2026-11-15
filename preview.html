@@ -501,6 +501,9 @@ body.home .homelinks{display:flex;gap:20px;position:absolute;top:calc(env(safe-a
 .ipo-main{font-family:var(--f-mono);font-size:15px}
 .ipo-meta{font-size:13px;color:var(--muted)}
 .ipo-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 6px;border-radius:5px;background:var(--n-bg);color:var(--n-fg);margin-left:6px;vertical-align:1px}
+.ipo-links{display:flex;gap:18px;margin-top:4px;font-size:14px;font-weight:600}
+.ipo-links a{color:var(--navy);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.ipo-links a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .ipo-est{color:var(--accent)}
 .sitefoot{display:none}
 body.faqmode .shelf{display:none}
@@ -2141,7 +2144,7 @@ async function showUpcoming(day){
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
 let ipoData = null, ipoStage = "";
 /* IPO filings with their own visual-summary page; also lets them sit on the watchlist */
-const IPO_PAGES = {VVVV: {name: "vVARDIS Holding AG", short: "vVARDIS", href: "ipo/VVVV.html"}};
+const IPO_PAGES = {VVVV: {name: "vVARDIS Holding AG", short: "vVARDIS", href: "ipo/VVVV.html", img: "ipo/VVVV-infographic.png", imgName: "VVVV-IPO-F-1A-2026-11-12-infographic.png"}};
 const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
 const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
 async function showIpo(){
@@ -2163,9 +2166,9 @@ async function showIpo(){
     }
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
-    const vis = IPO_PAGES[x.symbol];   // filings we've drawn as a visual summary
-    if (vis) meta.push(`<a href="${vis.href}">Visual summary of the filing →</a>`);
-    return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div></div>`;
+    const vis = IPO_PAGES[x.symbol];   // filings we've drawn as a visual summary, with its infographic
+    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><a href="${vis.img}" download="${esc(vis.imgName)}">Infographic<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>` : "";
+    return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>${tags ? `<span>${tags}</span>` : ""}<span class="ipo-sym">${esc(sym)}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div>${links}</div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
   const S = [["cleared", "Cleared by the SEC", "Registration declared effective; pricing is imminent and the final prospectus usually follows the next business day."],
