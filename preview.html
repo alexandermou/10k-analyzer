@@ -25,7 +25,7 @@ html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .grid>.card .barhead{padding-right:22px}
 .cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:56px 12px 16px}
 .cx-ov[hidden]{display:none}
-.cx-stage{margin:auto;flex:none}.cx-ov .cx-note{margin:2px 0 6px!important;color:var(--muted)!important;font:400 11px/1.3 "IBM Plex Sans",sans-serif!important}
+.cx-stage{margin:auto;flex:none}.sec h3 .sec-note{display:block;white-space:nowrap;margin-top:4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}.cx-ov .cx-note{margin:2px 0 6px!important;color:var(--muted)!important;font:400 11px/1.3 "IBM Plex Sans",sans-serif!important}
 .cx-stage>.card{padding:20px 22px;gap:10px}
 .cx-stage .barhead{padding-right:0}
 .cx-stage .big{font-size:40px}
@@ -1504,7 +1504,7 @@ function rsCards(c){
 }
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
-    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue</p></div>
