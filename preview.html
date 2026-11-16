@@ -2156,7 +2156,7 @@ async function openCompany(t, view, period){
   state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
   setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
-  $("#fname").innerHTML = `${esc(c.name).replace(/(\S+)$/, '<bdi style="white-space:nowrap">$1<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></bdi>')} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  $("#fname").innerHTML = `${esc(c.name).replace(/(\S+)$/, '<bdi style="white-space:nowrap">$1<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></bdi>')} <span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   wlChanged();   // sets the star next to the name
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(sd(shown.period))}</span><span>Filed ${esc(sd(shown.filed))}</span><span class="mono">CIK ${c.cik}</span>`;
   renderPeriods(c);
