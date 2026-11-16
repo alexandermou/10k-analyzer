@@ -2469,7 +2469,7 @@ async function showWatchlist(){
       rows.map(({t, c, x}) => { const ipo = !LIBRARY[t] && IPO_BY_T[t], href = ipo ? ipo.href : "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a><button type="button" class="wl-rm wl-star" data-t="${esc(t)}" aria-label="Remove ${esc(t)} from watchlist" title="Remove ${esc(t)} from watchlist">★</button></td>
-          <td>${x ? `<a href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Open the ${esc(x.report)} infographic">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
+          <td>${x ? `<a class="wl-dl" data-t="${esc(t)}" data-p="${esc(x.period || "")}" href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Get the ${esc(x.report)} infographic image">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
           <td>${x ? `<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}` : `<span class="muted">—</span>`}</td>
           <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + "d ago"}</b>`}</td>
 </tr>`; }).join("")
@@ -2482,7 +2482,8 @@ async function showWatchlist(){
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
-    showPage("watchlist", "Watchlist");
+    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "infographic", a.dataset.p || undefined); writeHash(); downloadInfographic(); }));
+  showPage("watchlist", "Watchlist");
 }
 $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const q = $("#wlInput").value.trim(), st = $("#wlStatus"); if (!q) return;
