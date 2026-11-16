@@ -1333,7 +1333,7 @@ function sparkline(c, it, wide){
   const chg = i => { const x = v[i], pv = v[i - 1]; if (i === 0 || x === null || pv === null || pv === undefined) return "";
     if (/%$/.test(F(x))) { const dd = x - pv; return (dd >= 0 ? "+" : "−") + Math.abs(dd).toFixed(1) + " pp"; }
     if (pv > 0 && x > 0) { const pc = (x / pv - 1) * 100; return pc >= 100 ? (x / pv).toFixed(1) + "×" : (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%"; }   // same rule as the chips
-    return pv < 0 && x > 0 ? "Loss to profit" : pv > 0 && x < 0 ? "Profit to loss" : pv < 0 && x < 0 ? "Loss both quarters" : "n/a"; };
+    return pv < 0 && x > 0 ? "Loss to profit" : pv > 0 && x < 0 ? "Profit to loss" : pv < 0 && x < 0 ? (x > pv ? "Loss narrows" : x < pv ? "Loss widens" : "Loss unchanged") : "n/a"; };
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit" data-q="${esc(q[i])}" data-v="${esc(x === null ? "n/a" : F(x))}" data-c="${esc(chg(i))}" data-u="${annual ? "YoY" : half ? "HoH" : "QoQ"}" data-first="${i === 0 ? 1 : ""}"></rect>`).join("");
   const desc = `${annual ? "Fiscal years" : half ? "Last 3 half-years" : "Last 5 quarters"}, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
@@ -1691,7 +1691,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitN
   function show(h){
     if (cur && cur !== h) cur.classList.remove("sel");
     cur = h; h.classList.add("sel");
-    const c = h.dataset.c, word = /^(Loss|Profit|n\/a)/.test(c), cls = !c || /^(Loss both|n\/a)/.test(c) ? "" : (c.startsWith("−") || c === "Profit to loss" ? "dn" : "up");
+    const c = h.dataset.c, word = /^(Loss|Profit)/.test(c), cls = !c || /^(Loss unchanged|n\/a)/.test(c) ? "" : (c.startsWith("−") || c === "Profit to loss" || c === "Loss widens" ? "dn" : "up");
     tip.innerHTML = `<span class="t-p">${esc(h.dataset.q)}</span><b>${esc(h.dataset.v)}</b>${c === "n/a" ? "" : c ? `<span class="t-c ${cls}">${esc(c)}${word ? "" : " " + esc(h.dataset.u)}</span>` : h.dataset.first ? `<span class="t-c t-p">no earlier point</span>` : ""}`;
     tip.style.display = "block";
     const r = h.getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
