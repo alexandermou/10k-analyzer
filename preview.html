@@ -11,8 +11,14 @@
 .cx-stage .sk-card .sankey svg{min-width:0;width:100%;height:100%}
 .cx-skv .cx-stage .sk-card{height:auto}.cx-skv .cx-stage .sk-card .sankey{flex:none}
 .cx-skv .cx-stage .sk-card .sankey svg{min-width:0;max-width:none;width:100%;height:auto}
-@media (orientation:landscape){.cx-skv .cx-stage .sk-card .sankey svg[data-rot]{display:none}
-.cx-skv .cx-stage .sk-card .sankey svg.sk-flat{display:block;width:auto;max-width:100%;height:calc(100vh - 150px);margin:0 auto}}
+@media (orientation:landscape){html:not(.rot-lock) .cx-skv .cx-stage .sk-card .sankey svg[data-rot]{display:none}
+html:not(.rot-lock) .cx-skv .cx-stage .sk-card .sankey svg.sk-flat{display:block;width:auto;max-width:100%;height:calc(100vh - 150px);margin:0 auto}}
+html.rot-lock,html.rot-lock body{overflow:hidden}
+html.rot-lock body{position:fixed;left:0;top:0;width:var(--lh);height:var(--lw);overflow-y:auto;overflow-x:hidden;transform-origin:0 0}
+html.rot-lock .cx-ov,html.rot-lock .ov{top:var(--bst,0px);bottom:calc(0px - var(--bst,0px))}
+html.rot-lock .cx-shrink,html.rot-lock .ov.img-fs .ov-exitfs{top:calc(12px + var(--bst,0px))}
+html.rot-lock.rot-ccw body{transform:translateY(var(--lh)) rotate(-90deg)}
+html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
@@ -1687,6 +1693,26 @@ function fitName(){
 }
 window.addEventListener("resize", () => fitName());
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitName());
+/* The page stays upright when a phone is turned sideways: the browser's landscape layout is turned back so the page keeps its portrait shape.
+   (Browsers don't let a web page lock the screen, except in an installed app.) Slides and video full screen are left alone. */
+let rotLocked = false;
+const pw = () => rotLocked ? innerHeight : innerWidth, ph = () => rotLocked ? innerWidth : innerHeight;
+function toBody(X, Y){ const h = document.documentElement; return h.classList.contains("rot-ccw") ? [innerHeight - Y, X] : [Y, innerWidth - X]; }   // a point on the screen -> a point in the turned page
+function pageLock(){
+  const h = document.documentElement, phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
+  let fs = false; try { fs = !!(document.fullscreenElement || document.webkitFullscreenElement) && !($("#cxOv") && !$("#cxOv").hidden); } catch (e) {}
+  try { if (typeof fsActive === "function" && fsActive()) fs = true; } catch (e) {}
+  const on = phone && innerWidth > innerHeight && !fs; rotLocked = on;
+  h.classList.toggle("rot-lock", on);
+  if (on) {
+    const ang = screen.orientation && typeof screen.orientation.angle === "number" ? screen.orientation.angle : (typeof window.orientation === "number" ? window.orientation : 90), cw = ang === 270 || ang === -90;
+    h.style.setProperty("--lw", innerWidth + "px"); h.style.setProperty("--lh", innerHeight + "px"); h.classList.toggle("rot-cw", cw); h.classList.toggle("rot-ccw", !cw);
+  }
+}
+const setBst = () => document.documentElement.style.setProperty("--bst", (rotLocked ? document.body.scrollTop : 0) + "px");   // fixed boxes sit in the scrolled, turned page: shift them with it
+["resize", "orientationchange"].forEach(ev => window.addEventListener(ev, () => { pageLock(); setBst(); setTimeout(() => { pageLock(); setBst(); }, 250); })); pageLock();
+document.body.addEventListener("scroll", setBst, {passive: true});
+try { screen.orientation.lock("portrait").catch(() => {}); } catch (e) {}
 /* Tooltip on a sparkline point: hover (computer) or tap (phone) shows the period, the value and the change from the previous point */
 (function(){
   const tip = document.createElement("div"); tip.id = "spTip"; tip.setAttribute("role", "status"); document.body.appendChild(tip);
@@ -1699,13 +1725,15 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitN
     tip.innerHTML = `<span class="t-p">${esc(h.dataset.q)}</span><b>${esc(h.dataset.v)}</b>${c === "n/a" ? "" : c ? `<span class="t-c ${cls}">${esc(c)}${word ? "" : " " + esc(h.dataset.u)}</span>` : h.dataset.first ? `<span class="t-c t-p">no earlier point</span>` : ""}`;
     tip.style.display = "block";
     const r = h.getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
-    let x = r.left + r.width / 2 - w / 2, y = r.top - ht - 8; if (y < 6) y = r.bottom + 8;
-    x = Math.max(6, Math.min(innerWidth - w - 6, x)); tip.style.left = x + "px"; tip.style.top = y + "px";
+    let cx = r.left + r.width / 2, top = r.top, bot = r.bottom;
+    if (rotLocked) { const a = toBody(r.left, r.top), b2 = toBody(r.right, r.bottom); cx = (a[0] + b2[0]) / 2; top = Math.min(a[1], b2[1]); bot = Math.max(a[1], b2[1]); }
+    let x = cx - w / 2, y = top - ht - 8; if (y < 6) y = bot + 8;
+    x = Math.max(6, Math.min(pw() - w - 6, x)); tip.style.left = x + "px"; tip.style.top = (y + (rotLocked ? document.body.scrollTop : 0)) + "px";
   }
   document.addEventListener("pointerover", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse") show(h); });
   document.addEventListener("pointerout", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse" && !h.dataset.pin) hide(); });
   document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h) { e.stopPropagation(); show(h); } else hide(); }, true);
-  window.addEventListener("scroll", hide, {passive: true}); window.addEventListener("hashchange", hide);
+  window.addEventListener("scroll", hide, {passive: true}); document.body.addEventListener("scroll", hide, {passive: true}); window.addEventListener("hashchange", hide);
 })();
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
@@ -2605,7 +2633,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   const realFs = () => document.fullscreenElement === ov || document.webkitFullscreenElement === ov;
   /* The income statement flow is wide: in a portrait phone it is turned 90 degrees, so turn the phone to landscape to read it; in landscape it is shown upright */
   /* Income flow in full screen: not turned with the phone. Portrait shows the top-to-bottom drawing; landscape shows the flat drawing, so the chart looks the same way up whichever way the phone is held */
-  function layoutSk(){ stage.style.cssText = `width:${innerWidth - 24}px`; delete stage.dataset.rot; }
+  function layoutSk(){ stage.style.cssText = `width:${pw() - 24}px`; delete stage.dataset.rot; }
   const isSk = () => ov.classList.contains("cx-sk");
   window.addEventListener("resize", () => { if (!ov.hidden && isSk()) layoutSk(); });
   function open(card){
@@ -2613,11 +2641,11 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
     if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
-      const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
+      const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
       stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
       ov.hidden = false; document.body.style.overflow = "hidden";
       const h = stage.getBoundingClientRect().height;
-      stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 72) / h));   // as big as fits the screen
+      stage.style.zoom = Math.max(1, Math.min(3, (pw() - 24) / LW, (ph() - 72) / h));   // as big as fits the screen
     }
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
