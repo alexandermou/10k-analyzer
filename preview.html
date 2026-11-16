@@ -1532,9 +1532,13 @@ async function makeInfographicBlob(c){
     n.prepend(h);
     host.appendChild(n);
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
+      // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
-      const vb = svg.viewBox.baseVal, w = box.clientWidth || (FULLIG ? W : 1160), hgt = Math.round(w * vb.height / vb.width);
-      const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
+      const src = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad);
+      const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
+      const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0);
+      cv.style.width = B + "px"; cv.style.height = Math.round(src.width / R) + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     n.querySelectorAll(".spark svg").forEach(svg => {      // sparklines as plain pictures (the image library can't draw them reliably)
       const w = Math.round(svg.getBoundingClientRect().width) || 300, hgt = Math.round(svg.getBoundingClientRect().height) || 56;
@@ -1609,10 +1613,10 @@ const PAINT = {
   "t-m": {fill: "#55606E"}, "t-i": {fill: "#15202B"}, "t-w": {fill: "#FFFFFF"}, "t-ws": {fill: "#DCE6F2"}, "t-p": {fill: "#17703F"}, "t-n": {fill: "#A8321F"}
 };
 const paintOf = el => PAINT[(el.getAttribute("class") || "").split(" ")[0]] || {};
-function drawSvgToCanvas(svg, W, H){
+function drawSvgToCanvas(svg, W, H, fscale = 1, padX = 0){
   const vb = svg.viewBox.baseVal, sx = W / vb.width, sy = H / vb.height;
-  const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = H;
-  const g = cvs.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H);
+  const cvs = document.createElement("canvas"); cvs.width = W + padX; cvs.height = H;
+  const g = cvs.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W + padX, H);
   g.setTransform(sx, 0, 0, sy, -vb.x * sx, -vb.y * sy);
   const paint = (el, shape) => {
     const p = paintOf(el);
@@ -1631,11 +1635,11 @@ function drawSvgToCanvas(svg, W, H){
     const fs = el.getAttribute("font-size") || "12", fw = el.getAttribute("font-weight") || "500", ff = paintOf(el).fill || "#15202B";
     const runs = Array.from(el.childNodes).map(nd => nd.nodeType === 3 ? {t: nd.textContent, s: fs, w: fw, f: ff}
       : {t: nd.textContent, s: nd.getAttribute("font-size") || fs, w: nd.getAttribute("font-weight") || fw, f: paintOf(nd).fill || ff}).filter(r => r.t);
-    let total = 0; runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; r.width = g.measureText(r.t).width; total += r.width; });
+    let total = 0; runs.forEach(r => { g.font = `${r.w} ${r.s * fscale}px ${FAM}`; r.width = g.measureText(r.t).width; total += r.width; });
     const anchor = el.getAttribute("text-anchor") || "start", x0 = +el.getAttribute("x") || 0, y0 = +el.getAttribute("y") || 0;
     let x = anchor === "middle" ? x0 - total / 2 : anchor === "end" ? x0 - total : x0;
     g.textAlign = "left"; g.textBaseline = "alphabetic";
-    runs.forEach(r => { g.font = `${r.w} ${r.s}px ${FAM}`; g.fillStyle = r.f; g.fillText(r.t, x, y0); x += r.width; });
+    runs.forEach(r => { g.font = `${r.w} ${r.s * fscale}px ${FAM}`; g.fillStyle = r.f; g.fillText(r.t, x, y0); x += r.width; });
   });
   return cvs;
 }
