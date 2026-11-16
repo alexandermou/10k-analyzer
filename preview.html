@@ -1519,6 +1519,7 @@ function loadImgLib(){
 /* "Sep 30, 2026" -> "09/30/26" inside a text, so dates stay short */
 const SD_M = {jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12};
 const sd = t => String(t == null ? "" : t).replace(/\b([A-Z][a-z]{2})[a-z]* (\d{1,2}), (\d{4})\b/g, (m, mo, d, y) => SD_M[mo.toLowerCase()] ? `${String(SD_M[mo.toLowerCase()]).padStart(2, "0")}/${d.padStart(2, "0")}/${y.slice(2)}` : m);
+const shortName = n => String(n).replace(/\bCorporation\b/g, "Corp.").replace(/\bCompany\b/g, "Co.");   // Corporation -> Corp., Company -> Co.
 const igDefault = () => { try { return /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent) || matchMedia("(max-width:700px)").matches ? "tall" : "wide"; } catch (e) { return "wide"; } };   // phone: tall; desktop: wide
 const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" || v === "wide" || v === "compact" ? v : v === "medium" || v === "full" ? "medium" : igDefault(); } catch (e) { return igDefault(); } };
 async function makeInfographicBlob(c){
@@ -1546,7 +1547,7 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
+    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(shortName(c.name))} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
     n.prepend(h);
     host.appendChild(n);
     n.querySelectorAll(".sankey svg.sk-flat").forEach(x => x.remove());
@@ -2169,7 +2170,7 @@ async function openCompany(t, view, period){
   setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   { const STAR = '<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button>';
-    const m = String(c.name).match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i), base = m ? m[1] : String(c.name), w = base.match(/^(.*?)(\S+)$/) || ["", "", base];
+    const nm0 = shortName(c.name), m = nm0.match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i), base = m ? m[1] : nm0, w = base.match(/^(.*?)(\S+)$/) || ["", "", base];
     $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`}<br><span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
     fitName(); requestAnimationFrame(() => { fitName(); setTimeout(fitName, 150); }); }
   wlChanged();   // sets the star next to the name
