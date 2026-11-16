@@ -1,5 +1,12 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.addform{display:flex;flex-direction:column;gap:8px;max-width:420px}.addform label{font-weight:600;margin-top:6px}.addform input[type=text],.addform input[type=email]{padding:10px 12px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}.addform .btn{align-self:flex-start;margin-top:10px}.addhint,.addstat{min-height:1.3em;margin:0;font-size:.92em;opacity:.85}.addthanks{max-width:420px}.addthanks:focus{outline:none}.missing .row.ask{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.grid>.card{position:relative;touch-action:manipulation}
+.grid>.card,.sk-card{position:relative;touch-action:manipulation}
+.sk-card .barhead{padding-right:26px}
+.cx-stage .sk-card{height:100%;padding:12px 18px!important;gap:6px}
+.cx-stage .sk-card .barhead{padding-right:46px}
+.cx-stage[data-rot] .sk-card .barhead{padding:0 0 0 50px}
+.cx-stage .sk-card .sub{display:none}
+.cx-stage .sk-card .sankey{flex:1;min-height:0;overflow:visible}
+.cx-stage .sk-card .sankey svg{min-width:0;width:100%;height:100%}
 .cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
@@ -33,8 +40,10 @@
 .cx-stage .seg-card.wide .seg-val b{font-size:34px;letter-spacing:-.02em}
 .cx-stage .seg-card.wide .seg-val .chip{font-size:14px;padding:3px 11px;white-space:nowrap}
 .cx-stage .seg-card.total .sp-axis-full span{color:rgba(255,255,255,.78)}
-.cx-shrink{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.cx-shrink{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20}
 .cx-shrink:hover,.cx-shrink:focus-visible{background:rgba(255,255,255,.34)}
+.cx-sk .cx-shrink{background:#1B2B45;box-shadow:0 0 0 2px #fff}
+.cx-sk .cx-shrink:hover,.cx-sk .cx-shrink:focus-visible{background:#2A3F63}
 </style></head><body>
 <title>10-K Analyzer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1372,7 +1381,7 @@ function renderInfographic(c){
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
-    <div class="card" style="padding:18px 20px">
+    <div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
       <div class="sankey">${sankey(c)}</div>
     </div>
@@ -2425,25 +2434,38 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
 
 /* Full screen for a card: double-tap (or double-click) it, or tap the small icon in its top-right corner; the shrink button returns */
 (function(){
-  const SEL = "#view-infographic .grid>.card, #view-report .grid>.card";
+  const SEL = "#view-infographic .grid>.card, #view-report .grid>.card, #view-infographic .sk-card, #view-report .sk-card";
   const ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
   const ov = $("#cxOv"), stage = $("#cxStage"); let from = null;
   function decorate(){ document.querySelectorAll(SEL).forEach(c => { if (c.querySelector(":scope>.cx-btn")) return;
     const b = document.createElement("button"); b.type = "button"; b.className = "cx-btn"; b.title = "Enlarge"; b.setAttribute("aria-label", "Enlarge this card"); b.innerHTML = ICON; c.appendChild(b); }); }
   let raf = 0; new MutationObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(decorate); }).observe($("#filing"), {childList: true, subtree: true}); decorate();
   const realFs = () => document.fullscreenElement === ov || document.webkitFullscreenElement === ov;
+  /* The income statement flow is wide: in a portrait phone it is turned 90 degrees, so turn the phone to landscape to read it; in landscape it is shown upright */
+  function layoutSk(){
+    const portrait = innerHeight > innerWidth, W = (portrait ? innerHeight : innerWidth) - 24, H = (portrait ? innerWidth : innerHeight) - 24;
+    if (portrait) stage.dataset.rot = "1"; else delete stage.dataset.rot;
+    stage.style.cssText = `position:fixed;margin:0;width:${W}px;height:${H}px;` + (portrait ? `left:0;top:0;transform-origin:0 0;transform:translate(${innerWidth - 12}px,12px) rotate(90deg)` : "left:12px;top:12px");
+  }
+  const isSk = () => ov.classList.contains("cx-sk");
+  window.addEventListener("resize", () => { if (!ov.hidden && isSk()) layoutSk(); });
   function open(card){
-    const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
+    stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
-    ov.hidden = false; document.body.style.overflow = "hidden";
-    const h = stage.getBoundingClientRect().height;
-    stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 72) / h));   // as big as fits the screen
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
+    else {
+      const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
+      stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
+      ov.hidden = false; document.body.style.overflow = "hidden";
+      const h = stage.getBoundingClientRect().height;
+      stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 72) / h));   // as big as fits the screen
+    }
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+    if (isSk() && innerHeight > innerWidth && screen.orientation && screen.orientation.lock) { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }   // Android Chrome turns the screen itself
   }
-  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); document.body.style.overflow = "";
+  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
     if (realFs()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
     if (from && from.focus) from.focus({preventScroll: true}); }
   ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ov.hidden && !document.fullscreenElement && !document.webkitFullscreenElement && ov.dataset.fs) close(); if (realFs()) ov.dataset.fs = "1"; else delete ov.dataset.fs; }));
