@@ -360,7 +360,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sp-line{fill:none;stroke:var(--navy);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .sp-dot{fill:var(--surface);stroke:var(--navy);stroke-width:1.5}.sp-last{fill:var(--navy)}
 .sp-zero{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3;opacity:.6}
-.sp-hit{fill:transparent}.sp-hit:hover{fill:var(--navy);fill-opacity:.08}
+.sp-hit{fill:transparent;cursor:pointer}.sp-hit:hover,.sp-hit.sel{fill:var(--navy);fill-opacity:.08}
+#spTip{position:fixed;z-index:2147483000;pointer-events:none;background:#15202B;color:#F3F5F8;border:1px solid #3A4757;border-radius:10px;padding:8px 12px;font:500 14px/1.35 'IBM Plex Sans',sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);white-space:nowrap;display:none}
+#spTip b{display:block;font:700 18px/1.2 'IBM Plex Mono',monospace}#spTip .t-p{display:block;color:#9FB0C4;font-size:13px}#spTip .t-c{display:block}#spTip .up{color:#7FD08F}#spTip .dn{color:#F0907B}
 .barhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .barhead p{line-height:1.3}
 .card>.bars{margin-top:auto}
@@ -1326,8 +1328,12 @@ function sparkline(c, it, wide){
   const dot = (x, y, last) => `<path d="M${x} ${y}l0 0" class="sp-pt${last ? " last" : ""}"/>` + (last ? "" : `<path d="M${x} ${y}l0 0" class="sp-pt-in"/>`);
   const dots = wide ? v.map((x, i) => x === null ? "" : dot(X(i).toFixed(1), Y(x).toFixed(1), hl && i === last)).join("") : v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${hl && i === last ? 3.2 : 2}" class="${hl && i === last ? "sp-last" : "sp-dot"}"/>`).join("");
   const F = it.fmt || (x => sparkFmt(x, k));
-  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
   const annual = /^FY/.test(q[0]), half = /^H\d/.test(q[0]);
+  /* tooltip data: period, value and the change from the point before (QoQ; YoY for fiscal years, HoH for half-years; pp when the value is a percentage) */
+  const chg = i => { const x = v[i], pv = v[i - 1]; if (i === 0 || x === null || pv === null || pv === undefined) return "";
+    if (/%$/.test(F(x))) { const dd = x - pv; return (dd >= 0 ? "+" : "−") + Math.abs(dd).toFixed(1) + " pp"; }
+    if (!pv) return ""; const pc = (x - pv) / Math.abs(pv) * 100; return (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%"; };
+  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit" data-q="${esc(q[i])}" data-v="${esc(x === null ? "n/a" : F(x))}" data-c="${esc(chg(i))}" data-u="${annual ? "YoY" : half ? "HoH" : "QoQ"}"></rect>`).join("");
   const desc = `${annual ? "Fiscal years" : half ? "Last 3 half-years" : "Last 5 quarters"}, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
@@ -1676,6 +1682,26 @@ function fitName(){
 }
 window.addEventListener("resize", () => fitName());
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitName());
+/* Tooltip on a sparkline point: hover (computer) or tap (phone) shows the period, the value and the change from the previous point */
+(function(){
+  const tip = document.createElement("div"); tip.id = "spTip"; tip.setAttribute("role", "status"); document.body.appendChild(tip);
+  let cur = null;
+  const hide = () => { tip.style.display = "none"; if (cur) cur.classList.remove("sel"); cur = null; };
+  function show(h){
+    if (cur && cur !== h) cur.classList.remove("sel");
+    cur = h; h.classList.add("sel");
+    const c = h.dataset.c, cls = c ? (c.startsWith("+") ? "up" : "dn") : "";
+    tip.innerHTML = `<span class="t-p">${esc(h.dataset.q)}</span><b>${esc(h.dataset.v)}</b>${c ? `<span class="t-c ${cls}">${esc(c)} ${esc(h.dataset.u)}</span>` : `<span class="t-c t-p">no earlier point</span>`}`;
+    tip.style.display = "block";
+    const r = h.getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
+    let x = r.left + r.width / 2 - w / 2, y = r.top - ht - 8; if (y < 6) y = r.bottom + 8;
+    x = Math.max(6, Math.min(innerWidth - w - 6, x)); tip.style.left = x + "px"; tip.style.top = y + "px";
+  }
+  document.addEventListener("pointerover", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse") show(h); });
+  document.addEventListener("pointerout", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse" && !h.dataset.pin) hide(); });
+  document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h) { e.stopPropagation(); show(h); } else hide(); }, true);
+  window.addEventListener("scroll", hide, {passive: true}); window.addEventListener("hashchange", hide);
+})();
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = "Pinch-zoom to view details";
