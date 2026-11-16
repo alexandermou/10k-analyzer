@@ -177,6 +177,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .wl-table .muted{color:var(--muted)}.wl-table .s-short{display:none}.wl-table b.soon{color:var(--accent)}
 .wl-rm{width:30px;height:30px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;cursor:pointer}
 .wl-rm:hover{color:var(--neg);border-color:var(--neg)}
+.wl-star{width:26px;height:26px;color:#e8a317;font-size:16px;margin-right:2px;vertical-align:middle;padding:0}.wl-table .wl-co{display:inline-flex;vertical-align:middle}
 @media (max-width:640px){.wl-table{font-size:12px}.wl-table td,.wl-table th button{padding:9px 4px}.wl-table td:first-child,.wl-table th:first-child button{padding-left:10px}.wl-co .nm,.wl-table .when,.wl-table .est-tag,.wl-table .wd,.wl-table .s-long{display:none}.wl-table .s-short{display:inline}.wl-co .tk{font-size:13.5px}.wl-table td:last-child,.wl-table th:last-child{width:28px;padding:0 4px}}
 .nr-sec{font-size:14px;font-weight:700;color:var(--muted);margin:14px 0 8px}.nr-day h3+.nr-sec{margin-top:4px}
 /* Watchlist (kept in a cookie in this browser) */
@@ -2464,14 +2465,14 @@ async function showWatchlist(){
   const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
   const when = {BMO: "before open", AMC: "after close", DMH: "during market hours"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
-    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", "Latest report")}${th("date", "Released")}${th("in", "Ago", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
+    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", "Latest report")}${th("date", "Released")}${th("in", "Ago", "num")}</tr></thead><tbody>${
       rows.map(({t, c, x}) => { const ipo = !LIBRARY[t] && IPO_BY_T[t], href = ipo ? ipo.href : "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
-        return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
+        return `<tr><td><button type="button" class="wl-rm wl-star" data-t="${esc(t)}" aria-label="Remove ${esc(t)} from watchlist" title="Remove ${esc(t)} from watchlist">★</button><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
           <td>${x ? `<a href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Open the ${esc(x.report)} infographic">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
           <td>${x ? `<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}` : `<span class="muted">—</span>`}</td>
           <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + "d ago"}</b>`}</td>
-          <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
+</tr>`; }).join("")
     }</tbody></table></div>
     <p class="sub">Latest report per company, with the date it was filed with the SEC.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
   if (list.length) {
