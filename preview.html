@@ -2355,6 +2355,7 @@ const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); ret
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
+const refocus = el => { if (matchMedia("(pointer:fine)").matches) el.focus(); };   // keyboard and mouse: keep focus on the picker; touch: leave it, or the phone reopens the list
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
@@ -2480,7 +2481,7 @@ async function showNew(day){
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
   bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
-  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
+  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
 }
@@ -2504,7 +2505,7 @@ async function showUpcoming(day){
   $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
     `<div class="up-notes"><p class="sub"><b>Notes</b></p><p class="sub">Forecast: last year's earnings release for the same quarter (SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date. BMO = before the market opens, AMC = after it closes.</p><p class="sub">Dashboard and Infographic show each company's latest published report.${d.generated ? ` Updated ${esc(mdy(d.generated))}.` : ""}</p></div>` +
     (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
-  $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => $("#upDayPick").focus()));
+  $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => refocus($("#upDayPick"))));
   showPage("upcoming", "Upcoming reports");
 }
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
