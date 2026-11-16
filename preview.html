@@ -719,7 +719,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
-    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Add companies to your watchlist here, or search for a company and click the ☆ next to its name. Saved in this browser only.</p></div>
+    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">To add a company to your watchlist, just click the ☆ next to its name. Saved in this browser only.</p></div>
     <div id="wlBody"></div>
     <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
   </section>
@@ -2450,7 +2450,7 @@ function wlChanged(){
   if (state.page === "upcoming") showUpcoming();
 }
 /* Watchlist: one row per company with its next report and earnings release date, soonest first */
-let wlSort = {key: "date", dir: -1}, wlSeq = 0;
+let wlSort = {key: "ticker", dir: 1}, wlSeq = 0;
 const daysUntil = iso => -dayDiff(iso);
 const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
 async function showWatchlist(){
