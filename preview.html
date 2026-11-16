@@ -1673,7 +1673,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; $("#dlInfo") && $("#dlInfo").focus(); });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; if (window.__fromWl) { window.__fromWl = false; location.hash = "#watchlist"; return; } $("#dlInfo") && $("#dlInfo").focus(); });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -2482,7 +2482,7 @@ async function showWatchlist(){
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
-    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "infographic", a.dataset.p || undefined); writeHash(); downloadInfographic(); }));
+    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "infographic", a.dataset.p || undefined); writeHash(); window.__fromWl = true; downloadInfographic(); }));
   showPage("watchlist", "Watchlist");
 }
 $("#wlForm").addEventListener("submit", e => { e.preventDefault();
