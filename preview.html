@@ -279,6 +279,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 }
 /* every card title takes two lines, so the numbers line up across a row */
 .grid>.card:not(.trend-card) .barhead p,.grid>.card .seg-name{line-height:1.25;min-height:2.5em}
+@container sec (min-width:701px){.grid>.brk{grid-column-start:1}}   /* wide: the continued group starts a new row, as before */
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
 .sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
@@ -1156,7 +1157,24 @@ function prepEps(c){
     .filter(sec => !((sec.type === "bars" && !sec.items.length) || (sec.type === "tiles" && !sec.tiles.length)));
   return html;
 }
-function renderSections(c){ return (c._secs || c.sections).map(sec => renderSection(c, sec)).join(""); }
+/* An untitled card group (e.g. the 3 balance-sheet items after the first 3) continues the group before it, so on a phone 6 cards make 3 rows of 2 instead of 2+1 and 2+1 */
+function renderSections(c){
+  const outs = []; let prevCards = false;
+  (c._secs || c.sections).forEach(sec => {
+    const h = renderSection(c, sec), cards = sec.type === "tiles" || sec.type === "bars";
+    if (cards && !sec.title && prevCards && outs.length && !/^<div class="sec"><h3/.test(h)) {
+      const m = h.match(/^<div class="sec"><div class="grid([^"]*)">([\s\S]*)<\/div><\/div>$/);
+      if (m) {
+        let prev = outs[outs.length - 1];
+        if (/two-line-wide/.test(m[1]) && !/^<div class="sec">(<h3[^>]*>[\s\S]*?<\/h3>)?<div class="grid[^"]*two-line-wide/.test(prev)) prev = prev.replace('<div class="grid', '<div class="grid two-line-wide');
+        outs[outs.length - 1] = prev.replace(/<\/div><\/div>$/, m[2].replace('class="card', 'class="card brk') + "</div></div>");
+        return;
+      }
+    }
+    outs.push(h); prevCards = cards;
+  });
+  return outs.join("");
+}
 /* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last 5 quarters */
 function sparkCard(c, it, label, chips, period){
   return `<div class="card sp-card">
