@@ -148,6 +148,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr{padding:0 10px 0 0}.nr-a{display:inline-flex;align-items:center;gap:6px;height:100%;color:inherit;text-decoration:none}
 .nr-a:first-child{padding-left:10px}.nr-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 .draw-cover{position:fixed;inset:0;z-index:1500;background:var(--bg,#F3F5F8);display:grid;place-items:center;color:var(--muted);font-size:15px}
+.up-notes{margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}.up-notes p{margin:0 0 4px;font-size:13px}
 .nr-rows{display:grid;grid-template-columns:max-content max-content max-content;justify-content:start;align-items:center;gap:6px 12px}.nr-row{display:contents}.nr-row .nr-lk{gap:6px;white-space:nowrap}.nr-tog{padding:0 10px!important;cursor:default;gap:6px}.nr-tog.fav{border-color:var(--line)}.nr-row .nr-star{font-size:17px;padding:4px 6px;margin:0}.nr-tog .stg{color:var(--muted);font-size:14px}.nr-tog.fav .stg,.nr-tog:hover .stg{color:var(--accent)}.nr-lk{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted)}.nr-lk a{color:var(--navy);text-decoration:none}.nr-lk a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .nr-star{border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:3px 2px;margin:0 -2px;cursor:pointer;border-radius:5px}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
@@ -688,7 +689,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   </section>
 
   <section class="newpage" id="upPage" hidden aria-labelledby="upTitle">
-    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Our forecast earnings-release (ER) dates for the next 10 business days: last year's earnings release for the same quarter (its SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date, so treat these as forecasts, not announced dates. BMO = before the market opens, AMC = after it closes. Each button opens the company's latest report.</p></div>
+    <div class="np-head"><h2 id="upTitle">Upcoming</h2><p class="sub">Forecast earnings release (ER) dates, which may not be exact. See the notes below. Dashboard and Infographic show the latest published financial reports.</p></div>
     <div id="upBody"></div>
   </section>
   <section class="newpage" id="newPage" hidden aria-labelledby="npTitle">
@@ -2341,9 +2342,10 @@ function nrButton(x, wl, opt = {}){
 /* The latest page: one company per line. The button stars the company; Dashboard and Infographic are links after it */
 function nrRow(x, wl, opt = {}){
   const fav = wl && wl.has(x.ticker), er = x.form === "Earnings release", tag = er ? "ER" : x.form;
-  const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
+  const per = opt.latestOnly ? "" : (x.period || "");   // upcoming list: the links open the latest report already out
+  const href = "#" + x.ticker.toLowerCase() + (per ? "-" + per : "");
   const tip = `${fav ? "Remove " + x.ticker + " from" : "Add " + x.ticker + " to"} your watchlist`;
-  return `<div class="nr-row"><span class="nr nr-tog"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span>${er && !opt.noType ? `<span class="tag er">ER</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</span><span class="nr-lk"><a href="${href}" class="nr-dash" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Dashboard</a><span aria-hidden="true">·</span><a href="${href}" class="nr-img" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Infographic</a></span><button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${esc(tip)}" title="${esc(tip)}">${fav ? "★" : "☆"}</button></div>`;
+  return `<div class="nr-row"><span class="nr nr-tog"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span>${er && (!opt.noType || !x.label) ? `<span class="tag er">ER</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</span><span class="nr-lk"><a href="${href}" class="nr-dash" data-t="${esc(x.ticker)}" data-p="${esc(per)}">Dashboard</a><span aria-hidden="true">·</span><a href="${href}" class="nr-img" data-t="${esc(x.ticker)}" data-p="${esc(per)}">Infographic</a></span><button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${esc(tip)}" title="${esc(tip)}">${fav ? "★" : "☆"}</button></div>`;
 }
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 /* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
@@ -2353,6 +2355,13 @@ const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); ret
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
+/* The date picker element is kept across redraws: replacing it while the phone's picker list is open leaves that list stuck on screen */
+function keepPicker(old, id, onChange){
+  const cur = $(id); if (!cur) return;
+  if (old && old.options.length === cur.options.length && [...old.options].every((o, i) => o.value === cur.options[i].value)) { old.value = cur.value; cur.replaceWith(old); }
+  const el = $(id); if (!el._bound) { el._bound = true; el.addEventListener("change", onChange); }
+}
+const refocus = el => { if (matchMedia("(pointer:fine)").matches) el.focus(); };   // keyboard and mouse: keep focus on the picker; touch: leave it, or the phone reopens the list
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
@@ -2376,10 +2385,10 @@ const TIMES = [["BMO", "Before market open (BMO)", "Results out before trading s
 function timeList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
-  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
+  const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, {...opt, latestOnly: true})).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine, {noType: true})}`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine, {noType: true})}`;
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
     if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
@@ -2432,7 +2441,14 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
 const WL_HEAD = "My top 10 <small class=\"t10-q\">Quarterly figures</small>";
 function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
-  if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
+  if (!pick || pick._bound) return; pick._bound = true;
+  pick.addEventListener("change", () => {
+    topKeys[sfx] = pick.value;
+    const tmp = document.createElement("div"); tmp.innerHTML = topChart(items, wl, sfx, note2, heading);
+    const fresh = tmp.firstElementChild, np = fresh.querySelector(".top-pick"); if (np) np.replaceWith(pick);   // keep the same picker element: replacing it leaves the phone's open list stuck
+    el.querySelector(".top10").replaceWith(fresh);
+    if (matchMedia("(pointer:fine)").matches) pick.focus();
+  });
 }
 /* Watchlist chart: each watched company's latest quarter, read from its quarter file */
 const QFIG = {};
@@ -2473,12 +2489,12 @@ async function showNew(day){
   const v = dayList(items, wl, head, "No reports filed this day");
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
-  const [top, list] = v.html.split("</h3>");
+  const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
   bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
-  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => $("#newDayPick").focus()));
+  keepPicker(oldNew, "#newDayPick", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
 }
@@ -2499,10 +2515,11 @@ async function showUpcoming(day){
   if (day) upSel = day; if (!days.includes(upSel)) upSel = days[0];
   const opts = days.map(x => `<option value="${x}"${x === upSel ? " selected" : ""}>${dayDiff(x) === -1 ? "Tomorrow · " : ""}${esc(dayName(x))} (${sched(x).length})</option>`).join("");
   const head = `<label for="upDayPick">Our forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
+  const oldUp = $("#upDayPick");
   $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
-    `<p class="sub">Forecast from SEC filings: last year's Form 8-K (Item 2.02) date + 52 weeks${d.generated ? ` · updated ${esc(mdy(d.generated))}` : ""}.</p>` +
+    `<div class="up-notes"><p class="sub"><b>Notes</b></p><p class="sub">Forecast: last year's earnings release for the same quarter (SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date. BMO = before the market opens, AMC = after it closes.</p><p class="sub">Dashboard and Infographic show each company's latest published report.${d.generated ? ` Updated ${esc(mdy(d.generated))}.` : ""}</p></div>` +
     (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
-  $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => $("#upDayPick").focus()));
+  keepPicker(oldUp, "#upDayPick", e => showUpcoming(e.target.value).then(() => refocus($("#upDayPick"))));
   showPage("upcoming", "Upcoming reports");
 }
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
