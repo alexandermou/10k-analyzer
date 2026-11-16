@@ -2381,7 +2381,7 @@ function timeList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, {...opt, latestOnly: true})).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine, {noType: true})}`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine, {noType: true})}`;
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
     if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
