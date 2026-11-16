@@ -58,6 +58,7 @@ html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .cx-sk .cx-shrink:hover,.cx-sk .cx-shrink:focus-visible{background:#2A3F63}
 </style></head><body>
 <title>10-K Analyzer</title>
+<script data-goatcounter="https://10kanalyzer.goatcounter.com/count" data-goatcounter-settings='{"no_onload":true}' async src="//gc.zgo.at/count.js"></script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -2337,7 +2338,7 @@ function nrRow(x, wl, opt = {}){
   const fav = wl && wl.has(x.ticker), er = x.form === "Earnings release", tag = er ? "ER" : x.form;
   const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
   const tip = `${fav ? "Remove " + x.ticker + " from" : "Add " + x.ticker + " to"} your watchlist`;
-  return `<div class="nr-row"><span class="nr nr-tog"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span>${er && !opt.noType ? `<span class="tag er">ER</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</span><span class="nr-lk"><a href="${href}">Dashboard</a><span aria-hidden="true">·</span><a href="${href}" class="nr-img" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Infographic</a></span><button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${esc(tip)}" title="${esc(tip)}">${fav ? "★" : "☆"}</button></div>`;
+  return `<div class="nr-row"><span class="nr nr-tog"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span>${er && !opt.noType ? `<span class="tag er">ER</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</span><span class="nr-lk"><a href="${href}" class="nr-dash" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Dashboard</a><span aria-hidden="true">·</span><a href="${href}" class="nr-img" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Infographic</a></span><button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${esc(tip)}" title="${esc(tip)}">${fav ? "★" : "☆"}</button></div>`;
 }
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 /* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
@@ -2653,7 +2654,17 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
+/* Visit counts (GoatCounter: no cookies, no personal data). Pages are counted by their address; taps on the list links are counted as events. */
+function gc(path, title, event, tries = 0){
+  try { if (window.goatcounter && window.goatcounter.count) { window.goatcounter.count({path, title: title || path, event: !!event}); return; } } catch (x) { return; }
+  if (tries < 5) setTimeout(() => gc(path, title, event, tries + 1), 800);   // the counter script is still loading
+}
+const gcPage = () => gc("/" + (location.hash.slice(1).toLowerCase() || "home"), document.title);
+window.addEventListener("load", gcPage); window.addEventListener("hashchange", gcPage);
 document.addEventListener("click", async e => {
+  const dl = e.target.closest(".nr-dash"); if (dl) gc("dashboard/" + dl.dataset.t + (dl.dataset.p ? "/" + dl.dataset.p : ""), "Dashboard link", true);
+  const ip = e.target.closest(".ipo-links a"); if (ip) gc((ip.classList.contains("ipo-info") ? "ipo-infographic/" : "ipo-dashboard/") + (ip.dataset.t || ip.getAttribute("href")), "IPO link", true);
+  const im0 = e.target.closest(".nr-img"); if (im0) gc("infographic/" + im0.dataset.t + (im0.dataset.p ? "/" + im0.dataset.p : ""), "Infographic link", true);
   const im = e.target.closest(".nr-img"); if (im) { e.preventDefault();   // the picture alone, over the list, like the IPO page's Infographic link
     const y = window.scrollY, cover = document.createElement("div"); cover.className = "draw-cover"; cover.textContent = "Drawing the image…"; document.body.appendChild(cover);   // hides the page while the picture is drawn
     let ok = false;
