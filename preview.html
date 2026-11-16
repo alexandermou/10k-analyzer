@@ -2465,7 +2465,7 @@ async function showWatchlist(){
   const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
   const when = {BMO: "before open", AMC: "after close", DMH: "during market hours"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
-    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", "Latest report")}${th("date", "Released")}${th("in", "Ago", "num")}</tr></thead><tbody>${
+    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", "Latest infographic")}${th("date", "Released")}${th("in", "Ago", "num")}</tr></thead><tbody>${
       rows.map(({t, c, x}) => { const ipo = !LIBRARY[t] && IPO_BY_T[t], href = ipo ? ipo.href : "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a><button type="button" class="wl-rm wl-star" data-t="${esc(t)}" aria-label="Remove ${esc(t)} from watchlist" title="Remove ${esc(t)} from watchlist">★</button></td>
