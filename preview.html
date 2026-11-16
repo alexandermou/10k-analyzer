@@ -1555,10 +1555,9 @@ async function makeInfographicBlob(c){
   root.setAttribute("data-theme", "light");
   const host = document.createElement("div");
   const IGL = igLayout(), FULLIG = IGL !== "compact", TALL = IGL === "tall", WIDE = IGL === "wide", W = TALL ? 600 : WIDE ? 1512 : 756;
-  host.style.cssText = "position:absolute;left:0;top:0;width:" + (TALL ? 720 : WIDE ? 1640 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
-  const clip = document.createElement("div"); clip.style.cssText = "position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none"; clip.appendChild(host);   // drawn inside a zero-size box, so a phone browser never zooms out to fit it
+  host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (TALL ? 720 : WIDE ? 1640 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
   if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
-  document.body.appendChild(clip);
+  document.body.appendChild(host);
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
@@ -1604,7 +1603,7 @@ async function makeInfographicBlob(c){
     if (!blob) throw new Error("blob");
     return blob;
   } finally {
-    clip.remove();
+    host.remove();
     if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
   }
 }
