@@ -1124,6 +1124,8 @@ function barCard(c, it){
   </div>`;
 }
 /* Quarterly revenue and EPS: the same card as every KPI, wider on desktop */
+/* short card titles: "Revenue", "Diluted EPS" (the section is already called Quarterly results) */
+function trendTitle(t){ t = String(t || "").replace(/ by quarter$/i, "").replace(/^Quarterly /i, "").replace(/^Diluted earnings( \(loss\))? per share$/i, "Diluted EPS"); return t.charAt(0).toUpperCase() + t.slice(1); }
 function trendCard(c, sec){
   const its = sec.items, n = its.length, kind = sec.type === "eps" ? "eps" : undefined;
   if (!n) return "";
@@ -1133,7 +1135,7 @@ function trendCard(c, sec){
   const y = prior === null ? null : chipFor({cur, prior}), q = prevQ === null ? null : qoqChip(cur, prevQ, "up", sec.title);
   const chips = (y ? `<span class="chip ${y.cls}">${esc(/YoY$/.test(y.t) ? y.t : y.t + " YoY")}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
   return `<div class="card sp-card">
-    <div class="barhead"><p>${esc(sec.title)}</p></div>
+    <div class="barhead"><p>${esc(trendTitle(sec.title))}</p></div>
     <p class="big${cur < 0 ? " down" : ""}">${money(c, cur, kind)} <small>${esc(L[n - 1])}</small></p>
     <div class="chips">${chips}</div>
     ${sec.callout ? `<p class="sub">${sec.callout}</p>` : ""}
