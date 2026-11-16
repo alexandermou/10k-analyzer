@@ -228,6 +228,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
 .meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .meta b{color:var(--ink);font-weight:600}
+.img-tools{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:8px 0;margin-bottom:8px;background:var(--bg,#F3F5F8)}.img-tools .info-settings{margin-left:0}.img-tools .status{flex:1;min-width:0}.img-ic{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 .tabs[hidden]{display:none}.fb-foot{margin:28px 0 8px;font-size:15px}.fb-foot a{color:var(--accent);text-decoration:underline;cursor:pointer}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
@@ -595,7 +596,7 @@ body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16p
 body:not(.home) .brand{padding-right:88px}
 .topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
 .tl-latest,body.home #homeIcon{display:none!important}
-#closeIcon{display:none}body.faqmode #closeIcon,body.subview #closeIcon{display:grid}body.faqmode #homeIcon,body.faqmode .hmenu,body.subview #homeIcon,body.subview .hmenu{display:none!important}body.subview .shelf,body.subview #periods{display:none}.info-pg{height:40px;padding:0 12px;margin-left:6px}   /* menu pages: a close button in the top-right corner returns to the page the menu was opened from */
+#closeIcon{display:none}body.faqmode #closeIcon{display:grid}body.faqmode #homeIcon,body.faqmode .hmenu{display:none!important}   /* menu pages: a close button in the top-right corner returns to the page the menu was opened from */
 body.home .tl-latest{display:flex!important;align-items:center;height:40px;padding:0 8px;border:0!important;background:none!important;width:auto!important;color:var(--ink);font-size:15px;font-weight:600}
 body.home .tl-latest:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .hmenu{position:relative}
@@ -770,6 +771,18 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       </div>
     </div>
     <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Dashboard</button>
+      <button class="tab" role="tab" id="tab-image" data-view="image" aria-selected="false">Infographic</button>
+      <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
+      <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
+    </div>
+    <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
+      <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
+        <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+      <img id="tabImg" alt="Infographic" hidden>
+    </div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
     <div class="media-bar" id="mediaBar" hidden>
@@ -1489,8 +1502,7 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span></button><a class="info-settings" href="#layout-settings">Settings</a>${c.quarter ? "" : `<button class="btn ghost info-pg" type="button" data-pg="media">Media</button><button class="btn ghost info-pg" type="button" data-pg="report">Report</button>`}<span class="status" id="infoStatus" role="status"></span></div>
-  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
+  $("#view-infographic").innerHTML = `  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
@@ -1501,9 +1513,7 @@ function renderInfographic(c){
     ${c.quarter ? "" : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
-  $("#dlInfo").addEventListener("click", downloadInfographic);
-  document.querySelectorAll(".info-pg").forEach(b => b.addEventListener("click", () => { setView(b.dataset.pg === "media" ? state.media : "report"); writeHash(); }));
-}
+  }
 
 /* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
 /* Bakes the site's fonts (IBM Plex, Latin subset) into the image as data, so a phone draws the picture with
@@ -1607,20 +1617,6 @@ async function saveShownImage(){
   }
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   st.textContent = "Downloaded " + name + ".";
-}
-async function downloadInfographic(){
-  const c = state.shown || LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
-  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
-  const name = `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`;
-  btn.disabled = true; st.textContent = "Drawing the image…";
-  try {
-    const blob = await makeInfographicBlob(c);
-    lastImg = {blob, name};
-    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
-    lastImgUrl = URL.createObjectURL(blob);
-    st.textContent = ""; showImage(lastImgUrl);
-  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
-  finally { btn.disabled = false; }
 }
 /* Paints a sparkline (line, points, zero line) onto a canvas at 2x, in the colors the card shows */
 function drawSparkToCanvas(svg, w, h){
@@ -1732,6 +1728,28 @@ try { screen.orientation.lock("portrait").catch(() => {}); } catch (e) {}
   document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h) { e.stopPropagation(); show(h); } else hide(); }, true);
   window.addEventListener("scroll", hide, {passive: true}); document.body.addEventListener("scroll", hide, {passive: true}); window.addEventListener("hashchange", hide);
 })();
+/* The Infographic tab: the picture itself, drawn the first time the tab opens (and again if the company, the report or the infographic layout changed) */
+let tabImgKey = "";
+async function loadInfoImage(){
+  const c = state.shown || LIBRARY[state.ticker]; if (!c) return;
+  const key = [c.ticker, c.fy, c.period, c.filed, igLayout()].join("|"), st = $("#imgTabStatus"), img = $("#tabImg");
+  if (key === tabImgKey && img.getAttribute("src")) return;
+  tabImgKey = ""; img.hidden = true; st.textContent = "Drawing the image…";
+  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+  try {
+    const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) return;
+    lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
+    img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key;
+  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+}
+let ovFromTab = false;
+$("#tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; showImage(lastImgUrl); setImgFs(true); });
+$("#tabShare").addEventListener("click", async () => {
+  if (!lastImg) return;
+  if (canShareImage()) { await shareShownImage(); return; }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove();   // no share sheet here: save the picture
+});
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = "Pinch-zoom to view details";
@@ -1741,6 +1759,7 @@ function showImage(url, title){
 $("#ovFs").addEventListener("click", () => setImgFs(true));   // full screen in place of the old save button
 /* Share button: the phone's or computer's share sheet with the picture attached (Messages, Mail, AirDrop, Save Image…).
    Shown only where the browser can share image files. */
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 const shareFileOf = () => lastImg ? new File([lastImg.blob], lastImg.name, {type: "image/png"}) : null;
 function canShareImage(){
   try { const f = shareFileOf() || new File([new Blob([""], {type: "image/png"})], "x.png", {type: "image/png"});
@@ -1766,7 +1785,7 @@ function setImgFs(on){
   }
 }
 const toggleImgFs = () => setImgFs(!$("#imgOverlay").classList.contains("img-fs"));
-$("#ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); });   // the exit button sits outside the picture, so it never ends up in a saved image
+$("#ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); if (ovFromTab) { ovFromTab = false; $("#ovImg").removeAttribute("src"); $("#imgOverlay").hidden = true; } });   // the exit button sits outside the picture, so it never ends up in a saved image
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
   if (!ovFsReal() && $("#imgOverlay").classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement)) {
     // left real full screen with the system gesture or Esc: drop the full-screen look too, unless we never had real full screen
@@ -1788,7 +1807,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; if (window.__fromWl) { window.__fromWl = false; location.hash = "#watchlist"; return; } $("#dlInfo") && $("#dlInfo").focus(); });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -2024,7 +2043,7 @@ $("#nextSlide").addEventListener("click", () => goSlide(1));
 $("#stage").addEventListener("keydown", e => { if (e.target.closest("button")) return; if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } if (e.key === " ") { e.preventDefault(); $("#voSlide").click(); } });
 
 /* ---------------- Shelf, routing ---------------- */
-const VIEWS = ["infographic", "slides", "video", "report"];
+const VIEWS = ["infographic", "image", "slides", "video", "report"];
 let state = {ticker: "AMZN", view: "infographic", media: "slides", period: ""};   // period: "" = annual report, else e.g. "q2-2026" 
 function renderSpines(){
   const sel = $("#pick");
@@ -2039,8 +2058,8 @@ function setView(v){
   const media = v === "slides" || v === "video";
   if (media) state.media = v;
   VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
-  document.body.classList.toggle("subview", v !== "infographic");   // Media and Report open as their own page, with a close icon
-  if (v !== "infographic") window.scrollTo(0, 0);
+  ["infographic", "image", "media", "report"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  if (v === "image") loadInfoImage();
   $("#mediaBar").hidden = !media;
   ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
   if (v !== "video" && player.playing) stop(false);
@@ -2213,7 +2232,7 @@ async function openCompany(t, view, period){
   }
   const c = LIBRARY[t];
   const qs = c.quarters || [];
-  if (period === undefined) period = view && !["infographic", "feedback"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
+  if (period === undefined) period = view && !["infographic", "image"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
   if (!qs.some(q => pid(q) === period)) period = "";
   let shown = c;
   if (period) {
@@ -2237,10 +2256,11 @@ async function openCompany(t, view, period){
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });   // the written report, slides and video are for the annual report
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
-  if (period && !["infographic", "feedback"].includes(v)) v = "infographic";
+  if (period && !["infographic", "image"].includes(v)) v = "infographic";
   setView(v);
 }
 function renderPeriods(c){
@@ -2601,7 +2621,7 @@ async function showWatchlist(){
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
-    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "infographic", a.dataset.p || undefined); writeHash(); window.__fromWl = true; downloadInfographic(); }));
+    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "image", a.dataset.p || undefined); writeHash(); }));
   showPage("watchlist", "Watchlist");
 }
 $("#wlForm").addEventListener("submit", e => { e.preventDefault();
@@ -2838,7 +2858,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
   let back = "";
   window.addEventListener("hashchange", e => { if (!MENU.has(location.hash.toLowerCase())) return; let old = ""; try { old = new URL(e.oldURL).hash; } catch (x) {} if (!MENU.has(old.toLowerCase())) back = old; });
-  $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (document.body.classList.contains("subview") && !document.body.classList.contains("faqmode")) { setView("infographic"); writeHash(); window.scrollTo(0, 0); return; } if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
+  $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
 })();
 /* Hamburger menu: Watchlist, Upcoming, IPOs, FAQ */
 (function(){
