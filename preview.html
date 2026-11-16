@@ -291,6 +291,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 #filing.lay-full .grid>.card .sp-vals span{font-size:13.5px}#filing.lay-full .grid>.card .sp-vals span.neg{color:var(--neg,#A8321F)}
 #filing.lay-full .grid>.card .spark.wide .sp-plot{margin:26px 0 4px}
 #filing.lay-full .grid>.card .spark.wide svg{height:clamp(90px,34cqw,170px)}
+.laydone{margin-top:18px}
 .laychoices{display:flex;flex-direction:column;gap:10px;max-width:460px}
 .laychoice{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
 .laychoice b{font-size:17px}.laychoice span{font-size:14px;color:var(--muted)}
@@ -668,6 +669,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Compact</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
       <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Full</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
     </div>
+    <button type="button" class="btn laydone" id="layDone">Done</button>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
     <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public companies to add, up to 10 at a time. We check the ticker against the SEC's list first.</p></div>
@@ -2558,6 +2560,10 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   const apply = m => { $("#filing").classList.toggle("lay-full", m === "full"); document.querySelectorAll(".laychoice").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lay === m))); };
   document.querySelectorAll(".laychoice").forEach(b => b.addEventListener("click", () => { try { localStorage.setItem("layout", b.dataset.lay); } catch (e) {} apply(b.dataset.lay); }));
   apply(get());
+  /* Done: back to the page the menu was opened from */
+  let back = "";
+  window.addEventListener("hashchange", e => { if (location.hash.toLowerCase() === "#layout-settings") { try { const h = new URL(e.oldURL).hash; back = h && h.toLowerCase() !== "#layout-settings" ? h : ""; } catch (x) { back = ""; } } });
+  $("#layDone").addEventListener("click", () => { if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
 })();
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
