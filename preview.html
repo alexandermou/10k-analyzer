@@ -1503,7 +1503,8 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
+  $("#view-infographic").innerHTML = `<p class="img-note">Pinch-zoom for details.</p>
+  <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
