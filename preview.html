@@ -1132,13 +1132,23 @@ function trendCard(c, sec){
   const it = {label: sec.title, cur, prior, spark: v, sparkL: L, fmt: x => money(c, x, kind)};
   const y = prior === null ? null : chipFor({cur, prior}), q = prevQ === null ? null : qoqChip(cur, prevQ, "up", sec.title);
   const chips = (y ? `<span class="chip ${y.cls}">${esc(/YoY$/.test(y.t) ? y.t : y.t + " YoY")}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
-  return `<div class="sec"><div class="grid trend-grid"><div class="card sp-card trend-card">
+  return `<div class="card sp-card">
     <div class="barhead"><p>${esc(sec.title)}</p></div>
     <p class="big${cur < 0 ? " down" : ""}">${money(c, cur, kind)} <small>${esc(L[n - 1])}</small></p>
     <div class="chips">${chips}</div>
     ${sec.callout ? `<p class="sub">${sec.callout}</p>` : ""}
-    ${sparkline(c, it, "full")}
-  </div></div></div>`;
+    ${sparkline(c, it, true)}
+  </div>`;
+}
+/* The quarterly revenue and EPS cards share one section of regular-size cards */
+function renderSections(c){
+  let out = "", buf = [], lab = "";
+  const flush = () => { if (buf.length) out += `<div class="sec"><h3>Quarterly results${lab ? ` <small>\u00b7 ${esc(lab)}</small>` : ""}</h3><div class="grid">${buf.join("")}</div></div>`; buf = []; lab = ""; };
+  c.sections.forEach(sec => {
+    if (sec.type === "eps" || sec.type === "quarters") { const h = trendCard(c, sec); if (h) { buf.push(h); if (!lab && sec.items && sec.items.length) lab = sec.items[sec.items.length - 1].q; } }
+    else { flush(); out += renderSection(c, sec); }
+  });
+  flush(); return out;
 }
 /* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last 5 quarters */
 function sparkCard(c, it, label, chips, period){
@@ -1387,7 +1397,7 @@ function renderInfographic(c){
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
       <div class="sankey">${sankey(c)}</div>
     </div>
-    ${c.sections.map(sec => renderSection(c, sec)).join("")}
+    ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(c.period)}; filed ${esc(c.filed)}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
