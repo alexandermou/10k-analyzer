@@ -2355,6 +2355,12 @@ const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); ret
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
+/* The date picker element is kept across redraws: replacing it while the phone's picker list is open leaves that list stuck on screen */
+function keepPicker(old, id, onChange){
+  const cur = $(id); if (!cur) return;
+  if (old && old.options.length === cur.options.length && [...old.options].every((o, i) => o.value === cur.options[i].value)) { old.value = cur.value; cur.replaceWith(old); }
+  const el = $(id); if (!el._bound) { el._bound = true; el.addEventListener("change", onChange); }
+}
 const refocus = el => { if (matchMedia("(pointer:fine)").matches) el.focus(); };   // keyboard and mouse: keep focus on the picker; touch: leave it, or the phone reopens the list
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
@@ -2476,12 +2482,12 @@ async function showNew(day){
   const v = dayList(items, wl, head, "No reports filed this day");
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
-  const [top, list] = v.html.split("</h3>");
+  const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
   bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
-  $("#newDayPick").addEventListener("change", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
+  keepPicker(oldNew, "#newDayPick", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
 }
@@ -2502,10 +2508,11 @@ async function showUpcoming(day){
   if (day) upSel = day; if (!days.includes(upSel)) upSel = days[0];
   const opts = days.map(x => `<option value="${x}"${x === upSel ? " selected" : ""}>${dayDiff(x) === -1 ? "Tomorrow · " : ""}${esc(dayName(x))} (${sched(x).length})</option>`).join("");
   const head = `<label for="upDayPick">Our forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
+  const oldUp = $("#upDayPick");
   $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
     `<div class="up-notes"><p class="sub"><b>Notes</b></p><p class="sub">Forecast: last year's earnings release for the same quarter (SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date. BMO = before the market opens, AMC = after it closes.</p><p class="sub">Dashboard and Infographic show each company's latest published report.${d.generated ? ` Updated ${esc(mdy(d.generated))}.` : ""}</p></div>` +
     (d.tickers ? `<p class="sub">Trial: limited to ${d.tickers.length} companies (${d.tickers.map(esc).join(", ")}).</p>` : "");
-  $("#upDayPick").addEventListener("change", e => showUpcoming(e.target.value).then(() => refocus($("#upDayPick"))));
+  keepPicker(oldUp, "#upDayPick", e => showUpcoming(e.target.value).then(() => refocus($("#upDayPick"))));
   showPage("upcoming", "Upcoming reports");
 }
 /* IPOs: pipeline read from SEC filings (build_ipo.py -> data/ipo.json) */
