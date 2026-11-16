@@ -25,7 +25,7 @@ html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .grid>.card .barhead{padding-right:22px}
 .cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:56px 12px 16px}
 .cx-ov[hidden]{display:none}
-.cx-stage{margin:auto;flex:none}
+.cx-stage{margin:auto;flex:none}.cx-note{margin:2px 0 6px;color:var(--muted);font-size:13px;font-weight:400}
 .cx-stage>.card{padding:20px 22px;gap:10px}
 .cx-stage .barhead{padding-right:0}
 .cx-stage .big{font-size:40px}
@@ -2658,7 +2658,8 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   function open(card){
     stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
+      stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
       const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
       stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
