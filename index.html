@@ -9,13 +9,23 @@
 .cx-stage .sk-card .sub{display:none}
 .cx-stage .sk-card .sankey{flex:1;min-height:0;overflow:visible}
 .cx-stage .sk-card .sankey svg{min-width:0;width:100%;height:100%}
+.cx-skv .cx-stage .sk-card{height:auto}.cx-skv .cx-stage .sk-card .sankey{flex:none}
+.cx-skv .cx-stage .sk-card .sankey svg{min-width:0;max-width:none;width:100%;height:auto}
+@media (orientation:landscape){html:not(.rot-lock) .cx-skv .cx-stage .sk-card .sankey svg[data-rot]{display:none}
+html:not(.rot-lock) .cx-skv .cx-stage .sk-card .sankey svg.sk-flat{display:block;width:auto;max-width:100%;height:calc(100vh - 150px);margin:0 auto}}
+html.rot-lock,html.rot-lock body{overflow:hidden}
+html.rot-lock body{position:fixed;left:0;top:0;width:var(--lh);height:var(--lw);overflow-y:auto;overflow-x:hidden;transform-origin:0 0}
+html.rot-lock .cx-ov,html.rot-lock .ov{top:var(--bst,0px);bottom:calc(0px - var(--bst,0px))}
+html.rot-lock .cx-shrink,html.rot-lock .ov.img-fs .ov-exitfs{top:calc(12px + var(--bst,0px))}
+html.rot-lock.rot-ccw body{transform:translateY(var(--lh)) rotate(-90deg)}
+html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
 .grid>.card .barhead{padding-right:22px}
 .cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:56px 12px 16px}
 .cx-ov[hidden]{display:none}
-.cx-stage{margin:auto;flex:none}
+.cx-stage{margin:auto;flex:none}.sec h3 .sec-note{display:block;white-space:nowrap;margin-top:4px;font-size:12px;overflow:hidden;text-overflow:ellipsis}.cx-ov .cx-note{margin:2px 0 6px!important;color:var(--muted)!important;font:400 11px/1.3 "IBM Plex Sans",sans-serif!important}
 .cx-stage>.card{padding:20px 22px;gap:10px}
 .cx-stage .barhead{padding-right:0}
 .cx-stage .big{font-size:40px}
@@ -48,6 +58,12 @@
 .cx-sk .cx-shrink:hover,.cx-sk .cx-shrink:focus-visible{background:#2A3F63}
 </style></head><body>
 <title>10-K Analyzer</title>
+<link rel="canonical" href="https://alexandermou.github.io/10k-analyzer/">
+<script data-goatcounter="https://10kanalyzer.goatcounter.com/count" data-goatcounter-settings='{"no_onload":true}' async src="//gc.zgo.at/count.js"></script>
+<script>/* Open the site once with ?nocount to stop counting your own visits on this browser; ?count turns counting back on */
+try { const u = new URL(location.href), off = u.searchParams.has("nocount"), on = u.searchParams.has("count");
+  if (off || on) { if (off) localStorage.setItem("skipgc", "t"); else localStorage.removeItem("skipgc"); u.searchParams.delete("nocount"); u.searchParams.delete("count"); history.replaceState(null, "", u.pathname + u.search + u.hash);
+    window.addEventListener("load", () => setTimeout(() => alert(off ? "Your visits on this browser are no longer counted." : "Your visits on this browser are counted again."), 300)); } } catch (e) {}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -131,6 +147,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr .when{font-size:11px;font-weight:600;color:var(--muted)}
 .nr{padding:0 10px 0 0}.nr-a{display:inline-flex;align-items:center;gap:6px;height:100%;color:inherit;text-decoration:none}
 .nr-a:first-child{padding-left:10px}.nr-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.draw-cover{position:fixed;inset:0;z-index:1500;background:var(--bg,#F3F5F8);display:grid;place-items:center;color:var(--muted);font-size:15px}
+.nr-rows{display:grid;grid-template-columns:max-content max-content max-content;justify-content:start;align-items:center;gap:6px 12px}.nr-row{display:contents}.nr-row .nr-lk{gap:6px;white-space:nowrap}.nr-tog{padding:0 10px!important;cursor:default;gap:6px}.nr-tog.fav{border-color:var(--line)}.nr-row .nr-star{font-size:17px;padding:4px 6px;margin:0}.nr-tog .stg{color:var(--muted);font-size:14px}.nr-tog.fav .stg,.nr-tog:hover .stg{color:var(--accent)}.nr-lk{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted)}.nr-lk a{color:var(--navy);text-decoration:none}.nr-lk a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .nr-star{border:0;background:transparent;color:var(--muted);font-size:14px;line-height:1;padding:3px 2px;margin:0 -2px;cursor:pointer;border-radius:5px}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -218,6 +236,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
 .meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .meta b{color:var(--ink);font-weight:600}
+.img-note{margin:-4px 0 0!important;color:var(--muted);font-size:13px!important;line-height:1.3}.img-tools{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:2px 0 4px;margin-bottom:2px;background:var(--bg,#F3F5F8)}.img-tools .info-settings{margin-left:0}.img-tools .status{flex:1;min-width:0}.img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+.tabs[hidden]{display:none}.fb-foot{margin:28px 0 8px;font-size:15px}.fb-foot a{color:var(--accent);text-decoration:underline;cursor:pointer}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
 .fb-card{max-width:720px;padding:22px 22px 20px}
@@ -360,7 +380,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sp-line{fill:none;stroke:var(--navy);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .sp-dot{fill:var(--surface);stroke:var(--navy);stroke-width:1.5}.sp-last{fill:var(--navy)}
 .sp-zero{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3;opacity:.6}
-.sp-hit{fill:transparent}.sp-hit:hover{fill:var(--navy);fill-opacity:.08}
+.sp-hit{fill:transparent;cursor:pointer}.sp-hit:hover,.sp-hit.sel{fill:var(--navy);fill-opacity:.08}
+#spTip{position:fixed;z-index:2147483000;pointer-events:none;background:#15202B;color:#F3F5F8;border:1px solid #3A4757;border-radius:10px;padding:8px 12px;font:500 14px/1.35 'IBM Plex Sans',sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);white-space:nowrap;display:none}
+#spTip b{display:block;font:700 18px/1.2 'IBM Plex Mono',monospace}#spTip .t-p{display:block;color:#9FB0C4;font-size:13px}#spTip .t-c{display:block}#spTip .up{color:#7FD08F}#spTip .dn{color:#F0907B}
 .barhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .barhead p{line-height:1.3}
 .card>.bars{margin-top:auto}
@@ -514,7 +536,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 
 /* Infographic download */
 .info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.info-settings{align-self:center;margin-left:14px;font-size:15px;color:var(--accent);text-decoration:underline}.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
+.info-settings{align-self:center;margin-left:10px;font-size:14px;color:var(--accent);text-decoration:underline}.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
@@ -755,42 +777,23 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <h2 id="fname"></h2>
         <div class="meta" id="fmeta"></div>
       </div>
-      <div class="tabs" role="tablist" aria-label="Views">
-        <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Infographic</button>
-        <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
-        <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
-        <button class="tab" role="tab" id="tab-feedback" data-view="feedback" aria-selected="false">Feedback</button>
-      </div>
     </div>
     <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Dashboard</button>
+      <button class="tab" role="tab" id="tab-image" data-view="image" aria-selected="false">Infographic</button>
+      <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
+      <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Summary</button>
+    </div>
+    <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
+      <p class="img-note">Pinch-zoom for details.</p>
+      <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
+        <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+      <img id="tabImg" alt="Infographic" hidden>
+    </div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
-    <div id="view-feedback" role="tabpanel" aria-labelledby="tab-feedback" hidden>
-      <div class="card fb-card">
-        <form id="fbForm" novalidate>
-          <h2 class="fb-h">Send feedback</h2>
-          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
-          <div class="fb-two">
-            <div class="fb-field"><label class="fb-lbl" for="fbName">Name</label>
-              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
-            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email</label>
-              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
-          </div>
-          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
-          <div class="fb-field"><label class="fb-lbl" for="fbSubj">Subject</label>
-            <input type="text" id="fbSubj" name="subject" maxlength="200"></div>
-          <label class="fb-lbl" for="fbMsg">Your message</label>
-          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
-          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
-          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
-        </form>
-        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
-          <h2 class="fb-h">Thank you!</h2>
-          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
-          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
-        </div>
-      </div>
-    </div>
     <div class="media-bar" id="mediaBar" hidden>
       <div class="seg" role="group" aria-label="Media type">
         <button type="button" class="seg-btn" id="seg-slides" data-media="slides" aria-pressed="true">Slides</button>
@@ -822,6 +825,33 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         </div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
+      </div>
+    </div>
+      <div class="fb-foot"><a href="#feedback" id="fbLink" role="button" aria-expanded="false" aria-controls="view-feedback">Feedback</a></div>
+    <div id="view-feedback" hidden>
+      <div class="card fb-card">
+        <form id="fbForm" novalidate>
+          <h2 class="fb-h">Send feedback</h2>
+          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
+          <div class="fb-two">
+            <div class="fb-field"><label class="fb-lbl" for="fbName">Name</label>
+              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
+            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email</label>
+              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
+          </div>
+          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
+          <div class="fb-field"><label class="fb-lbl" for="fbSubj">Subject</label>
+            <input type="text" id="fbSubj" name="subject" maxlength="200"></div>
+          <label class="fb-lbl" for="fbMsg">Your message</label>
+          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
+          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
+          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
+        </form>
+        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
+          <h2 class="fb-h">Thank you!</h2>
+          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
+          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1326,8 +1356,13 @@ function sparkline(c, it, wide){
   const dot = (x, y, last) => `<path d="M${x} ${y}l0 0" class="sp-pt${last ? " last" : ""}"/>` + (last ? "" : `<path d="M${x} ${y}l0 0" class="sp-pt-in"/>`);
   const dots = wide ? v.map((x, i) => x === null ? "" : dot(X(i).toFixed(1), Y(x).toFixed(1), hl && i === last)).join("") : v.map((x, i) => x === null ? "" : `<circle cx="${X(i).toFixed(1)}" cy="${Y(x).toFixed(1)}" r="${hl && i === last ? 3.2 : 2}" class="${hl && i === last ? "sp-last" : "sp-dot"}"/>`).join("");
   const F = it.fmt || (x => sparkFmt(x, k));
-  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit"><title>${esc(q[i])}: ${esc(F(x))}</title></rect>`).join("");
   const annual = /^FY/.test(q[0]), half = /^H\d/.test(q[0]);
+  /* tooltip data: period, value and the change from the point before (QoQ; YoY for fiscal years, HoH for half-years; pp when the value is a percentage) */
+  const chg = i => { const x = v[i], pv = v[i - 1]; if (i === 0 || x === null || pv === null || pv === undefined) return "";
+    if (/%$/.test(F(x))) { const dd = x - pv; return (dd >= 0 ? "+" : "−") + Math.abs(dd).toFixed(1) + " pp"; }
+    if (pv > 0 && x > 0) { const pc = (x / pv - 1) * 100; return pc >= 100 ? (x / pv).toFixed(1) + "×" : (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%"; }   // same rule as the chips
+    return pv < 0 && x > 0 ? "Loss to profit" : pv > 0 && x < 0 ? "Profit to loss" : pv < 0 && x < 0 ? (x > pv ? "Loss narrows" : x < pv ? "Loss widens" : "Loss unchanged") : "n/a"; };
+  const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit" data-q="${esc(q[i])}" data-v="${esc(x === null ? "n/a" : F(x))}" data-c="${esc(chg(i))}" data-u="${annual ? "YoY" : half ? "HoH" : "QoQ"}" data-first="${i === 0 ? 1 : ""}"></rect>`).join("");
   const desc = `${annual ? "Fiscal years" : half ? "Last 3 half-years" : "Last 5 quarters"}, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
   const approx = it.sparkNote === "approx" ? `<span class="sp-note" title="Quarterly figures as filed with the SEC; the company defines this card slightly differently">≈ as filed</span>` : "";
@@ -1476,9 +1511,9 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span></button><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="infoStatus" role="status"></span></div>
+  $("#view-infographic").innerHTML = `<p class="img-note">Pinch-zoom for details.</p>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
-    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue</p></div>
@@ -1488,8 +1523,7 @@ function renderInfographic(c){
     ${c.quarter ? "" : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
-  $("#dlInfo").addEventListener("click", downloadInfographic);
-}
+  }
 
 /* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
 /* Bakes the site's fonts (IBM Plex, Latin subset) into the image as data, so a phone draws the picture with
@@ -1547,9 +1581,12 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(shortName(c.name))} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
+    const nm0 = shortName(c.name), nmM = nm0.match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i);
+    h.innerHTML = `<div><p id="igNm" style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${nmM ? `${esc(nmM[1])}<span class="ig-suf">${esc(nmM[2])} ${esc(nmM[3])}</span>` : esc(nm0)}</p><p style="margin:4px 0 0;font:600 ${TALL ? 22 : WIDE ? 24 : FULLIG ? 21 : 26}px/1.2 'IBM Plex Sans',sans-serif;color:#55606E"><span style="color:#A9550D">${c.ticker}</span> · ${esc(c.fy)}</p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div>`;
     n.prepend(h);
     host.appendChild(n);
+    { const nmEl = n.querySelector("#igNm"), suf = nmEl && nmEl.querySelector(".ig-suf");   // name on one line: drop "Inc." / "Corp." (and its comma) when it would wrap
+      if (suf && nmEl.getBoundingClientRect().height > parseFloat(getComputedStyle(nmEl).fontSize) * 1.6) suf.remove(); }
     n.querySelectorAll(".sankey svg.sk-flat").forEach(x => x.remove());
     n.querySelectorAll(".sankey svg[data-rot]").forEach(svg => { const [w0, h0] = svg.dataset.rot.split(" "); svg.setAttribute("viewBox", `0 0 ${w0} ${h0}`); const g = svg.querySelector("g.rotg"); if (g) g.replaceWith(...g.childNodes); svg.removeAttribute("data-rot"); svg.style.maxWidth = "none"; });   // back to the flat drawing; the picture code below turns it
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
@@ -1558,7 +1595,7 @@ async function makeInfographicBlob(c){
       if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
         const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
       const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
-      const src = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad);
+      const src = trimRight(drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), 24 * R);   // no empty space after the last label
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
       const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0);
       cv.style.width = B + "px"; cv.style.height = Math.round(src.width / R) + "px"; cv.style.display = "block";
@@ -1594,20 +1631,6 @@ async function saveShownImage(){
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   st.textContent = "Downloaded " + name + ".";
 }
-async function downloadInfographic(){
-  const c = state.shown || LIBRARY[state.ticker], btn = $("#dlInfo"), st = $("#infoStatus");
-  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
-  const name = `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`;
-  btn.disabled = true; st.textContent = "Drawing the image…";
-  try {
-    const blob = await makeInfographicBlob(c);
-    lastImg = {blob, name};
-    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl);
-    lastImgUrl = URL.createObjectURL(blob);
-    st.textContent = ""; showImage(lastImgUrl);
-  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
-  finally { btn.disabled = false; }
-}
 /* Paints a sparkline (line, points, zero line) onto a canvas at 2x, in the colors the card shows */
 function drawSparkToCanvas(svg, w, h){
   const vb = svg.viewBox.baseVal, R = 2, sx = w / vb.width, sy = h / vb.height;
@@ -1636,6 +1659,14 @@ const PAINT = {
   "t-m": {fill: "#55606E"}, "t-i": {fill: "#15202B"}, "t-w": {fill: "#FFFFFF"}, "t-ws": {fill: "#DCE6F2"}, "t-p": {fill: "#17703F"}, "t-n": {fill: "#A8321F"}
 };
 const paintOf = el => PAINT[(el.getAttribute("class") || "").split(" ")[0]] || {};
+/* Cuts the empty white strip off the right end of a drawing (keeps `margin` pixels after the last mark) */
+function trimRight(cv, margin){
+  const w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;
+  let last = 0;
+  for (let x = w - 1; x >= 0 && !last; x--) for (let y = 0; y < h; y++) { const i = (y * w + x) * 4; if (d[i] < 250 || d[i + 1] < 250 || d[i + 2] < 250) { last = x; break; } }
+  const nw = Math.min(w, last + margin); if (nw >= w || nw < w * 0.3) return cv;
+  const o = document.createElement("canvas"); o.width = nw; o.height = h; const g = o.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, nw, h); g.drawImage(cv, 0, 0); return o;
+}
 function drawSvgToCanvas(svg, W, H, fscale = 1, padX = 0){
   const vb = svg.viewBox.baseVal, sx = W / vb.width, sy = H / vb.height;
   const cvs = document.createElement("canvas"); cvs.width = W + padX; cvs.height = H;
@@ -1676,6 +1707,70 @@ function fitName(){
 }
 window.addEventListener("resize", () => fitName());
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitName());
+/* The page stays upright when a phone is turned sideways: the browser's landscape layout is turned back so the page keeps its portrait shape.
+   (Browsers don't let a web page lock the screen, except in an installed app.) Slides and video full screen are left alone. */
+let rotLocked = false;
+const pw = () => rotLocked ? innerHeight : innerWidth, ph = () => rotLocked ? innerWidth : innerHeight;
+function toBody(X, Y){ const h = document.documentElement; return h.classList.contains("rot-ccw") ? [innerHeight - Y, X] : [Y, innerWidth - X]; }   // a point on the screen -> a point in the turned page
+function pageLock(){
+  const h = document.documentElement, phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
+  let fs = false; try { fs = !!(document.fullscreenElement || document.webkitFullscreenElement) && !($("#cxOv") && !$("#cxOv").hidden); } catch (e) {}
+  try { if (typeof fsActive === "function" && fsActive()) fs = true; } catch (e) {}
+  const on = phone && innerWidth > innerHeight && !fs; rotLocked = on;
+  h.classList.toggle("rot-lock", on);
+  if (on) {
+    const ang = screen.orientation && typeof screen.orientation.angle === "number" ? screen.orientation.angle : (typeof window.orientation === "number" ? window.orientation : 90), cw = ang === 270 || ang === -90;
+    h.style.setProperty("--lw", innerWidth + "px"); h.style.setProperty("--lh", innerHeight + "px"); h.classList.toggle("rot-cw", cw); h.classList.toggle("rot-ccw", !cw);
+  }
+}
+const setBst = () => document.documentElement.style.setProperty("--bst", (rotLocked ? document.body.scrollTop : 0) + "px");   // fixed boxes sit in the scrolled, turned page: shift them with it
+["resize", "orientationchange"].forEach(ev => window.addEventListener(ev, () => { pageLock(); setBst(); setTimeout(() => { pageLock(); setBst(); }, 250); })); pageLock();
+document.body.addEventListener("scroll", setBst, {passive: true});
+try { screen.orientation.lock("portrait").catch(() => {}); } catch (e) {}
+/* Tooltip on a sparkline point: hover (computer) or tap (phone) shows the period, the value and the change from the previous point */
+(function(){
+  const tip = document.createElement("div"); tip.id = "spTip"; tip.setAttribute("role", "status"); document.body.appendChild(tip);
+  let cur = null;
+  const hide = () => { tip.style.display = "none"; if (cur) cur.classList.remove("sel"); cur = null; };
+  function show(h){
+    if (cur && cur !== h) cur.classList.remove("sel");
+    cur = h; h.classList.add("sel");
+    const c = h.dataset.c, word = /^(Loss|Profit)/.test(c), cls = !c || /^(Loss unchanged|n\/a)/.test(c) ? "" : (c.startsWith("−") || c === "Profit to loss" || c === "Loss widens" ? "dn" : "up");
+    tip.innerHTML = `<span class="t-p">${esc(h.dataset.q)}</span><b>${esc(h.dataset.v)}</b>${c === "n/a" ? "" : c ? `<span class="t-c ${cls}">${esc(c)}${word ? "" : " " + esc(h.dataset.u)}</span>` : h.dataset.first ? `<span class="t-c t-p">no earlier point</span>` : ""}`;
+    tip.style.display = "block";
+    const r = h.getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
+    let cx = r.left + r.width / 2, top = r.top, bot = r.bottom;
+    if (rotLocked) { const a = toBody(r.left, r.top), b2 = toBody(r.right, r.bottom); cx = (a[0] + b2[0]) / 2; top = Math.min(a[1], b2[1]); bot = Math.max(a[1], b2[1]); }
+    let x = cx - w / 2, y = top - ht - 8; if (y < 6) y = bot + 8;
+    x = Math.max(6, Math.min(pw() - w - 6, x)); tip.style.left = x + "px"; tip.style.top = (y + (rotLocked ? document.body.scrollTop : 0)) + "px";
+  }
+  document.addEventListener("pointerover", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse") show(h); });
+  document.addEventListener("pointerout", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h && e.pointerType === "mouse" && !h.dataset.pin) hide(); });
+  document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".sp-hit"); if (h) { e.stopPropagation(); show(h); } else hide(); }, true);
+  window.addEventListener("scroll", hide, {passive: true}); document.body.addEventListener("scroll", hide, {passive: true}); window.addEventListener("hashchange", hide);
+})();
+/* The Infographic tab: the picture itself, drawn the first time the tab opens (and again if the company, the report or the infographic layout changed) */
+let tabImgKey = "";
+async function loadInfoImage(){
+  const c = state.shown || LIBRARY[state.ticker]; if (!c) return;
+  const key = [c.ticker, c.fy, c.period, c.filed, igLayout()].join("|"), st = $("#imgTabStatus"), img = $("#tabImg");
+  if (key === tabImgKey && img.getAttribute("src")) return;
+  tabImgKey = ""; img.hidden = true; st.textContent = "Drawing the image…";
+  const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+  try {
+    const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) return;
+    lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
+    img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key;
+  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+}
+let ovFromTab = false;
+$("#tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; showImage(lastImgUrl); setImgFs(true); });
+$("#tabShare").addEventListener("click", async () => {
+  if (!lastImg) return;
+  if (canShareImage()) { await shareShownImage(); return; }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove();   // no share sheet here: save the picture
+});
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = "Pinch-zoom to view details";
@@ -1685,6 +1780,7 @@ function showImage(url, title){
 $("#ovFs").addEventListener("click", () => setImgFs(true));   // full screen in place of the old save button
 /* Share button: the phone's or computer's share sheet with the picture attached (Messages, Mail, AirDrop, Save Image…).
    Shown only where the browser can share image files. */
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 const shareFileOf = () => lastImg ? new File([lastImg.blob], lastImg.name, {type: "image/png"}) : null;
 function canShareImage(){
   try { const f = shareFileOf() || new File([new Blob([""], {type: "image/png"})], "x.png", {type: "image/png"});
@@ -1710,7 +1806,7 @@ function setImgFs(on){
   }
 }
 const toggleImgFs = () => setImgFs(!$("#imgOverlay").classList.contains("img-fs"));
-$("#ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); });   // the exit button sits outside the picture, so it never ends up in a saved image
+$("#ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); if (ovFromTab) { ovFromTab = false; $("#ovImg").removeAttribute("src"); $("#imgOverlay").hidden = true; } });   // the exit button sits outside the picture, so it never ends up in a saved image
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => {
   if (!ovFsReal() && $("#imgOverlay").classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement)) {
     // left real full screen with the system gesture or Esc: drop the full-screen look too, unless we never had real full screen
@@ -1732,7 +1828,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; if (window.__fromWl) { window.__fromWl = false; location.hash = "#watchlist"; return; } $("#dlInfo") && $("#dlInfo").focus(); });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -1968,7 +2064,7 @@ $("#nextSlide").addEventListener("click", () => goSlide(1));
 $("#stage").addEventListener("keydown", e => { if (e.target.closest("button")) return; if (e.key === "ArrowRight") { e.preventDefault(); goSlide(1); } if (e.key === "ArrowLeft") { e.preventDefault(); goSlide(-1); } if (e.key === " ") { e.preventDefault(); $("#voSlide").click(); } });
 
 /* ---------------- Shelf, routing ---------------- */
-const VIEWS = ["infographic", "slides", "video", "report", "feedback"];
+const VIEWS = ["infographic", "image", "slides", "video", "report"];
 let state = {ticker: "AMZN", view: "infographic", media: "slides", period: ""};   // period: "" = annual report, else e.g. "q2-2026" 
 function renderSpines(){
   const sel = $("#pick");
@@ -1983,7 +2079,8 @@ function setView(v){
   const media = v === "slides" || v === "video";
   if (media) state.media = v;
   VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
-  ["infographic", "media", "report", "feedback"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  ["infographic", "image", "media", "report"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  if (v === "image") loadInfoImage();
   $("#mediaBar").hidden = !media;
   ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
   if (v !== "video" && player.playing) stop(false);
@@ -2156,7 +2253,7 @@ async function openCompany(t, view, period){
   }
   const c = LIBRARY[t];
   const qs = c.quarters || [];
-  if (period === undefined) period = view && !["infographic", "feedback"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
+  if (period === undefined) period = view && !["infographic", "image"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
   if (!qs.some(q => pid(q) === period)) period = "";
   let shown = c;
   if (period) {
@@ -2180,10 +2277,11 @@ async function openCompany(t, view, period){
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });   // the written report, slides and video are for the annual report
+  $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
-  if (period && !["infographic", "feedback"].includes(v)) v = "infographic";
+  if (period && !["infographic", "image"].includes(v)) v = "infographic";
   setView(v);
 }
 function renderPeriods(c){
@@ -2240,6 +2338,13 @@ function nrButton(x, wl, opt = {}){
   const star = `<button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${fav ? "Remove " + esc(x.ticker) + " from" : "Add " + esc(x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button>`;
   return `<span class="nr${fav ? " fav" : ""}" title="${esc(tip)}"><a class="nr-a" href="${href}" aria-label="${esc(tip)}"><span class="tk">${esc(x.ticker)}</span></a>${star}<a class="nr-a" href="${href}" tabindex="-1" aria-hidden="true"><span class="what">${esc(yr(x.label))}</span>${opt.noType ? "" : `<span class="tag${er ? " er" : ""}">${esc(tag)}</span>`}${x.time && !opt.noTime ? `<span class="when">${esc(x.time)}</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</a></span>`;
 }
+/* The latest page: one company per line. The button stars the company; Dashboard and Infographic are links after it */
+function nrRow(x, wl, opt = {}){
+  const fav = wl && wl.has(x.ticker), er = x.form === "Earnings release", tag = er ? "ER" : x.form;
+  const href = "#" + x.ticker.toLowerCase() + (x.period ? "-" + x.period : "");
+  const tip = `${fav ? "Remove " + x.ticker + " from" : "Add " + x.ticker + " to"} your watchlist`;
+  return `<div class="nr-row"><span class="nr nr-tog"><span class="tk">${esc(x.ticker)}</span><span class="what">${esc(yr(x.label))}</span>${er && !opt.noType ? `<span class="tag er">ER</span>` : ""}${x.test ? `<span class="tag test">TEST</span>` : ""}</span><span class="nr-lk"><a href="${href}" class="nr-dash" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Dashboard</a><span aria-hidden="true">·</span><a href="${href}" class="nr-img" data-t="${esc(x.ticker)}" data-p="${esc(x.period || "")}">Infographic</a></span><button type="button" class="nr-star" data-t="${esc(x.ticker)}" aria-pressed="${!!fav}" aria-label="${esc(tip)}" title="${esc(tip)}">${fav ? "★" : "☆"}</button></div>`;
+}
 /* One day of report buttons: your watchlist companies first (only when there are any), then everyone else */
 /* Report type order wherever buttons are listed: earnings releases, then 10-Qs, then 10-Ks; A–Z within each */
 const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
@@ -2251,10 +2356,10 @@ const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q qu
 function dayList(items, wl, head, emptyText){
   const sorted = items.slice().sort(byForm);
   const mine = sorted.filter(x => wl.has(x.ticker)), rest = sorted.filter(x => !wl.has(x.ticker));
-  const grid = (list, opt) => `<div class="nr-grid">${list.map(x => nrButton(x, wl, opt)).join("")}</div>`;
+  const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, opt)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine)}`;
   for (const [f, title] of FORMS) {
     const list = rest.filter(x => x.form === f);
     if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
@@ -2431,7 +2536,7 @@ async function showIpo(){
     if (ipoStage === "spac") meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
     const vis = IPO_PAGES[String(x.cik)];   // filings we've drawn as a visual summary, with its infographic
-    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Visual summary</a><span class="ipo-dot" aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(String(x.cik))}">Infographic</a></div>` : "";
+    const links = vis ? `<div class="ipo-links"><a href="${vis.href}">Dashboard</a><span class="ipo-dot" aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(String(x.cik))}">Infographic</a></div>` : "";
     return `<div class="ipo"><div class="ipo-top"><a class="ipo-name" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a><span class="ipo-right">${sym ? `<span class="ipo-sym">${esc(sym)}</span>` : ""}${tags}</span></div>${main ? `<div class="ipo-main">${main}</div>` : ""}<div class="ipo-meta">${meta.join(" · ")}</div>${links}</div>`;
   };
   /* stages in the order a company gets closer to listing; priced ones last */
@@ -2544,7 +2649,7 @@ async function showWatchlist(){
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
-    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); await openCompany(a.dataset.t, "infographic", a.dataset.p || undefined); writeHash(); window.__fromWl = true; downloadInfographic(); }));
+    $("#wlBody").querySelectorAll(".wl-dl").forEach(a => a.addEventListener("click", async e => { e.preventDefault(); try { history.pushState(null, "", "#" + a.dataset.t.toLowerCase() + (a.dataset.p ? "-" + a.dataset.p : "") + "-image"); } catch (x) {} await openCompany(a.dataset.t, "image", a.dataset.p || undefined); writeHash(); }));
   showPage("watchlist", "Watchlist");
 }
 $("#wlForm").addEventListener("submit", e => { e.preventDefault();
@@ -2554,6 +2659,31 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const t = hits[0].ticker; st.textContent = wlHas(t) ? `${t} is already on your watchlist.` : `Added ${t}.`;
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
+/* Visit counts (GoatCounter: no cookies, no personal data). Pages are counted by their address; taps on the list links are counted as events. */
+function gc(path, title, event, tries = 0){
+  try { if (window.goatcounter && window.goatcounter.count) { window.goatcounter.count({path, title: title || path, event: !!event}); return; } } catch (x) { return; }
+  if (tries < 5) setTimeout(() => gc(path, title, event, tries + 1), 800);   // the counter script is still loading
+}
+const gcPage = () => gc("/" + (location.hash.slice(1).toLowerCase() || "home"), document.title);
+window.addEventListener("load", gcPage); window.addEventListener("hashchange", gcPage);
+document.addEventListener("click", async e => {
+  const dl = e.target.closest(".nr-dash"); if (dl) gc("dashboard/" + dl.dataset.t + (dl.dataset.p ? "/" + dl.dataset.p : ""), "Dashboard link", true);
+  const ip = e.target.closest(".ipo-links a"); if (ip) gc((ip.classList.contains("ipo-info") ? "ipo-infographic/" : "ipo-dashboard/") + (ip.dataset.t || ip.getAttribute("href")), "IPO link", true);
+  const im0 = e.target.closest(".nr-img"); if (im0) gc("infographic/" + im0.dataset.t + (im0.dataset.p ? "/" + im0.dataset.p : ""), "Infographic link", true);
+  const im = e.target.closest(".nr-img"); if (im) { e.preventDefault();   // the picture alone, over the list, like the IPO page's Infographic link
+    const y = window.scrollY, cover = document.createElement("div"); cover.className = "draw-cover"; cover.textContent = "Drawing the image…"; document.body.appendChild(cover);   // hides the page while the picture is drawn
+    let ok = false;
+    try {
+      await openCompany(im.dataset.t, "infographic", im.dataset.p || undefined);
+      const c = state.shown || LIBRARY[state.ticker], kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+      const blob = await makeInfographicBlob(c);
+      lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
+      if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob); ok = true;
+    } catch (x) {}
+    await showNew(); window.scrollTo(0, y); cover.remove();   // the list is back underneath, then the picture opens over it
+    if (ok) showImage(lastImgUrl); else { $("#ovImg").removeAttribute("src"); $("#ovTitle").textContent = "Infographic"; $("#ovStatus").textContent = "The image couldn't be drawn right now. Try again in a moment."; $("#ovShare").hidden = true; $("#imgOverlay").hidden = false; }
+    return; }
+});
 document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
 const MENU_N = {"#newCount": "#mNew", "#upCount": "#mUp"};
 const badge = (id, n, word) => { for (const x of [id, MENU_N[id]].filter(Boolean)) { const b = $(x); if (!b) continue; if (!n) { b.hidden = true; continue; } b.textContent = n; b.hidden = false; b.setAttribute("aria-label", `${n} ${word}`); } };
@@ -2573,30 +2703,27 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   let raf = 0; new MutationObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(decorate); }).observe($("#filing"), {childList: true, subtree: true}); decorate();
   const realFs = () => document.fullscreenElement === ov || document.webkitFullscreenElement === ov;
   /* The income statement flow is wide: in a portrait phone it is turned 90 degrees, so turn the phone to landscape to read it; in landscape it is shown upright */
-  function layoutSk(){
-    const portrait = innerHeight > innerWidth, W = (portrait ? innerHeight : innerWidth) - 24, H = (portrait ? innerWidth : innerHeight) - 24;
-    if (portrait) stage.dataset.rot = "1"; else delete stage.dataset.rot;
-    stage.style.cssText = `position:fixed;margin:0;width:${W}px;height:${H}px;` + (portrait ? `left:0;top:0;transform-origin:0 0;transform:translate(${innerWidth - 12}px,12px) rotate(90deg)` : "left:12px;top:12px");
-  }
+  /* Income flow in full screen: not turned with the phone. Portrait shows the top-to-bottom drawing; landscape shows the flat drawing, so the chart looks the same way up whichever way the phone is held */
+  function layoutSk(){ stage.style.cssText = `width:${pw() - 24}px`; delete stage.dataset.rot; }
   const isSk = () => ov.classList.contains("cx-sk");
   window.addEventListener("resize", () => { if (!ov.hidden && isSk()) layoutSk(); });
   function open(card){
-    stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk");
+    stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (false) { ov.classList.add("cx-sk"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
+      stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
-      const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
+      const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
       stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
       ov.hidden = false; document.body.style.overflow = "hidden";
       const h = stage.getBoundingClientRect().height;
-      stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 72) / h));   // as big as fits the screen
+      stage.style.zoom = Math.max(1, Math.min(3, (pw() - 24) / LW, (ph() - 72) / h));   // as big as fits the screen
     }
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
-    if (isSk() && innerHeight > innerWidth && screen.orientation && screen.orientation.lock) { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }   // Android Chrome turns the screen itself
   }
-  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
+  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk", "cx-skv"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
     if (realFs()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
     if (from && from.focus) from.focus({preventScroll: true}); }
   ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ov.hidden && !document.fullscreenElement && !document.webkitFullscreenElement && ov.dataset.fs) close(); if (realFs()) ov.dataset.fs = "1"; else delete ov.dataset.fs; }));
@@ -2606,7 +2733,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); open(b.closest(".card")); } });
   let last = null;
   document.addEventListener("pointerup", e => {
-    const card = e.target.closest && e.target.closest(SEL); if (!card || e.target.closest("a,button,input,select,summary")) { last = null; return; }
+    const card = e.target.closest && e.target.closest(SEL); if (!card || e.target.closest("a,button,input,select,summary,.sp-hit")) { last = null; return; }
     const now = Date.now();
     if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); open(card); }
     else last = {card, t: now, x: e.clientX, y: e.clientY};
@@ -2623,6 +2750,8 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   document.querySelectorAll(".laychoice[data-ig]").forEach(b => b.addEventListener("click", () => { try { localStorage.setItem("igLayout", b.dataset.ig); } catch (e) {} applyIg(b.dataset.ig); }));
   applyIg(igLayout());
 })();
+$("#fbLink").addEventListener("click", e => { e.preventDefault(); const box = $("#view-feedback"), open = box.hidden; box.hidden = !open; $("#fbLink").setAttribute("aria-expanded", String(open));
+  if (open) { box.scrollIntoView({behavior: "smooth", block: "start"}); setTimeout(() => { try { $("#fbName").focus({preventScroll: true}); } catch (x) {} }, 350); } });
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
 $("#fbForm").addEventListener("submit", async e => {
@@ -2662,7 +2791,6 @@ function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) ret
   else if (parts[0] === "10k") { parts.shift(); p = ""; }      // #msft-10k: the 10-K tab; #msft alone: the latest report
   const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value).then(writeHash); });
-document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
 const ALIASES = {GOOGL: "GOOG", VSCO: "VSXY", RBC: "RY", TOYOF: "TM", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE", CENTA: "CENT", "CWEN.A": "CWEN", CWENA: "CWEN", UA: "UAA", INDV: "SUPN", ASGN: "EFOR", ATGE: "CVSA", AXL: "DCH", EXPI: "AGNT", FDP: "DMC", IAC: "PPLI", MSGS: "MSGK", SJW: "HTO", BHLB: "BBT", NYMT: "ADAM", CEIX: "CNR", ARCH: "CNR", LANC: "MZTI", NXT: "NXT", NXTR: "NXT", TPX: "SGI", NYCB: "FLG", PNM: "TXNM", MODG: "CALY", VIAD: "PRSU", TMST: "MTUS", BELFA: "BELFB", BATRA: "BATRK", LILA: "LILAK", GLIBA: "GLIBK", METCB: "METC", "BH.A": "BH", TXCP: "TCBI", RUSHB: "RUSHA", HOS: "HLX", "GEF.B": "GEF", "AGM.A": "AGM", AGMA: "AGM", ATROB: "ATRO", BATRB: "BATRK", "CRD.B": "CRD.A", CRDA: "CRD.A", CRDB: "CRD.A", DGICB: "DGICA", GLIBB: "GLIBK", "GTN.A": "GTN", GTNA: "GTN", "HVT.A": "HVT", HVTA: "HVT", IHRTB: "IHRT", KELYB: "KELYA", LILAB: "LILAK", MOVAA: "MOV", SENEB: "SENEA", HOVVB: "HOV", "MOG.B": "MOG.A", MOGA: "MOG.A", MOGB: "MOG.A", GEFB: "GEF", BHA: "BH", LC: "HAPN", MPLN: "CTEV", BBBY: "NXH", CMPO: "GPGI", MGPI: "CASK", TOI: "STLN", DOMO: "HUCK", MEG: "ONT", PX: "RPC", GCI: "TDAY", BIGC: "CMRC", SCVL: "SHOE", COMM: "VISN", ATUS: "OPTU", OMI: "ACH", AHH: "AHRT", GMRE: "XRN", BLDE: "SRTA", RMBL: "RDNW", MESA: "RJET", BITF: "KEEL", AMBC: "OSG", FREY: "TE", GLT: "MAGN", AMRK: "GOLD", CDXC: "NAGE", HMST: "MCHB", ABL: "ABX", PTSI: "PAMT", GLYC: "CBIO", AVTE: "JBIO", AADI: "WHWK", GLTO: "DMRA", SRM: "TRON", NVFY: "XMAX", THAR: "CNTN", MFH: "CD", NEHC: "NUAI", NR: "NPKI", OBNK: "OBK"};
