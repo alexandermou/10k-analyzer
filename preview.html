@@ -681,10 +681,10 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
     <h3 class="lay-h">Infographic</h3>
     <div class="laychoices" role="radiogroup" aria-label="Infographic layout">
+      <button type="button" class="laychoice" role="radio" data-ig="tall" aria-checked="false"><b>Tall</b><span>1 card per row with the biggest text, easiest to read on a phone. A very tall image.</span></button>
+      <button type="button" class="laychoice" role="radio" data-ig="wide" aria-checked="false"><b>Wide</b><span>For desktop: twice as wide as Medium, 4 cards per row with a number at every dot, and the income statement flow left to right.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="compact" aria-checked="true"><b>Compact</b><span>4 small cards per row, as it is now. One image with the whole report.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="medium" aria-checked="false"><b>Medium</b><span>2 bigger cards per row, with the number shown at every dot of each trend. Larger text, ready to download.</span></button>
-      <button type="button" class="laychoice" role="radio" data-ig="wide" aria-checked="false"><b>Wide</b><span>For desktop: twice as wide as Medium, 4 cards per row with a number at every dot, and the income statement flow left to right.</span></button>
-      <button type="button" class="laychoice" role="radio" data-ig="tall" aria-checked="false"><b>Tall</b><span>1 card per row with the biggest text, easiest to read on a phone. A very tall image.</span></button>
     </div>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
@@ -1504,7 +1504,8 @@ function loadImgLib(){
   if (window.htmlToImage) return Promise.resolve();
   return new Promise((res, rej) => { const s = document.createElement("script"); s.src = "vendor/html-to-image.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
 }
-const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" ? "tall" : v === "wide" ? "wide" : v === "medium" || v === "full" ? "medium" : "compact"; } catch (e) { return "compact"; } };
+const igDefault = () => { try { return /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent) || matchMedia("(max-width:700px)").matches ? "tall" : "wide"; } catch (e) { return "wide"; } };   // phone: tall; desktop: wide
+const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" || v === "wide" || v === "compact" ? v : v === "medium" || v === "full" ? "medium" : igDefault(); } catch (e) { return igDefault(); } };
 async function makeInfographicBlob(c){
   // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
   await loadImgLib();
