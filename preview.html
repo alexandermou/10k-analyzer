@@ -297,7 +297,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .ig-full .grid>.card .sp-vals span{font-size:13.5px}.ig-full .grid>.card .sp-vals span.neg{color:var(--neg,#A8321F)}
 .ig-full .grid>.card .spark.wide .sp-plot{margin:26px 0 24px}
 .ig-full .grid>.card .spark.wide svg{height:clamp(90px,34cqw,170px)}
-.ig-full .grid>.card .big{font-size:34px}.ig-full .grid>.card .seg-val b{font-size:34px}.ig-full .grid>.card .barhead p,.ig-full .grid>.card .seg-name{font-size:17px}.ig-full .grid>.card .sp-axis span{font-size:13px}.ig-full .grid>.card .sub{font-size:13px}
+.ig-full .grid>.card .big{font-size:38px}.ig-full .grid>.card .seg-val b{font-size:34px}.ig-full .grid>.card .barhead p,.ig-full .grid>.card .seg-name{font-size:20px}.ig-full .grid>.card .sp-axis span{font-size:16px}.ig-full .grid>.card .sub{font-size:16px}.ig-full .grid>.card .chip{font-size:15px}.ig-full .grid>.card .lbl{font-size:16px}.ig-full .grid>.card .sp-vals span{font-size:16px}.ig-full .grid>.card .sp-why{font-size:15px}
 .lay-h{margin:22px 0 10px;font-size:18px}.laychoices{display:flex;flex-direction:column;gap:10px;max-width:460px}
 .laychoice{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
 .laychoice b{font-size:17px}.laychoice span{font-size:14px;color:var(--muted)}
@@ -1507,14 +1507,15 @@ async function makeInfographicBlob(c){
   const root = document.documentElement, prevTheme = root.getAttribute("data-theme");
   root.setAttribute("data-theme", "light");
   const host = document.createElement("div");
-  host.style.cssText = "position:fixed;left:-20000px;top:0;width:1224px;pointer-events:none";
+  const FULLIG = igLayout() === "full";
+  host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (FULLIG ? 880 : 1224) + "px;pointer-events:none";
   if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
   document.body.appendChild(host);
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
     if (igLayout() === "full") n.classList.add("ig-full");
-    n.style.width = "1160px"; n.style.padding = "32px"; n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
+    n.style.width = (FULLIG ? 756 : 1160) + "px"; n.style.padding = (FULLIG ? "26px" : "32px"); n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
     n.querySelectorAll(".seg-card.wide .seg-metrics").forEach(x => { x.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))"; x.style.gap = "28px"; });
     n.querySelectorAll(".seg-card.wide .seg-val").forEach(x => { x.style.gap = "10px"; });
     n.querySelectorAll(".seg-card.wide .seg-val b").forEach(x => { x.style.fontSize = "32px"; x.style.letterSpacing = "-.02em"; });
@@ -1525,12 +1526,12 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 40px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E">10-K Analyzer</p>`;
+    h.innerHTML = `<div><p style="margin:0;font:700 ${FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
     n.prepend(h);
     host.appendChild(n);
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
       svg.style.minWidth = "0";
-      const vb = svg.viewBox.baseVal, w = box.clientWidth || 1160, hgt = Math.round(w * vb.height / vb.width);
+      const vb = svg.viewBox.baseVal, w = box.clientWidth || (FULLIG ? 756 : 1160), hgt = Math.round(w * vb.height / vb.width);
       const cv = drawSvgToCanvas(svg, w * 2, hgt * 2); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     n.querySelectorAll(".spark svg").forEach(svg => {      // sparklines as plain pictures (the image library can't draw them reliably)
