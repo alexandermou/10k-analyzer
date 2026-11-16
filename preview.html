@@ -263,22 +263,38 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
 /* 4 cards per row on wide screens; 2 per row by default on phones and narrow screens */
 @container sec (max-width:700px){
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .grid>.card{padding:12px 11px;gap:6px}
-  .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:4px;padding-right:20px}
-  .grid>.card .barhead p,.grid>.card .seg-name{font-size:14px;line-height:1.25}
-  .two-line-wide .barhead p,.two-line .barhead p{min-height:2.5em}
-  .grid>.card .chip{font-size:11px;padding:2px 7px}
-  .grid>.card .big{font-size:21px;letter-spacing:-.03em}
-  .grid>.card .big small{font-size:11px}
-  .grid>.card .sub{font-size:11.5px}
-  .grid>.card .sp-axis span{font-size:10.5px}
-  .grid>.card .sp-why{font-size:10.5px;line-height:1.3}
-  .grid>.card .seg-val b{font-size:21px;letter-spacing:-.03em}
-  .grid>.card .lbl{font-size:12px}
+  #filing:not(.lay-full) .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #filing:not(.lay-full) .grid>.card{padding:12px 11px;gap:6px}
+  #filing:not(.lay-full) .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:4px;padding-right:20px}
+  #filing:not(.lay-full) .grid>.card .barhead p,#filing:not(.lay-full) .grid>.card .seg-name{font-size:14px;line-height:1.25}
+  #filing:not(.lay-full) .two-line-wide .barhead p,#filing:not(.lay-full) .two-line .barhead p{min-height:2.5em}
+  #filing:not(.lay-full) .grid>.card .chip{font-size:11px;padding:2px 7px}
+  #filing:not(.lay-full) .grid>.card .big{font-size:21px;letter-spacing:-.03em}
+  #filing:not(.lay-full) .grid>.card .big small{font-size:11px}
+  #filing:not(.lay-full) .grid>.card .sub{font-size:11.5px}
+  #filing:not(.lay-full) .grid>.card .sp-axis span{font-size:10.5px}
+  #filing:not(.lay-full) .grid>.card .sp-why{font-size:10.5px;line-height:1.3}
+  #filing:not(.lay-full) .grid>.card .seg-val b{font-size:21px;letter-spacing:-.03em}
+  #filing:not(.lay-full) .grid>.card .lbl{font-size:12px}
 }
 /* every card title takes two lines, so the numbers line up across a row */
 .grid>.card:not(.trend-card) .barhead p,.grid>.card .seg-name{line-height:1.25;min-height:2.5em}
+/* Layout settings: Full mode = 1 card per row (2 on a computer) with every number shown on the chart; the saved infographic is unaffected */
+#filing.lay-full .grid{grid-template-columns:minmax(0,1fr)}
+@container sec (min-width:701px){#filing.lay-full .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#filing.lay-full .grid>.card .sub{display:block}
+#filing.lay-full .grid>.card .spark.wide .sp-axis{display:none}
+#filing.lay-full .grid>.card .sp-axis-full{display:block;position:relative;height:22px;margin-top:8px}
+#filing.lay-full .grid>.card .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);font-size:12.5px;color:var(--muted);white-space:nowrap}
+#filing.lay-full .grid>.card .sp-axis-full span:first-child{transform:none}#filing.lay-full .grid>.card .sp-axis-full span:last-child{transform:translateX(-100%)}
+#filing.lay-full .grid>.card .sp-vals{display:block}
+#filing.lay-full .grid>.card .sp-vals span{font-size:13.5px}#filing.lay-full .grid>.card .sp-vals span.neg{color:var(--neg,#A8321F)}
+#filing.lay-full .grid>.card .spark.wide .sp-plot{margin:26px 0 4px}
+#filing.lay-full .grid>.card .spark.wide svg{height:clamp(90px,34cqw,170px)}
+.laychoices{display:flex;flex-direction:column;gap:10px;max-width:460px}
+.laychoice{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
+.laychoice b{font-size:17px}.laychoice span{font-size:14px;color:var(--muted)}
+.laychoice[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
 .sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
@@ -612,7 +628,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPOs<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPOs<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -645,6 +661,13 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   <section class="newpage" id="ipoPage" hidden aria-labelledby="ipoTitle">
     <div class="np-head"><h2 id="ipoTitle">IPOs</h2><p class="sub">Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).</p></div>
     <div id="ipoBody"></div>
+  </section>
+  <section class="newpage" id="layoutPage" hidden aria-labelledby="layTitle">
+    <div class="np-head"><h2 id="layTitle">Layout settings</h2><p class="sub">How the report cards are shown on this device.</p></div>
+    <div class="laychoices" role="radiogroup" aria-label="Card layout">
+      <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Compact</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
+      <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Full</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
+    </div>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
     <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public companies to add, up to 10 at a time. We check the ticker against the SEC's list first.</p></div>
@@ -2387,13 +2410,14 @@ function showPage(name, title){
   if (player.playing) stop(false); if (deck.playing) stopDeck(false);
   document.body.classList.remove("home", "company"); document.body.classList.add("faqmode");   // list pages and FAQ: no search box or selector
   $("#filing").hidden = true; $("#missing").hidden = true;
-  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#addPage").hidden = name !== "add"; $("#ipoPage").hidden = name !== "ipo";
+  $("#newPage").hidden = name !== "new"; $("#wlPage").hidden = name !== "watchlist"; $("#upPage").hidden = name !== "upcoming"; $("#faqPage").hidden = name !== "faq"; $("#addPage").hidden = name !== "add"; $("#layoutPage").hidden = name !== "layout"; $("#ipoPage").hidden = name !== "ipo";
   ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
   state.page = name; renderSpines(); document.title = `${title} · 10-K Analyzer`;
 }
 function showAdd(t){ showPage("add", "Add tickers"); if (t != null) $("#addTicker").value = t; resetAdd(); window.scrollTo(0, 0); }
+function showLayout(){ showPage("layout", "Layout settings"); window.scrollTo(0, 0); }
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
 function goHome(){
@@ -2402,7 +2426,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#addPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#addPage").hidden = true; $("#layoutPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Analyzer"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2528,6 +2552,13 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   });
 })();
 
+/* Layout settings: compact (default) or full; remembered on this device */
+(function(){
+  const get = () => { try { return localStorage.getItem("layout") === "full" ? "full" : "compact"; } catch (e) { return "compact"; } };
+  const apply = m => { $("#filing").classList.toggle("lay-full", m === "full"); document.querySelectorAll(".laychoice").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lay === m))); };
+  document.querySelectorAll(".laychoice").forEach(b => b.addEventListener("click", () => { try { localStorage.setItem("layout", b.dataset.lay); } catch (e) {} apply(b.dataset.lay); }));
+  apply(get());
+})();
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
 $("#fbForm").addEventListener("submit", async e => {
@@ -2695,7 +2726,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   window.addEventListener("hashchange", () => set(false));
 })();
 
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#layout-settings") { showLayout(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -2704,7 +2735,7 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (["#latest", "#new"].includes(location.hash.toLowerCase())) { await showNew(); return; }   // #new: old links
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
-  if (location.hash.toLowerCase() === "#faq") { showFaq(); return; } if (location.hash.toLowerCase() === "#add-tickers") { showAdd(); return; }
+  if (location.hash.toLowerCase() === "#faq") { showFaq(); return; } if (location.hash.toLowerCase() === "#add-tickers") { showAdd(); return; } if (location.hash.toLowerCase() === "#layout-settings") { showLayout(); return; }
   if (["#ipo", "#ipos"].includes(location.hash.toLowerCase())) { await showIpo(); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
