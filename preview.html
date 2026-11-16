@@ -1821,7 +1821,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; if (window.__fromNew) { window.__fromNew = false; showNew(); } });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -2653,8 +2653,17 @@ $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   if (!wlHas(t)) wlSet(wlGet().concat(t)); $("#wlInput").value = ""; });
 $("#fname").addEventListener("click", e => { if (e.target.closest("#starBtn")) wlToggle(state.ticker); });
 document.addEventListener("click", async e => {
-  const im = e.target.closest(".nr-img"); if (im) { e.preventDefault(); try { history.pushState(null, "", "#" + im.dataset.t.toLowerCase() + (im.dataset.p ? "-" + im.dataset.p : "") + "-image"); } catch (x) {}   // a new history entry, so Back returns to this list
-    await openCompany(im.dataset.t, "image", im.dataset.p || undefined); writeHash(); }
+  const im = e.target.closest(".nr-img"); if (im) { e.preventDefault();   // the picture alone, over the list, like the IPO page's Infographic link
+    const ov = $("#imgOverlay"); $("#ovImg").removeAttribute("src"); $("#ovTitle").textContent = "Infographic"; $("#ovStatus").textContent = "Drawing the image…"; $("#ovShare").hidden = true; ov.hidden = false; window.__fromNew = true;
+    try {
+      await openCompany(im.dataset.t, "infographic", im.dataset.p || undefined);
+      const c = state.shown || LIBRARY[state.ticker], kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
+      const blob = await makeInfographicBlob(c);
+      if (ov.hidden) return;   // closed while drawing
+      lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
+      if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob); showImage(lastImgUrl);
+    } catch (x) { $("#ovStatus").textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+    return; }
 });
 document.addEventListener("click", e => { const b = e.target.closest(".nr-star"); if (b) { e.preventDefault(); wlToggle(b.dataset.t); } });
 const MENU_N = {"#newCount": "#mNew", "#upCount": "#mUp"};
