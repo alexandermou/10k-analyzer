@@ -2441,7 +2441,14 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
 const WL_HEAD = "My top 10 <small class=\"t10-q\">Quarterly figures</small>";
 function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
-  if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
+  if (!pick || pick._bound) return; pick._bound = true;
+  pick.addEventListener("change", () => {
+    topKeys[sfx] = pick.value;
+    const tmp = document.createElement("div"); tmp.innerHTML = topChart(items, wl, sfx, note2, heading);
+    const fresh = tmp.firstElementChild, np = fresh.querySelector(".top-pick"); if (np) np.replaceWith(pick);   // keep the same picker element: replacing it leaves the phone's open list stuck
+    el.querySelector(".top10").replaceWith(fresh);
+    if (matchMedia("(pointer:fine)").matches) pick.focus();
+  });
 }
 /* Watchlist chart: each watched company's latest quarter, read from its quarter file */
 const QFIG = {};
