@@ -719,7 +719,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
   </section>
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
-    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Your favorite companies, saved in a cookie in this browser only. Add them here, or search for a company and click the ☆ next to its name.</p></div>
+    <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">Add companies to your watchlist here, or search for a company and click the ☆ next to its name. Saved in this browser only.</p></div>
     <div id="wlBody"></div>
     <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
   </section>
@@ -2261,7 +2261,7 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
       : `<p class="sub">No company here has the figures for this ranking.</p>`}
     <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
-const WL_HEAD = "Top 10 <small class=\"t10-q\">Quarterly figures</small>";
+const WL_HEAD = "My top 10 <small class=\"t10-q\">Quarterly figures</small>";
 function bindTop(el, items, wl, sfx = "", note2, heading){
   const pick = el.querySelector(".top-pick");
   if (pick) pick.addEventListener("change", () => { topKeys[sfx] = pick.value; const box = el.querySelector(".top10"); box.outerHTML = topChart(items, wl, sfx, note2, heading); bindTop(el, items, wl, sfx, note2, heading); el.querySelector(".top-pick").focus(); });
@@ -2450,13 +2450,13 @@ function wlChanged(){
   if (state.page === "upcoming") showUpcoming();
 }
 /* Watchlist: one row per company with its next report and earnings release date, soonest first */
-let wlSort = {key: "date", dir: 1}, wlSeq = 0;
+let wlSort = {key: "date", dir: -1}, wlSeq = 0;
 const daysUntil = iso => -dayDiff(iso);
 const inDays = n => n === 0 ? "Today" : n === 1 ? "Tomorrow" : n > 1 ? `In ${n} days` : n === -1 ? "Yesterday" : `${-n} days ago`;
 async function showWatchlist(){
   await loadIpoPages();
-  const list = wlGet(), up = await loadUpcoming(), next = {};
-  for (const x of up.items) if (!next[x.ticker] || x.date < next[x.ticker].date) next[x.ticker] = x;
+  const list = wlGet(), lt = await loadLatest(), next = {}, up = {};
+  for (const x of lt.items) next[x.ticker] = {report: x.label, date: x.date, period: x.period};
   const rows = list.map(t => ({t, c: LIBRARY[t] || IPO_BY_T[t] || {short: t, name: t}, x: next[t]}));
   const val = r => wlSort.key === "ticker" ? r.t : wlSort.key === "report" ? (r.x ? r.x.report : "~") : (r.x ? r.x.date : "9999");   // "date" and "in" sort alike
   rows.sort((a, b) => { const va = val(a), vb = val(b); if ((va === "9999" || va === "~") !== (vb === "9999" || vb === "~")) return va === "9999" || va === "~" ? 1 : -1;
@@ -2464,16 +2464,16 @@ async function showWatchlist(){
   const th = (key, label, cls) => `<th scope="col" class="${cls || ""}" aria-sort="${wlSort.key === key ? (wlSort.dir > 0 ? "ascending" : "descending") : "none"}"><button type="button" data-k="${key}">${label}${wlSort.key === key ? (wlSort.dir > 0 ? " ▲" : " ▼") : ""}</button></th>`;
   const when = {BMO: "before open", AMC: "after close", DMH: "during market hours"};
   $("#wlBody").innerHTML = !list.length ? `<p class="sub">No companies yet.</p>` :
-    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", `<span class="s-long">Next report</span><span class="s-short">Report</span>`)}${th("date", `<span class="s-long">Earnings release</span><span class="s-short">Release</span>`)}${th("in", "In", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
+    `<div class="wl-wrap"><table class="wl-table"><thead><tr>${th("ticker", "Company")}${th("report", "Latest report")}${th("date", "Released")}${th("in", "Ago", "num")}<th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody>${
       rows.map(({t, c, x}) => { const ipo = !LIBRARY[t] && IPO_BY_T[t], href = ipo ? ipo.href : "#" + t.toLowerCase() + (x && x.period ? "-" + x.period : "");
         const n = x ? daysUntil(x.date) : null;
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
-          <td>${x ? esc(x.report) : ipo ? "IPO" : `<span class="muted">—</span>`}</td>
-          <td>${x ? `${x.estimated || x.forecast ? `<span class="est" title="Our forecast: last year's release date for the same quarter plus 52 weeks">~</span>` : ""}<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}${x.time ? ` <span class="when" title="${when[x.time]}">${esc(x.time)}</span>` : ""}${x.estimated || x.forecast ? ` <span class="tag est-tag">forecast</span>` : ""}` : `<span class="muted">Not scheduled yet</span>`}</td>
-          <td class="num">${n === null ? "" : `<b class="${n <= 1 ? "soon" : ""}"><span class="s-long">${inDays(n)}</span><span class="s-short">${n === 0 ? "Today" : n === 1 ? "Tmrw" : n > 0 ? n + "d" : inDays(n)}</span></b>`}</td>
+          <td>${x ? `<a href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Open the ${esc(x.report)} infographic">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
+          <td>${x ? `<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}` : `<span class="muted">—</span>`}</td>
+          <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + " days ago"}</b>`}</td>
           <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
     }</tbody></table></div>
-    <p class="sub">Dates from Nasdaq's earnings calendar; “~ … est.” is an estimate (last year's date for the same quarter + 52 weeks) until the company announces it. BMO = before the market opens, AMC = after it closes.${up.tickers ? ` Trial: dates for ${up.tickers.length} companies only.` : ""}${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+    <p class="sub">Latest report per company, with the date it was filed with the SEC.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
   if (list.length) {
     const seq = ++wlSeq, figs = await watchFigures(list), miss = list.length - figs.length;
     const note2 = (miss ? `${miss} watched ${miss === 1 ? "company has" : "companies have"} no quarterly figures yet. ` : "") + "Figures are for each company's latest quarter";
