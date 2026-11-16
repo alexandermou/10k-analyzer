@@ -9,6 +9,10 @@
 .cx-stage .sk-card .sub{display:none}
 .cx-stage .sk-card .sankey{flex:1;min-height:0;overflow:visible}
 .cx-stage .sk-card .sankey svg{min-width:0;width:100%;height:100%}
+.cx-skv .cx-stage .sk-card{height:auto}.cx-skv .cx-stage .sk-card .sankey{flex:none}
+.cx-skv .cx-stage .sk-card .sankey svg{min-width:0;max-width:none;width:100%;height:auto}
+@media (orientation:landscape){.cx-skv .cx-stage .sk-card .sankey svg[data-rot]{display:none}
+.cx-skv .cx-stage .sk-card .sankey svg.sk-flat{display:block;width:auto;max-width:100%;height:calc(100vh - 150px);margin:0 auto}}
 .cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
@@ -2600,17 +2604,14 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   let raf = 0; new MutationObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(decorate); }).observe($("#filing"), {childList: true, subtree: true}); decorate();
   const realFs = () => document.fullscreenElement === ov || document.webkitFullscreenElement === ov;
   /* The income statement flow is wide: in a portrait phone it is turned 90 degrees, so turn the phone to landscape to read it; in landscape it is shown upright */
-  function layoutSk(){
-    const portrait = innerHeight > innerWidth, W = (portrait ? innerHeight : innerWidth) - 24, H = (portrait ? innerWidth : innerHeight) - 24;
-    if (portrait) stage.dataset.rot = "1"; else delete stage.dataset.rot;
-    stage.style.cssText = `position:fixed;margin:0;width:${W}px;height:${H}px;` + (portrait ? `left:0;top:0;transform-origin:0 0;transform:translate(${innerWidth - 12}px,12px) rotate(90deg)` : "left:12px;top:12px");
-  }
+  /* Income flow in full screen: not turned with the phone. Portrait shows the top-to-bottom drawing; landscape shows the flat drawing, so the chart looks the same way up whichever way the phone is held */
+  function layoutSk(){ stage.style.cssText = `width:${innerWidth - 24}px`; delete stage.dataset.rot; }
   const isSk = () => ov.classList.contains("cx-sk");
   window.addEventListener("resize", () => { if (!ov.hidden && isSk()) layoutSk(); });
   function open(card){
-    stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk");
+    stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (false) { ov.classList.add("cx-sk"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
       const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
       stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
@@ -2621,9 +2622,8 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
-    if (isSk() && innerHeight > innerWidth && screen.orientation && screen.orientation.lock) { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }   // Android Chrome turns the screen itself
   }
-  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
+  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk", "cx-skv"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
     if (realFs()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
     if (from && from.focus) from.focus({preventScroll: true}); }
   ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ov.hidden && !document.fullscreenElement && !document.webkitFullscreenElement && ov.dataset.fs) close(); if (realFs()) ov.dataset.fs = "1"; else delete ov.dataset.fs; }));
