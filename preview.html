@@ -266,6 +266,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
   .grid>.card .seg-val b{font-size:21px;letter-spacing:-.03em}
   .grid>.card .lbl{font-size:12px}
 }
+/* every card title takes two lines, so the numbers line up across a row */
+.grid>.card:not(.trend-card) .barhead p,.grid>.card .seg-name{line-height:1.25;min-height:2.5em}
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
 .sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
