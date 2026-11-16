@@ -1,9 +1,9 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.addform{display:flex;flex-direction:column;gap:8px;max-width:420px}.addform label{font-weight:600;margin-top:6px}.addform input[type=text],.addform input[type=email]{padding:10px 12px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}.addform .btn{align-self:flex-start;margin-top:10px}.addhint,.addstat{min-height:1.3em;margin:0;font-size:.92em;opacity:.85}.addthanks{max-width:420px}.addthanks:focus{outline:none}.missing .row.ask{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-.grid>.card:not(.trend-card){position:relative;touch-action:manipulation}
+.grid>.card{position:relative;touch-action:manipulation}
 .cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
-.grid>.card:not(.trend-card) .barhead{padding-right:22px}
+.grid>.card .barhead{padding-right:22px}
 .cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:12px}
 .cx-ov[hidden]{display:none}
 .cx-stage{margin:auto;flex:none}
@@ -246,7 +246,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .grid>.card{padding:12px 11px;gap:6px}
   .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:4px;padding-right:20px}
-  .grid>.card .barhead p,.grid>.card .seg-name{font-size:14px;line-height:1.25;min-height:0!important}
+  .grid>.card .barhead p,.grid>.card .seg-name{font-size:14px;line-height:1.25}
+  .two-line-wide .barhead p,.two-line .barhead p{min-height:2.5em}
   .grid>.card .chip{font-size:11px;padding:2px 7px}
   .grid>.card .big{font-size:21px;letter-spacing:-.03em}
   .grid>.card .big small{font-size:11px}
@@ -337,6 +338,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .eaxis{display:grid;gap:12px;text-align:center}.eaxis b{display:block;font-weight:400}.eaxis .sub{display:block;font-size:12px}
 .fill.qprev{background:var(--bar);opacity:.6}.fill.qprev.neg{background:var(--node-neg);opacity:.6}.fill.qprev2{background:var(--bar);opacity:.32}.fill.qprev2.neg{background:var(--node-neg);opacity:.32}
 .chips{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.sp-card .chips{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:6px}
 .seg-val .chip+.chip{margin-left:0}
 .vchips{display:inline-flex;flex-direction:column;align-items:flex-start;gap:6px}
 .bars strong{font-family:var(--f-mono);font-weight:400;text-align:right}
@@ -1104,8 +1106,9 @@ function trendCard(c, sec){
   const y = prior === null ? null : chipFor({cur, prior}), q = prevQ === null ? null : qoqChip(cur, prevQ, "up", sec.title);
   const chips = (y ? `<span class="chip ${y.cls}">${esc(/YoY$/.test(y.t) ? y.t : y.t + " YoY")}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
   return `<div class="sec"><div class="grid trend-grid"><div class="card sp-card trend-card">
-    <div class="barhead"><p>${esc(sec.title)}</p><div class="chips">${chips}</div></div>
+    <div class="barhead"><p>${esc(sec.title)}</p></div>
     <p class="big${cur < 0 ? " down" : ""}">${money(c, cur, kind)} <small>${esc(L[n - 1])}</small></p>
+    <div class="chips">${chips}</div>
     ${sec.callout ? `<p class="sub">${sec.callout}</p>` : ""}
     ${sparkline(c, it, "full")}
   </div></div></div>`;
@@ -1113,8 +1116,9 @@ function trendCard(c, sec){
 /* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last 5 quarters */
 function sparkCard(c, it, label, chips, period){
   return `<div class="card sp-card">
-    <div class="barhead"><p>${esc(label)}</p><div class="chips">${chips}</div></div>
+    <div class="barhead"><p>${esc(label)}</p></div>
     <p class="big${it.cur < 0 ? " down" : ""}">${money(c, it.cur, it.money)} <small>${esc(period)}</small></p>
+    <div class="chips">${chips}</div>
     ${it.foot ? `<p class="sub">${esc(footYear(c, it.foot))}</p>` : ""}
     ${sparkline(c, it, true) || `<p class="sp-why">No chart because ${c.quarter ? "earlier quarters of this metric aren't" : "the periods for this metric aren't"} in the filings' tagged data</p>`}
   </div>`;
@@ -1174,8 +1178,9 @@ function tileCard(t, top, c, bs){
   const chips = (t.delta ? `<span class="chip ${t.tone || "flat"}">${esc(yoyDelta(t.delta))}</span>` : "") + (q ? `<span class="chip ${q.cls}">${esc(q.t)}</span>` : "");
   const sub = t.delta ? stripPrior(t.sub) : withYear(c, t.sub, bs);
   return `<div class="card sp-card${top ? " tile-top" : ""}">
-    <div class="barhead"><p>${esc(t.label)}</p>${chips ? `<div class="chips">${chips}</div>` : ""}</div>
+    <div class="barhead"><p>${esc(t.label)}</p></div>
     <p class="big">${esc(t.value)}${t.spark && (c.sparkQ || c.sparkH) ? ` <small>${esc(yr(c.fy))}</small>` : ""}</p>
+    ${chips ? `<div class="chips">${chips}</div>` : ""}
     ${sub ? `<p class="sub">${esc(sub)}</p>` : ""}
     ${t.foot ? `<p class="sub">${esc(t.foot)}</p>` : ""}
     ${sparkline(c, t, true)}
@@ -1231,9 +1236,9 @@ function sparkline(c, it, wide){
 function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
 function renderSection(c, sec){
   /* a long card title wraps to two lines: give every title in the row two lines so the numbers line up (only when cards sit side by side) */
-  const tl = list => list.some(x => String(x.label || "").length > 14) ? " two-line-wide" : "";
+  const tl = list => list.some(x => String(x.label || "").length > 20) ? " two-line-wide" : "";
   if (sec.type === "tiles") return `<div class="sec">${head(sec)}<div class="grid${tl(sec.tiles)}">${sec.tiles.map(t => tileCard(t, sec.top, c, sec.title === "Balance sheet")).join("")}</div></div>`;
-  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${sec.title === "Cash flow & earnings" ? " two-line" : tl(sec.items)}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
+  if (sec.type === "bars") return `<div class="sec">${head(sec)}<div class="grid${tl(sec.items)}">${sec.items.map(it => barCard(c, it)).join("")}</div></div>`;
   if (sec.type === "stats") return `<div class="sec">${head(sec)}<div class="grid">${sec.items.map(([v, l]) => `<div class="card stat"><p class="big">${esc(v)}</p><p class="sub">${esc(l)}</p></div>`).join("")}</div></div>`;
   if (sec.type === "bridge") return `<div class="card"><div class="bridge"><b>From GAAP to adjusted:</b>${sec.parts.map((p, i) => `${i ? `<i>${i === sec.parts.length - 1 ? "=" : "+"}</i>` : ""}<span class="${i === 0 ? "first" : i === sec.parts.length - 1 ? "last" : ""}">${esc(p)}</span>`).join("")}</div></div>`;
   if (sec.type === "eps" || sec.type === "quarters") return trendCard(c, sec);
@@ -2404,7 +2409,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
 
 /* Full screen for a card: double-tap (or double-click) it, or tap the small icon in its top-right corner; the shrink button returns */
 (function(){
-  const SEL = "#view-infographic .grid>.card:not(.trend-card), #view-report .grid>.card:not(.trend-card)";
+  const SEL = "#view-infographic .grid>.card, #view-report .grid>.card";
   const ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
   const ov = $("#cxOv"), stage = $("#cxStage"); let from = null;
   function decorate(){ document.querySelectorAll(SEL).forEach(c => { if (c.querySelector(":scope>.cx-btn")) return;
