@@ -1573,9 +1573,12 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(shortName(c.name))} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div>`;
+    const nm0 = shortName(c.name), nmM = nm0.match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i);
+    h.innerHTML = `<div><p id="igNm" style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${nmM ? `${esc(nmM[1])}<span class="ig-suf">${esc(nmM[2])} ${esc(nmM[3])}</span>` : esc(nm0)}</p><p style="margin:4px 0 0;font:600 ${TALL ? 22 : WIDE ? 24 : FULLIG ? 21 : 26}px/1.2 'IBM Plex Sans',sans-serif;color:#55606E"><span style="color:#A9550D">${c.ticker}</span> · ${esc(c.fy)}</p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div>`;
     n.prepend(h);
     host.appendChild(n);
+    { const nmEl = n.querySelector("#igNm"), suf = nmEl && nmEl.querySelector(".ig-suf");   // name on one line: drop "Inc." / "Corp." (and its comma) when it would wrap
+      if (suf && nmEl.getBoundingClientRect().height > parseFloat(getComputedStyle(nmEl).fontSize) * 1.6) suf.remove(); }
     n.querySelectorAll(".sankey svg.sk-flat").forEach(x => x.remove());
     n.querySelectorAll(".sankey svg[data-rot]").forEach(svg => { const [w0, h0] = svg.dataset.rot.split(" "); svg.setAttribute("viewBox", `0 0 ${w0} ${h0}`); const g = svg.querySelector("g.rotg"); if (g) g.replaceWith(...g.childNodes); svg.removeAttribute("data-rot"); svg.style.maxWidth = "none"; });   // back to the flat drawing; the picture code below turns it
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
