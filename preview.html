@@ -1,14 +1,31 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.addform{display:flex;flex-direction:column;gap:8px;max-width:420px}.addform label{font-weight:600;margin-top:6px}.addform input[type=text],.addform input[type=email]{padding:10px 12px;border:1px solid var(--line,#ccc);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}.addform .btn{align-self:flex-start;margin-top:10px}.addhint,.addstat{min-height:1.3em;margin:0;font-size:.92em;opacity:.85}.addthanks{max-width:420px}.addthanks:focus{outline:none}.missing .row.ask{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .grid>.card:not(.trend-card){position:relative;touch-action:manipulation}
-.cx-btn{position:absolute;right:5px;bottom:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.7;border-radius:5px}
-.cx-btn::before{content:"";position:absolute;inset:-10px}
+.cx-btn{position:absolute;right:4px;top:4px;width:18px;height:18px;padding:0;border:0;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.75;border-radius:5px;z-index:1}
+.cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
-.cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.86);display:flex;overflow:auto;padding:56px 16px 24px}
+.grid>.card:not(.trend-card) .barhead{padding-right:22px}
+.cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:12px}
 .cx-ov[hidden]{display:none}
 .cx-stage{margin:auto;flex:none}
-.cx-stage>.card{box-shadow:0 10px 40px rgba(0,0,0,.35)}
-.cx-close{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.cx-close:hover,.cx-close:focus-visible{background:rgba(255,255,255,.3)}
+.cx-stage>.card{padding:20px 22px;gap:10px}
+.cx-stage .barhead{padding-right:0}
+.cx-stage .big{font-size:40px}
+.cx-stage .seg-val b{font-size:34px}
+.cx-stage .barhead p,.cx-stage .seg-name{font-size:20px;font-weight:700}
+.cx-stage .chip{font-size:14px;padding:3px 11px}
+.cx-stage .big small{font-size:15px}
+.cx-stage .sub{font-size:15px}
+.cx-stage .spark.wide .sp-axis{display:none}
+.cx-stage .sp-axis-full{display:block;position:relative;height:22px;margin-top:8px}
+.cx-stage .sp-axis-full span{position:absolute;top:0;transform:translateX(-50%);font-size:13px;color:var(--muted);white-space:nowrap}
+.cx-stage .sp-axis-full span:first-child{transform:none}.cx-stage .sp-axis-full span:last-child{transform:translateX(-100%)}
+.cx-stage .sp-vals{display:block}
+.cx-stage .sp-vals span{font-size:15px}.cx-stage .sp-vals span.neg{color:var(--neg,#A8321F)}
+.cx-stage .spark.wide .sp-plot{margin:26px 0 4px}
+.cx-stage .spark.wide svg{height:clamp(90px,26vh,260px)}
+@media (max-width:700px){.cx-stage .sp-axis-full span{font-size:11px}.cx-stage .sp-vals span{font-size:13px}}
+.cx-shrink{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.cx-shrink:hover,.cx-shrink:focus-visible{background:rgba(255,255,255,.34)}
 </style></head><body>
 <title>10-K Analyzer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -223,10 +240,23 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 
 /* Shared blocks */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.grid{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
-/* Every card is the same size: 4 per row on wide screens, 2 on medium, 1 on phones, even when a row is not full */
-@container sec (min-width:440px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@container sec (min-width:800px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
+/* Always 4 cards per row, even on a phone: compact cards for a quick look at the trends; enlarge one to read it */
+@container sec (max-width:700px){
+  .grid{gap:6px}
+  .grid>.card{padding:8px 6px;gap:4px;border-radius:9px}
+  .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:3px;padding-right:14px}
+  .grid>.card .barhead p,.grid>.card .seg-name{font-size:10.5px;line-height:1.2;min-height:0!important;font-weight:600}
+  .grid>.card .chips{display:flex;flex-wrap:wrap;gap:2px}
+  .grid>.card .chip{font-size:8.5px;padding:1px 4px;white-space:normal;line-height:1.25}
+  .grid>.card .big{font-size:14px;letter-spacing:-.04em}
+  .grid>.card .big small,.grid>.card .sub,.grid>.card .sp-axis,.grid>.card .sp-axis-full{display:none}
+  .grid>.card .sp-why{font-size:8.5px;line-height:1.25;padding-top:4px}
+  .grid>.card .spark.wide{padding-top:6px}
+  .grid>.card .seg-metrics{gap:6px}.grid>.card .seg-metric{padding-top:5px}
+  .grid>.card .lbl{font-size:9.5px;line-height:1.2}
+  .grid>.card .seg-val{gap:3px}.grid>.card .seg-val b{font-size:13px;letter-spacing:-.04em}
+}
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
 .sec>h3 small{font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--muted)}
@@ -721,7 +751,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
   </section>
 </div>
-<div class="cx-ov" id="cxOv" hidden role="dialog" aria-modal="true" aria-label="Enlarged card"><button type="button" class="cx-close" id="cxClose" aria-label="Close" title="Close">&times;</button><div class="cx-stage" id="cxStage"></div></div>
+<div class="cx-ov" id="cxOv" hidden role="dialog" aria-modal="true" aria-label="Card, full screen"><button type="button" class="cx-shrink" id="cxShrink" aria-label="Shrink" title="Shrink"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/></svg></button><div class="cx-stage" id="cxStage"></div></div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box" tabindex="-1">
     <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
@@ -1191,8 +1221,8 @@ function sparkline(c, it, wide){
   const axis = `<div class="sp-axis"><span>${esc(sq(q[0]))}</span>${src || approx}<span>${esc(sq(q[last]))}</span></div>`;
   /* Wide (desktop) trend cards: every quarter labelled with its value under its point */
   /* Wide (desktop) trend cards: each point labelled with its value; the axis below shows only the quarters */
-  const axisFull = full ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%">${esc(sq(q[i]))}</span>`).join("")}</div>` : "";
-  const ptLabels = full ? `<div class="sp-vals" aria-hidden="true">${v.map((x, i) => x === null ? "" : (() => {
+  const axisFull = wide ? `<div class="sp-axis-full">${v.map((x, i) => `<span style="left:${(X(i) / W * 100).toFixed(2)}%">${esc(sq(q[i]))}</span>`).join("")}</div>` : "";
+  const ptLabels = wide ? `<div class="sp-vals" aria-hidden="true">${v.map((x, i) => x === null ? "" : (() => {
       const yp = Y(x) / H * 100, nb = [v[i - 1], v[i + 1]].filter(y => y !== null && y !== undefined),
         below = nb.length && nb.reduce((a, b) => a + b, 0) / nb.length > x;      // a dip: label under the point, clear of the line
       return `<span class="${i === 0 ? "first" : i === last ? "last" : ""}${below ? " below" : ""}${x < 0 ? " neg" : ""}" style="left:${(X(i) / W * 100).toFixed(2)}%;top:${yp.toFixed(2)}%">${esc(F(x))}</span>`; })()).join("")}</div>` : "";
@@ -2373,7 +2403,7 @@ loadLatest().then(d => { const nd = newDay(d.items); badge("#newCount", nd ? d.i
 /* badge: today's not-yet-filed releases, or the next business day's when today's are done */
 const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length || u.nextItems.length, "upcoming"));
 
-/* Enlarge a card: double-tap (or double-click) it, or tap the small corner icon */
+/* Full screen for a card: double-tap (or double-click) it, or tap the small icon in its top-right corner; the shrink button returns */
 (function(){
   const SEL = "#view-infographic .grid>.card:not(.trend-card), #view-report .grid>.card:not(.trend-card)";
   const ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
@@ -2381,15 +2411,24 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   function decorate(){ document.querySelectorAll(SEL).forEach(c => { if (c.querySelector(":scope>.cx-btn")) return;
     const b = document.createElement("button"); b.type = "button"; b.className = "cx-btn"; b.title = "Enlarge"; b.setAttribute("aria-label", "Enlarge this card"); b.innerHTML = ICON; c.appendChild(b); }); }
   let raf = 0; new MutationObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(decorate); }).observe($("#filing"), {childList: true, subtree: true}); decorate();
+  const realFs = () => document.fullscreenElement === ov || document.webkitFullscreenElement === ov;
   function open(card){
-    const w = card.getBoundingClientRect().width, avail = Math.min(innerWidth - 32, 880), z = Math.max(1, Math.min(3, avail / w));
+    const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    stage.style.width = w + "px"; stage.style.zoom = z; stage.replaceChildren(k);
-    from = document.activeElement; ov.hidden = false; document.body.style.overflow = "hidden"; ov.scrollTop = 0; $("#cxClose").focus({preventScroll: true});
+    stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
+    ov.hidden = false; document.body.style.overflow = "hidden";
+    const h = stage.getBoundingClientRect().height;
+    stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 24) / h));   // as big as fits the screen
+    ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
+    const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
+    if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
   }
-  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); document.body.style.overflow = ""; if (from && from.focus) from.focus({preventScroll: true}); }
-  $("#cxClose").addEventListener("click", close);
-  ov.addEventListener("click", e => { if (!e.target.closest(".cx-stage") && !e.target.closest(".cx-close")) close(); });
+  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); document.body.style.overflow = "";
+    if (realFs()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+    if (from && from.focus) from.focus({preventScroll: true}); }
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ov.hidden && !document.fullscreenElement && !document.webkitFullscreenElement && ov.dataset.fs) close(); if (realFs()) ov.dataset.fs = "1"; else delete ov.dataset.fs; }));
+  $("#cxShrink").addEventListener("click", close);
+  ov.addEventListener("click", e => { if (!e.target.closest(".cx-stage") && !e.target.closest(".cx-shrink")) close(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
   document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); open(b.closest(".card")); } });
   let last = null;
