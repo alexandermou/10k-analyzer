@@ -404,6 +404,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sankey{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
 .sankey svg[data-rot]{min-width:0;max-width:560px;margin:0 auto}
+.sankey svg.sk-flat{display:none}#filing.lay-wide .sankey svg.sk-flat{display:block}#filing.lay-wide .sankey svg[data-rot]{display:none}
+#filing.lay-wide .grid{grid-template-columns:repeat(2,minmax(0,1fr))}@container sec (min-width:1000px){#filing.lay-wide .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
 .ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
 .nrev{fill:var(--node-rev)}.npos{fill:var(--node-pos)}.nneg{fill:var(--node-neg)}
@@ -678,6 +680,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <h3 class="lay-h">Web</h3>
     <div class="laychoices" role="radiogroup" aria-label="Card layout">
       <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Tall</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
+      <button type="button" class="laychoice" role="radio" data-lay="wide" aria-checked="false"><b>Wide</b><span>For desktop: 4 cards per row, with every number shown on the chart and the income statement flow left to right.</span></button>
       <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Medium</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
     </div>
     <h3 class="lay-h">Infographic</h3>
@@ -1477,7 +1480,7 @@ function renderInfographic(c){
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue</p></div>
-      <div class="sankey">${rotSvg(sankey(c))}</div>
+      <div class="sankey">${rotSvg(sankey(c))}${sankey(c).replace("<svg ", "<svg class=\"sk-flat\" ")}</div>
     </div>
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
@@ -1541,6 +1544,7 @@ async function makeInfographicBlob(c){
     h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
     n.prepend(h);
     host.appendChild(n);
+    n.querySelectorAll(".sankey svg.sk-flat").forEach(x => x.remove());
     n.querySelectorAll(".sankey svg[data-rot]").forEach(svg => { const [w0, h0] = svg.dataset.rot.split(" "); svg.setAttribute("viewBox", `0 0 ${w0} ${h0}`); const g = svg.querySelector("g.rotg"); if (g) g.replaceWith(...g.childNodes); svg.removeAttribute("data-rot"); svg.style.maxWidth = "none"; });   // back to the flat drawing; the picture code below turns it
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
@@ -2592,8 +2596,8 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
 
 /* Layout settings: compact (default) or full; remembered on this device */
 (function(){
-  const get = () => { try { return localStorage.getItem("layout") === "full" ? "full" : "compact"; } catch (e) { return "compact"; } };
-  const apply = m => { $("#filing").classList.toggle("lay-full", m === "full"); document.querySelectorAll(".laychoice[data-lay]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lay === m))); };
+  const get = () => { try { const v = localStorage.getItem("layout"); return v === "full" || v === "wide" ? v : "compact"; } catch (e) { return "compact"; } };
+  const apply = m => { $("#filing").classList.toggle("lay-full", m === "full" || m === "wide"); $("#filing").classList.toggle("lay-wide", m === "wide"); document.querySelectorAll(".laychoice[data-lay]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lay === m))); };
   document.querySelectorAll(".laychoice[data-lay]").forEach(b => b.addEventListener("click", () => { try { localStorage.setItem("layout", b.dataset.lay); } catch (e) {} apply(b.dataset.lay); }));
   apply(get());
   const applyIg = m => document.querySelectorAll(".laychoice[data-ig]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.ig === m)));
