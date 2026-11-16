@@ -2470,7 +2470,7 @@ async function showWatchlist(){
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a></td>
           <td>${x ? `<a href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Open the ${esc(x.report)} infographic">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
           <td>${x ? `<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}` : `<span class="muted">—</span>`}</td>
-          <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + " days ago"}</b>`}</td>
+          <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + "D ago"}</b>`}</td>
           <td><button type="button" class="wl-rm" data-t="${esc(t)}" aria-label="Remove ${esc(t)}" title="Remove ${esc(t)}">×</button></td></tr>`; }).join("")
     }</tbody></table></div>
     <p class="sub">Latest report per company, with the date it was filed with the SEC.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
