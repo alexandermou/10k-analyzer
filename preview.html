@@ -288,7 +288,6 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 #filing.lay-full .grid>.card .sp-vals span{font-size:13.5px}#filing.lay-full .grid>.card .sp-vals span.neg{color:var(--neg,#A8321F)}
 #filing.lay-full .grid>.card .spark.wide .sp-plot{margin:26px 0 24px}
 #filing.lay-full .grid>.card .spark.wide svg{height:clamp(90px,34cqw,170px)}
-.laydone{margin-top:18px}
 .laychoices{display:flex;flex-direction:column;gap:10px;max-width:460px}
 .laychoice{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
 .laychoice b{font-size:17px}.laychoice span{font-size:14px;color:var(--muted)}
@@ -566,6 +565,7 @@ body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16p
 body:not(.home) .brand{padding-right:88px}
 .topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
 .tl-latest,body.home #homeIcon{display:none!important}
+#closeIcon{display:none}body.faqmode #closeIcon{display:grid}body.faqmode #homeIcon{display:none!important}   /* menu pages: a close button in the top-right corner returns to the page the menu was opened from */
 body.home .tl-latest{display:flex!important;align-items:center;height:40px;padding:0 8px;border:0!important;background:none!important;width:auto!important;color:var(--ink);font-size:15px;font-weight:600}
 body.home .tl-latest:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .hmenu{position:relative}
@@ -626,7 +626,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
@@ -666,7 +666,6 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Compact</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
       <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Full</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
     </div>
-    <button type="button" class="btn laydone" id="layDone">Done</button>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
     <div class="np-head"><h2 id="addTitle">Add tickers</h2><p class="sub">Tell us which public companies to add, up to 10 at a time. We check the ticker against the SEC's list first.</p></div>
@@ -2557,10 +2556,6 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   const apply = m => { $("#filing").classList.toggle("lay-full", m === "full"); document.querySelectorAll(".laychoice").forEach(b => b.setAttribute("aria-checked", String(b.dataset.lay === m))); };
   document.querySelectorAll(".laychoice").forEach(b => b.addEventListener("click", () => { try { localStorage.setItem("layout", b.dataset.lay); } catch (e) {} apply(b.dataset.lay); }));
   apply(get());
-  /* Done: back to the page the menu was opened from */
-  let back = "";
-  window.addEventListener("hashchange", e => { if (location.hash.toLowerCase() === "#layout-settings") { try { const h = new URL(e.oldURL).hash; back = h && h.toLowerCase() !== "#layout-settings" ? h : ""; } catch (x) { back = ""; } } });
-  $("#layDone").addEventListener("click", () => { if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
 })();
 /* ---------------- Feedback: emailed to the author through FormSubmit (no account or server needed) ---------------- */
 const FB_TO = "4fd5a506c2a9b09312a0fb8f6881cef3";   // FormSubmit alias: delivers to the owner without showing the address
@@ -2718,6 +2713,13 @@ enterSubmits($("#ticker"), $("#searchForm"));
 enterSubmits($("#wlInput"), $("#wlForm"));
 $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); });
 $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); window.scrollTo(0, 0); });
+/* Close button on the menu pages: back to the page the menu was opened from */
+(function(){
+  const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
+  let back = "";
+  window.addEventListener("hashchange", e => { if (!MENU.has(location.hash.toLowerCase())) return; let old = ""; try { old = new URL(e.oldURL).hash; } catch (x) {} if (!MENU.has(old.toLowerCase())) back = old; });
+  $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
+})();
 /* Hamburger menu: Watchlist, Upcoming, IPOs, FAQ */
 (function(){
   const btn = $("#menuBtn"), panel = $("#menuPanel");
