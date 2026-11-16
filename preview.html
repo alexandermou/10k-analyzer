@@ -403,6 +403,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 /* Sankey */
 .sankey{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
+.sankey svg[data-rot]{min-width:0;max-width:560px;margin:0 auto}
 .fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
 .ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
 .nrev{fill:var(--node-rev)}.npos{fill:var(--node-pos)}.nneg{fill:var(--node-neg)}
@@ -942,6 +943,12 @@ function ribbon(x0,a0,b0,x1,a1,b1,cls){
   return `<path class="${cls}" d="M${x0} ${a0}C${xm} ${a0} ${xm} ${a1} ${x1} ${a1}L${x1} ${b1}C${xm} ${b1} ${xm} ${b0} ${x0} ${b0}Z"/>`;
 }
 function txt(x,y,s,size,cls,weight,anchor){ if (anchor === "middle" && /^t-w/.test(cls)) { const n = String(s).replace(/<[^>]+>/g, "").length; if (n * size * 0.6 > 88) size = Math.max(9.5, +(88 / (n * 0.6)).toFixed(1)); } return `<text x="${x}" y="${y}" font-size="${size}" class="${cls}" font-weight="400"${anchor ? ` text-anchor="${anchor}"` : ""}>${s}</text>`; }
+/* Turns the flow chart 90 degrees (top to bottom): the same drawing, viewBox swapped, content wrapped in a rotated group */
+function rotSvg(str){
+  const m = str.match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/); if (!m) return str;
+  const w = m[1], h = m[2], at = str.indexOf(">", str.indexOf("<svg")) + 1, end = str.lastIndexOf("</svg>");
+  return str.slice(0, at).replace(m[0], `viewBox="0 0 ${h} ${w}" data-rot="${w} ${h}"`) + `<g class="rotg" transform="translate(${h},0) rotate(90)">` + str.slice(at, end) + "</g></svg>";
+}
 function sankey(c){
   if (c.opIncome < 0) return sankeyLoss(c);
   const s = 358 / c.revenue, H = v => Math.max(v * s, 0);
@@ -1469,8 +1476,8 @@ function renderInfographic(c){
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
-      <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
-      <div class="sankey">${sankey(c)}</div>
+      <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue</p></div>
+      <div class="sankey">${rotSvg(sankey(c))}</div>
     </div>
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
@@ -1534,6 +1541,7 @@ async function makeInfographicBlob(c){
     h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
     n.prepend(h);
     host.appendChild(n);
+    n.querySelectorAll(".sankey svg[data-rot]").forEach(svg => { const [w0, h0] = svg.dataset.rot.split(" "); svg.setAttribute("viewBox", `0 0 ${w0} ${h0}`); const g = svg.querySelector("g.rotg"); if (g) g.replaceWith(...g.childNodes); svg.removeAttribute("data-rot"); svg.style.maxWidth = "none"; });   // back to the flat drawing; the picture code below turns it
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
@@ -2552,7 +2560,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   function open(card){
     stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
+    if (false) { ov.classList.add("cx-sk"); stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
       const LW = innerWidth < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
       stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
