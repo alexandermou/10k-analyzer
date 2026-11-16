@@ -677,18 +677,18 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   </section>
   <section class="newpage" id="layoutPage" hidden aria-labelledby="layTitle">
     <div class="np-head"><h2 id="layTitle">Layout settings</h2><p class="sub">How the report cards and the downloadable infographic are shown on this device.</p></div>
-    <h3 class="lay-h">Web</h3>
-    <div class="laychoices" role="radiogroup" aria-label="Card layout">
-      <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Tall</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
-      <button type="button" class="laychoice" role="radio" data-lay="wide" aria-checked="false"><b>Wide</b><span>For desktop: 4 cards per row, with every number shown on the chart and the income statement flow left to right.</span></button>
-      <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Medium</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
-    </div>
     <h3 class="lay-h">Infographic</h3>
     <div class="laychoices" role="radiogroup" aria-label="Infographic layout">
       <button type="button" class="laychoice" role="radio" data-ig="tall" aria-checked="false"><b>Tall</b><span>1 card per row with the biggest text, easiest to read on a phone. A very tall image.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="wide" aria-checked="false"><b>Wide</b><span>For desktop: twice as wide as Medium, 4 cards per row with a number at every dot, and the income statement flow left to right.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="compact" aria-checked="true"><b>Compact</b><span>4 small cards per row, as it is now. One image with the whole report.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="medium" aria-checked="false"><b>Medium</b><span>2 bigger cards per row, with the number shown at every dot of each trend. Larger text, ready to download.</span></button>
+    </div>
+    <h3 class="lay-h">Web</h3>
+    <div class="laychoices" role="radiogroup" aria-label="Card layout">
+      <button type="button" class="laychoice" role="radio" data-lay="full" aria-checked="false"><b>Tall</b><span>1 card per row on a phone (2 on a computer), with every number shown on the chart.</span></button>
+      <button type="button" class="laychoice" role="radio" data-lay="wide" aria-checked="false"><b>Wide</b><span>For desktop: 4 cards per row, with every number shown on the chart and the income statement flow left to right.</span></button>
+      <button type="button" class="laychoice" role="radio" data-lay="compact" aria-checked="true"><b>Medium</b><span>2 cards per row on a phone (4 on a computer). A quick look at the trends. Open a card's full screen to see every number.</span></button>
     </div>
   </section>
   <section class="newpage" id="addPage" hidden aria-labelledby="addTitle">
@@ -2156,7 +2156,7 @@ async function openCompany(t, view, period){
   state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
   setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
-  $("#fname").innerHTML = `${esc(c.name)} <span>(${c.ticker})</span><button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  $("#fname").innerHTML = `${esc(c.name).replace(/(\S+)$/, '<bdi style="white-space:nowrap">$1<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></bdi>')} <span>(${c.ticker})</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
   wlChanged();   // sets the star next to the name
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(sd(shown.period))}</span><span>Filed ${esc(sd(shown.filed))}</span><span class="mono">CIK ${c.cik}</span>`;
   renderPeriods(c);
