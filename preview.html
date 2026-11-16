@@ -1142,22 +1142,21 @@ function trendCard(c, sec){
     ${sparkline(c, it, true)}
   </div>`;
 }
-/* The quarterly revenue and EPS cards share one section of regular-size cards */
-function renderSections(c){
-  let out = "", buf = [], lab = "";
-  /* most companies have no separate quarterly revenue series: build the card from the filed quarterly revenue behind the Total company sparkline */
-  let secs = c.sections; const ql = c.sparkQ, rv = c.sparkTot && c.sparkTot.rev;   // quarterly filers only (half-year filers have no quarters)
-  if (!secs.some(x => x.type === "quarters") && ql && rv && rv.length === ql.length && rv.length >= 2 && rv.every(x => x !== null && x !== undefined)) {
-    let i = secs.findIndex(x => x.type === "eps"); if (i < 0) i = secs.findIndex(x => /^Balance sheet/i.test(x.title || "")); if (i < 0) i = secs.length;
-    secs = [...secs.slice(0, i), {type: "quarters", title: "Quarterly revenue", items: ql.map((q, j) => ({q, v: c.unit === "B" ? rv[j] / 1000 : rv[j]}))}, ...secs.slice(i)];
-  }
-  const flush = () => { if (buf.length) out += `<div class="sec"><h3>Quarterly results${lab ? ` <small>\u00b7 ${esc(lab)}</small>` : ""}</h3><div class="grid">${buf.join("")}</div></div>`; buf = []; lab = ""; };
-  secs.forEach(sec => {
-    if (sec.type === "eps" || sec.type === "quarters") { const h = trendCard(c, sec); if (h) { buf.push(h); if (!lab && sec.items && sec.items.length) lab = sec.items[sec.items.length - 1].q; } }
-    else { flush(); out += renderSection(c, sec); }
-  });
-  flush(); return out;
+/* Diluted EPS joins Revenue, Operating income and Operating margin under Total company; its other copies are removed */
+function prepEps(c){
+  const isEps = l => /\b(per share|EPS)\b/i.test(l || "");
+  let src = null;
+  c.sections.forEach(sec => { if (!src && sec.type === "bars") src = sec.items.find(it => isEps(it.label) && it.spark) || null; });
+  let html = "";
+  if (src) html = barCard(c, {...src, label: /loss/i.test(src.label) && !/\(loss\)/i.test(src.label) ? src.label : "Diluted EPS"});
+  else { const e = c.sections.find(x => x.type === "eps"); if (e) html = trendCard(c, e); }
+  c._secs = c.sections.filter(x => x.type !== "eps" && x.type !== "quarters").map(sec => !html ? sec
+    : sec.type === "bars" ? {...sec, items: sec.items.filter(it => !isEps(it.label))}
+    : sec.type === "tiles" ? {...sec, tiles: sec.tiles.filter(t => !isEps(t.label))} : sec)
+    .filter(sec => !((sec.type === "bars" && !sec.items.length) || (sec.type === "tiles" && !sec.tiles.length)));
+  return html;
 }
+function renderSections(c){ return (c._secs || c.sections).map(sec => renderSection(c, sec)).join(""); }
 /* A KPI card whose trend is a sparkline: the headline value, the change chips, then the last 5 quarters */
 function sparkCard(c, it, label, chips, period){
   return `<div class="card sp-card">
@@ -1372,6 +1371,15 @@ function segBig(c, which){
     const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
     const V = h => pq ? `<span class="vchips">${h}</span>` : h;
     const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
+    if (s.total) {   /* Total company: separate regular cards, one per metric */
+      const per = esc(yr(c.fy));
+      const card = (lab, big, chips, sp) => `<div class="card sp-card"><div class="barhead"><p>${lab}</p></div><p class="big">${big} <small>${per}</small></p><div class="chips">${chips}</div>${sp}</div>`;
+      const mBig = !(s.rev > 0) || Math.abs(mc) > 1000 ? "n/m" : segPct(mc);
+      const mChips = !(s.rev > 0) || Math.abs(mc) > 1000 ? `<span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`;
+      return card("Revenue", money(c, s.rev), yo(chip(s.rev, s.revPrior)) + qRev, tsp(s, "rev"))
+        + card(esc(s.oi < 0 ? "Operating loss" : "Operating income"), money(c, s.oi), yo(chip(s.oi, s.oiPrior)) + qOi, tsp(s, "op"))
+        + card("Operating margin", mBig, mChips, tsp(s, "om"));
+    }
     return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
       <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div>${tsp(s, "rev")}</div>
       <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div>${tsp(s, "op")}</div>
@@ -1399,7 +1407,7 @@ function rsCards(c){
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
-    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid seg-grid">${segBig(c, "total")}</div></div>
+    <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
     <div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue · scroll sideways on a phone</p></div>
