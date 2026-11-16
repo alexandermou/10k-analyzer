@@ -1584,7 +1584,7 @@ async function makeInfographicBlob(c){
       if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
         const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
       const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
-      const src = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad);
+      const src = trimRight(drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), 24 * R);   // no empty space after the last label
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
       const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0);
       cv.style.width = B + "px"; cv.style.height = Math.round(src.width / R) + "px"; cv.style.display = "block";
@@ -1648,6 +1648,14 @@ const PAINT = {
   "t-m": {fill: "#55606E"}, "t-i": {fill: "#15202B"}, "t-w": {fill: "#FFFFFF"}, "t-ws": {fill: "#DCE6F2"}, "t-p": {fill: "#17703F"}, "t-n": {fill: "#A8321F"}
 };
 const paintOf = el => PAINT[(el.getAttribute("class") || "").split(" ")[0]] || {};
+/* Cuts the empty white strip off the right end of a drawing (keeps `margin` pixels after the last mark) */
+function trimRight(cv, margin){
+  const w = cv.width, h = cv.height, d = cv.getContext("2d").getImageData(0, 0, w, h).data;
+  let last = 0;
+  for (let x = w - 1; x >= 0 && !last; x--) for (let y = 0; y < h; y++) { const i = (y * w + x) * 4; if (d[i] < 250 || d[i + 1] < 250 || d[i + 2] < 250) { last = x; break; } }
+  const nw = Math.min(w, last + margin); if (nw >= w || nw < w * 0.3) return cv;
+  const o = document.createElement("canvas"); o.width = nw; o.height = h; const g = o.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, nw, h); g.drawImage(cv, 0, 0); return o;
+}
 function drawSvgToCanvas(svg, W, H, fscale = 1, padX = 0){
   const vb = svg.viewBox.baseVal, sx = W / vb.width, sy = H / vb.height;
   const cvs = document.createElement("canvas"); cvs.width = W + padX; cvs.height = H;
