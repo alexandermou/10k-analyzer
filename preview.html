@@ -527,7 +527,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 
 /* Infographic download */
 .info-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.info-settings{align-self:center;margin-left:14px;font-size:15px;color:var(--accent);text-decoration:underline}.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
+.info-settings{align-self:center;margin-left:10px;font-size:14px;color:var(--accent);text-decoration:underline}.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
@@ -595,7 +595,7 @@ body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16p
 body:not(.home) .brand{padding-right:88px}
 .topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
 .tl-latest,body.home #homeIcon{display:none!important}
-#closeIcon{display:none}body.faqmode #closeIcon{display:grid}body.faqmode #homeIcon,body.faqmode .hmenu{display:none!important}   /* menu pages: a close button in the top-right corner returns to the page the menu was opened from */
+#closeIcon{display:none}body.faqmode #closeIcon,body.subview #closeIcon{display:grid}body.faqmode #homeIcon,body.faqmode .hmenu,body.subview #homeIcon,body.subview .hmenu{display:none!important}body.subview .shelf,body.subview #periods{display:none}.info-pg{height:40px;padding:0 12px;margin-left:6px}   /* menu pages: a close button in the top-right corner returns to the page the menu was opened from */
 body.home .tl-latest{display:flex!important;align-items:center;height:40px;padding:0 8px;border:0!important;background:none!important;width:auto!important;color:var(--ink);font-size:15px;font-weight:600}
 body.home .tl-latest:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
 .hmenu{position:relative}
@@ -768,42 +768,10 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <h2 id="fname"></h2>
         <div class="meta" id="fmeta"></div>
       </div>
-      <div class="tabs" role="tablist" aria-label="Views">
-        <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Dashboard</button>
-        <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
-        <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Report</button>
-      </div>
     </div>
     <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
     <div id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden></div>
-    <div class="fb-foot"><a href="#feedback" id="fbLink" role="button" aria-expanded="false" aria-controls="view-feedback">Feedback</a></div>
-    <div id="view-feedback" hidden>
-      <div class="card fb-card">
-        <form id="fbForm" novalidate>
-          <h2 class="fb-h">Send feedback</h2>
-          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
-          <div class="fb-two">
-            <div class="fb-field"><label class="fb-lbl" for="fbName">Name</label>
-              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
-            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email</label>
-              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
-          </div>
-          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
-          <div class="fb-field"><label class="fb-lbl" for="fbSubj">Subject</label>
-            <input type="text" id="fbSubj" name="subject" maxlength="200"></div>
-          <label class="fb-lbl" for="fbMsg">Your message</label>
-          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
-          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
-          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
-        </form>
-        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
-          <h2 class="fb-h">Thank you!</h2>
-          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
-          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
-        </div>
-      </div>
-    </div>
     <div class="media-bar" id="mediaBar" hidden>
       <div class="seg" role="group" aria-label="Media type">
         <button type="button" class="seg-btn" id="seg-slides" data-media="slides" aria-pressed="true">Slides</button>
@@ -835,6 +803,33 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <div class="progress" aria-hidden="true"><div id="prog"></div></div>
         </div>
         <p class="status" id="vstatus">About a minute long, with captions. Narration uses your device's voice.</p>
+      </div>
+    </div>
+      <div class="fb-foot"><a href="#feedback" id="fbLink" role="button" aria-expanded="false" aria-controls="view-feedback">Feedback</a></div>
+    <div id="view-feedback" hidden>
+      <div class="card fb-card">
+        <form id="fbForm" novalidate>
+          <h2 class="fb-h">Send feedback</h2>
+          <p class="fb-sub">What works, what's missing, or a number that looks wrong — tell us here. Your message goes straight to the site's author.</p>
+          <div class="fb-two">
+            <div class="fb-field"><label class="fb-lbl" for="fbName">Name</label>
+              <input type="text" id="fbName" name="name" autocomplete="name" maxlength="120"></div>
+            <div class="fb-field"><label class="fb-lbl" for="fbEmail">Email</label>
+              <input type="email" id="fbEmail" name="email" autocomplete="email" inputmode="email" maxlength="200" aria-describedby="fbEmailHint"></div>
+          </div>
+          <p class="fb-hint" id="fbEmailHint">Leave your email only if you'd like a reply.</p>
+          <div class="fb-field"><label class="fb-lbl" for="fbSubj">Subject</label>
+            <input type="text" id="fbSubj" name="subject" maxlength="200"></div>
+          <label class="fb-lbl" for="fbMsg">Your message</label>
+          <textarea id="fbMsg" name="message" rows="7" maxlength="4000" required placeholder="Write your feedback…"></textarea>
+          <input type="text" name="_honey" id="fbHoney" tabindex="-1" autocomplete="off" aria-hidden="true" class="fb-hp">
+          <div class="fb-row"><button class="btn" type="submit" id="fbSend">Send feedback</button><span class="status" id="fbStatus" role="status"></span></div>
+        </form>
+        <div id="fbThanks" class="fb-thanks" hidden tabindex="-1">
+          <h2 class="fb-h">Thank you!</h2>
+          <p class="fb-sub">Your feedback has been sent. We appreciate you taking the time.</p>
+          <button class="btn ghost" type="button" id="fbAgain">Send more feedback</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1494,7 +1489,7 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span></button><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="infoStatus" role="status"></span></div>
+  $("#view-infographic").innerHTML = `<div class="info-tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span></button><a class="info-settings" href="#layout-settings">Settings</a>${c.quarter ? "" : `<button class="btn ghost info-pg" type="button" data-pg="media">Media</button><button class="btn ghost info-pg" type="button" data-pg="report">Report</button>`}<span class="status" id="infoStatus" role="status"></span></div>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}${!c.quarter && (c.sparkQ || c.sparkH) ? (q => ` · the figures are for the full year; sparklines show the last ${c.sparkQ ? "5 quarters" : /^H\d/.test(q[0]) ? "3 half-years" : "quarters"} (${esc(q[0])} – ${esc(q[q.length - 1])})`)(c.sparkQ || c.sparkH) : ""}</small></h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
@@ -1507,6 +1502,7 @@ function renderInfographic(c){
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
   $("#dlInfo").addEventListener("click", downloadInfographic);
+  document.querySelectorAll(".info-pg").forEach(b => b.addEventListener("click", () => { setView(b.dataset.pg === "media" ? state.media : "report"); writeHash(); }));
 }
 
 /* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
@@ -2043,7 +2039,8 @@ function setView(v){
   const media = v === "slides" || v === "video";
   if (media) state.media = v;
   VIEWS.forEach(x => { $("#view-" + x).hidden = x !== v; });
-  ["infographic", "media", "report"].forEach(x => $("#tab-" + x).setAttribute("aria-selected", x === (media ? "media" : v)));
+  document.body.classList.toggle("subview", v !== "infographic");   // Media and Report open as their own page, with a close icon
+  if (v !== "infographic") window.scrollTo(0, 0);
   $("#mediaBar").hidden = !media;
   ["slides", "video"].forEach(x => $("#seg-" + x).setAttribute("aria-pressed", x === v));
   if (v !== "video" && player.playing) stop(false);
@@ -2240,8 +2237,6 @@ async function openCompany(t, view, period){
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });
-  $("#filing .tabs").hidden = !!period;   // a quarterly report has only the dashboard: no tab bar
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
@@ -2722,7 +2717,6 @@ function readHash(){ const h = location.hash.slice(1).toLowerCase(); if (!h) ret
   else if (parts[0] === "10k") { parts.shift(); p = ""; }      // #msft-10k: the 10-K tab; #msft alone: the latest report
   const v = parts[0]; return {t: t.toUpperCase(), v: VIEWS.includes(v) ? v : "infographic", p}; }
 $("#pick").addEventListener("change", e => { openCompany(e.target.value).then(writeHash); });
-document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => { setView(b.dataset.view === "media" ? state.media : b.dataset.view); writeHash(); }));
 document.querySelectorAll(".seg-btn").forEach(b => b.addEventListener("click", () => { setView(b.dataset.media); writeHash(); }));
 /* Search: tickers and company names already in the library */
 const ALIASES = {GOOGL: "GOOG", VSCO: "VSXY", RBC: "RY", TOYOF: "TM", "BRK.A": "BRK.B", BRKB: "BRK.B", BRK: "BRK.B", MMC: "MRSH", FI: "FISV", SQ: "XYZ", BK: "BNY", FOX: "FOXA", NWS: "NWSA", EQR: "VMRK", PSKY: "SKYD", PARA: "SKYD", "BF.A": "BF.B", BFB: "BF.B", BFA: "BF.B", CHK: "EXE", CENTA: "CENT", "CWEN.A": "CWEN", CWENA: "CWEN", UA: "UAA", INDV: "SUPN", ASGN: "EFOR", ATGE: "CVSA", AXL: "DCH", EXPI: "AGNT", FDP: "DMC", IAC: "PPLI", MSGS: "MSGK", SJW: "HTO", BHLB: "BBT", NYMT: "ADAM", CEIX: "CNR", ARCH: "CNR", LANC: "MZTI", NXT: "NXT", NXTR: "NXT", TPX: "SGI", NYCB: "FLG", PNM: "TXNM", MODG: "CALY", VIAD: "PRSU", TMST: "MTUS", BELFA: "BELFB", BATRA: "BATRK", LILA: "LILAK", GLIBA: "GLIBK", METCB: "METC", "BH.A": "BH", TXCP: "TCBI", RUSHB: "RUSHA", HOS: "HLX", "GEF.B": "GEF", "AGM.A": "AGM", AGMA: "AGM", ATROB: "ATRO", BATRB: "BATRK", "CRD.B": "CRD.A", CRDA: "CRD.A", CRDB: "CRD.A", DGICB: "DGICA", GLIBB: "GLIBK", "GTN.A": "GTN", GTNA: "GTN", "HVT.A": "HVT", HVTA: "HVT", IHRTB: "IHRT", KELYB: "KELYA", LILAB: "LILAK", MOVAA: "MOV", SENEB: "SENEA", HOVVB: "HOV", "MOG.B": "MOG.A", MOGA: "MOG.A", MOGB: "MOG.A", GEFB: "GEF", BHA: "BH", LC: "HAPN", MPLN: "CTEV", BBBY: "NXH", CMPO: "GPGI", MGPI: "CASK", TOI: "STLN", DOMO: "HUCK", MEG: "ONT", PX: "RPC", GCI: "TDAY", BIGC: "CMRC", SCVL: "SHOE", COMM: "VISN", ATUS: "OPTU", OMI: "ACH", AHH: "AHRT", GMRE: "XRN", BLDE: "SRTA", RMBL: "RDNW", MESA: "RJET", BITF: "KEEL", AMBC: "OSG", FREY: "TE", GLT: "MAGN", AMRK: "GOLD", CDXC: "NAGE", HMST: "MCHB", ABL: "ABX", PTSI: "PAMT", GLYC: "CBIO", AVTE: "JBIO", AADI: "WHWK", GLTO: "DMRA", SRM: "TRON", NVFY: "XMAX", THAR: "CNTN", MFH: "CD", NEHC: "NUAI", NR: "NPKI", OBNK: "OBK"};
@@ -2844,7 +2838,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
   let back = "";
   window.addEventListener("hashchange", e => { if (!MENU.has(location.hash.toLowerCase())) return; let old = ""; try { old = new URL(e.oldURL).hash; } catch (x) {} if (!MENU.has(old.toLowerCase())) back = old; });
-  $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
+  $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (document.body.classList.contains("subview") && !document.body.classList.contains("faqmode")) { setView("infographic"); writeHash(); window.scrollTo(0, 0); return; } if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
 })();
 /* Hamburger menu: Watchlist, Upcoming, IPOs, FAQ */
 (function(){
