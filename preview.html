@@ -241,21 +241,20 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 /* Shared blocks */
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
-/* Always 4 cards per row, even on a phone: compact cards for a quick look at the trends; enlarge one to read it */
+/* 4 cards per row on wide screens; 2 per row by default on phones and narrow screens */
 @container sec (max-width:700px){
-  .grid{gap:6px}
-  .grid>.card{padding:8px 6px;gap:4px;border-radius:9px}
-  .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:3px;padding-right:14px}
-  .grid>.card .barhead p,.grid>.card .seg-name{font-size:10.5px;line-height:1.2;min-height:0!important;font-weight:600}
-  .grid>.card .chips{display:flex;flex-wrap:wrap;gap:2px}
-  .grid>.card .chip{font-size:8.5px;padding:1px 4px;white-space:normal;line-height:1.25}
-  .grid>.card .big{font-size:14px;letter-spacing:-.04em}
-  .grid>.card .big small,.grid>.card .sub,.grid>.card .sp-axis,.grid>.card .sp-axis-full{display:none}
-  .grid>.card .sp-why{font-size:8.5px;line-height:1.25;padding-top:4px}
-  .grid>.card .spark.wide{padding-top:6px}
-  .grid>.card .seg-metrics{gap:6px}.grid>.card .seg-metric{padding-top:5px}
-  .grid>.card .lbl{font-size:9.5px;line-height:1.2}
-  .grid>.card .seg-val{gap:3px}.grid>.card .seg-val b{font-size:13px;letter-spacing:-.04em}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .grid>.card{padding:12px 11px;gap:6px}
+  .grid>.card .barhead{flex-direction:column;align-items:flex-start;gap:4px;padding-right:20px}
+  .grid>.card .barhead p,.grid>.card .seg-name{font-size:14px;line-height:1.25;min-height:0!important}
+  .grid>.card .chip{font-size:11px;padding:2px 7px}
+  .grid>.card .big{font-size:21px;letter-spacing:-.03em}
+  .grid>.card .big small{font-size:11px}
+  .grid>.card .sub{font-size:11.5px}
+  .grid>.card .sp-axis span{font-size:10.5px}
+  .grid>.card .sp-why{font-size:10.5px;line-height:1.3}
+  .grid>.card .seg-val b{font-size:21px;letter-spacing:-.03em}
+  .grid>.card .lbl{font-size:12px}
 }
 .sec{display:flex;flex-direction:column;gap:12px}
 .sec>h3{font-size:22px;font-weight:700}
@@ -277,7 +276,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .spark.wide{display:block;padding-top:12px}
 .sp-card,.seg-metric{container-type:inline-size}
 .spark.wide svg{display:block;width:100%;height:clamp(28px,22cqw,110px);overflow:visible}
-@container (max-width:170px){.spark .sp-axis{display:none}}
+@container (max-width:130px){.spark .sp-axis{display:none}}
 .spark.wide .sp-line,.spark.wide .sp-zero{vector-effect:non-scaling-stroke}
 .sp-pt{fill:none;stroke:var(--navy);stroke-width:6;stroke-linecap:round;vector-effect:non-scaling-stroke}.sp-pt.last{stroke-width:8}
 .sp-pt-in{fill:none;stroke:var(--surface);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
