@@ -2474,7 +2474,7 @@ async function showWatchlist(){
           <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + "d ago"}</b>`}</td>
 </tr>`; }).join("")
     }</tbody></table></div>
-    <p class="sub">Latest report per company, with the date it was filed with the SEC.${list.length > 1 ? ` <button type="button" class="btn ghost" id="wlClear" style="height:32px;margin-left:8px">Clear all</button>` : ""}</p>`;
+    <p class="sub">Latest report per company, with the date it was filed with the SEC.</p>`;
   if (list.length) {
     const seq = ++wlSeq, figs = await watchFigures(list), miss = list.length - figs.length;
     const note2 = (miss ? `${miss} watched ${miss === 1 ? "company has" : "companies have"} no quarterly figures yet. ` : "") + "Figures are for each company's latest quarter";
@@ -2482,8 +2482,7 @@ async function showWatchlist(){
   }
   $("#wlBody").querySelectorAll(".wl-rm").forEach(b => b.addEventListener("click", () => wlSet(wlGet().filter(x => x !== b.dataset.t))));
   $("#wlBody").querySelectorAll("th button").forEach(b => b.addEventListener("click", () => { wlSort = wlSort.key === b.dataset.k ? {key: b.dataset.k, dir: -wlSort.dir} : {key: b.dataset.k, dir: 1}; showWatchlist(); }));
-  const clr = $("#wlClear"); if (clr) clr.addEventListener("click", () => { if (confirm("Remove all companies from your watchlist?")) wlSet([]); });
-  showPage("watchlist", "Watchlist");
+    showPage("watchlist", "Watchlist");
 }
 $("#wlForm").addEventListener("submit", e => { e.preventDefault();
   const q = $("#wlInput").value.trim(), st = $("#wlStatus"); if (!q) return;
