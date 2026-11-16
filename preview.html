@@ -4,7 +4,7 @@
 .cx-btn::before{content:"";position:absolute;inset:-6px}
 .cx-btn:hover,.cx-btn:focus-visible{opacity:1;background:var(--sunk)}
 .grid>.card .barhead{padding-right:22px}
-.cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:12px}
+.cx-ov{position:fixed;inset:0;z-index:1200;background:rgba(10,18,32,.97);display:flex;overflow:auto;padding:56px 12px 16px}
 .cx-ov[hidden]{display:none}
 .cx-stage{margin:auto;flex:none}
 .cx-stage>.card{padding:20px 22px;gap:10px}
@@ -24,6 +24,15 @@
 .cx-stage .spark.wide .sp-plot{margin:26px 0 4px}
 .cx-stage .spark.wide svg{height:clamp(90px,26vh,260px)}
 @media (max-width:700px){.cx-stage .sp-axis-full span{font-size:11px}.cx-stage .sp-vals span{font-size:13px}}
+.cx-stage .seg-card.wide{border-top-width:4px}
+.cx-stage .seg-card.wide .seg-metrics{grid-template-columns:minmax(0,1fr);gap:16px}
+.cx-stage .seg-card.wide .seg-metric{border-top:1px solid rgba(255,255,255,.22);padding-top:12px}
+.cx-stage .seg-card.wide .seg-metric:first-child{border-top:0;padding-top:0}
+.cx-stage .seg-card.wide .lbl{font-size:16px}
+.cx-stage .seg-card.wide .seg-val{gap:10px}
+.cx-stage .seg-card.wide .seg-val b{font-size:34px;letter-spacing:-.02em}
+.cx-stage .seg-card.wide .seg-val .chip{font-size:14px;padding:3px 11px;white-space:nowrap}
+.cx-stage .seg-card.total .sp-axis-full span{color:rgba(255,255,255,.78)}
 .cx-shrink{position:fixed;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .cx-shrink:hover,.cx-shrink:focus-visible{background:rgba(255,255,255,.34)}
 </style></head><body>
@@ -446,6 +455,11 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .seg-card.total .seg-metric{border-top-color:rgba(255,255,255,.22)}
 .seg-name{font-family:var(--f-display);font-size:20px;font-weight:700}
 .seg-card{gap:14px;border-top:4px solid var(--accent)}
+.seg-card.wide{grid-column:1/-1}
+.seg-card.wide .seg-metric{border-top:0;padding-top:0}
+.seg-card.wide{border-top-width:1px}
+.seg-card.wide .seg-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+@media (max-width:640px){.seg-card.wide .seg-metrics{gap:10px}.seg-card.wide .seg-val{gap:4px}.seg-card.wide .seg-val b{font-size:18px;letter-spacing:-.03em}.seg-card.wide .seg-val .chip{font-size:10.5px;padding:2px 6px;white-space:normal}.seg-card.wide .lbl{font-size:12px}}
 .seg-metric{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}
 .seg-metrics{display:flex;flex-direction:column;gap:14px}
 .seg-val{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -1327,7 +1341,7 @@ function segBig(c, which){
     const yo = h => !pq ? h : (/YoY<\/span>$/.test(h) ? h : h.replace(/<\/span>$/, " YoY</span>")).replace(/(<span class="chip[^"]*">)([a-z])/, (m, a, b) => a + b.toUpperCase());
     const V = h => pq ? `<span class="vchips">${h}</span>` : h;
     const qRev = pq ? qc(s.rev, pq.revenue) : "", qOi = pq ? qc(s.oi, pq.opIncome) : "", qM = pq ? (q => `<span class="chip ${q.cls}">${esc(q.t)}</span>`)(ppQoQ(c, s.oi, pq.opIncome)) : "";
-    return `<div class="card seg-card${s.total ? " total" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
+    return `<div class="card seg-card${s.total ? " total wide" : ""}">${s.total ? "" : `<p class="seg-name">${esc(s.name)}</p>`}<div class="seg-metrics">
       <div class="seg-metric"><span class="lbl">Revenue</span><div class="seg-val"><b>${money(c, s.rev)}</b>${V(yo(chip(s.rev, s.revPrior)) + qRev)}</div>${tsp(s, "rev")}</div>
       <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[0] : (s.oi < 0 ? "Operating loss" : "Operating income")}</span><div class="seg-val"><b>${money(c, s.oi)}</b>${V(yo(chip(s.oi, s.oiPrior)) + qOi)}</div>${tsp(s, "op")}</div>
       <div class="seg-metric"><span class="lbl">${segL(c, s) ? segL(c, s)[1] : "Operating margin"}</span><div class="seg-val">${!(s.rev > 0) || Math.abs(mc) > 1000 ? `<b>n/m</b><span class="chip flat">${s.rev > 0 ? "revenue too small" : "no revenue"}</span>` : `<b>${segPct(mc)}</b>${V(`<span class="chip ${Math.abs(d) < 0.05 ? "flat" : d >= 0 ? "up" : "down"}">${Math.abs(d) > 100 ? "from " + segPct(mp) : ppStr(d) + " YoY"}</span>${qM}`)}`}</div>${tsp(s, "om")}</div></div>
@@ -2422,7 +2436,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
     stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
     ov.hidden = false; document.body.style.overflow = "hidden";
     const h = stage.getBoundingClientRect().height;
-    stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 24) / h));   // as big as fits the screen
+    stage.style.zoom = Math.max(1, Math.min(3, (innerWidth - 24) / LW, (innerHeight - 72) / h));   // as big as fits the screen
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
