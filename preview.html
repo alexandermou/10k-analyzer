@@ -298,6 +298,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .ig-full .grid>.card .spark.wide .sp-plot{margin:26px 0 24px}
 .ig-full .grid>.card .spark.wide svg{height:clamp(90px,34cqw,170px)}
 .ig-full .grid>.card .big{font-size:46px}.ig-full .grid>.card .seg-val b{font-size:42px}.ig-full .grid>.card .barhead p,.ig-full .grid>.card .seg-name{font-size:23px;min-height:0!important;line-height:1.2}.ig-full .grid>.card .sp-axis span{font-size:18px}.ig-full .grid>.card .sub{font-size:18px}.ig-full .grid>.card .chip{font-size:17px}.ig-full .grid>.card .lbl{font-size:18px}.ig-full .grid>.card .sp-vals span{font-size:18px}.ig-full .grid>.card .sp-why{font-size:17px}
+.ig-wide .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 .ig-tall .grid{grid-template-columns:minmax(0,1fr)!important}.ig-tall .grid>.card .big{font-size:60px}.ig-tall .grid>.card .seg-val b{font-size:54px}.ig-tall .grid>.card .barhead p,.ig-tall .grid>.card .seg-name{font-size:30px}.ig-tall .grid>.card .sp-axis span{font-size:23px}.ig-tall .grid>.card .sub{font-size:23px}.ig-tall .grid>.card .chip{font-size:22px;padding:4px 12px}.ig-tall .grid>.card .lbl{font-size:23px}.ig-tall .grid>.card .sp-vals span{font-size:23px}.ig-tall .grid>.card .sp-why{font-size:21px}.ig-tall .grid>.card .big small{font-size:20px}.ig-tall .grid>.card .spark.wide svg{height:210px}.ig-tall .grid>.card{padding:20px 22px}
 .lay-h{margin:22px 0 10px;font-size:18px}.laychoices{display:flex;flex-direction:column;gap:10px;max-width:460px}
 .laychoice{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:inherit;font:inherit;cursor:pointer}
@@ -682,6 +683,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div class="laychoices" role="radiogroup" aria-label="Infographic layout">
       <button type="button" class="laychoice" role="radio" data-ig="compact" aria-checked="true"><b>Compact</b><span>4 small cards per row, as it is now. One image with the whole report.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="medium" aria-checked="false"><b>Medium</b><span>2 bigger cards per row, with the number shown at every dot of each trend. Larger text, ready to download.</span></button>
+      <button type="button" class="laychoice" role="radio" data-ig="wide" aria-checked="false"><b>Wide</b><span>For desktop: twice as wide as Medium, 4 cards per row with a number at every dot, and the income statement flow left to right.</span></button>
       <button type="button" class="laychoice" role="radio" data-ig="tall" aria-checked="false"><b>Tall</b><span>1 card per row with the biggest text, easiest to read on a phone. A very tall image.</span></button>
     </div>
   </section>
@@ -1502,21 +1504,21 @@ function loadImgLib(){
   if (window.htmlToImage) return Promise.resolve();
   return new Promise((res, rej) => { const s = document.createElement("script"); s.src = "vendor/html-to-image.js"; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
 }
-const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" ? "tall" : v === "medium" || v === "full" ? "medium" : "compact"; } catch (e) { return "compact"; } };
+const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" ? "tall" : v === "wide" ? "wide" : v === "medium" || v === "full" ? "medium" : "compact"; } catch (e) { return "compact"; } };
 async function makeInfographicBlob(c){
   // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
   await loadImgLib();
   const root = document.documentElement, prevTheme = root.getAttribute("data-theme");
   root.setAttribute("data-theme", "light");
   const host = document.createElement("div");
-  const IGL = igLayout(), FULLIG = IGL !== "compact", TALL = IGL === "tall", W = TALL ? 600 : 756;
-  host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (TALL ? 720 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
+  const IGL = igLayout(), FULLIG = IGL !== "compact", TALL = IGL === "tall", WIDE = IGL === "wide", W = TALL ? 600 : WIDE ? 1512 : 756;
+  host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (TALL ? 720 : WIDE ? 1640 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
   if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
   document.body.appendChild(host);
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
-    if (FULLIG) n.classList.add("ig-full"); if (TALL) n.classList.add("ig-tall");
+    if (FULLIG) n.classList.add("ig-full"); if (TALL) n.classList.add("ig-tall"); if (WIDE) n.classList.add("ig-wide");
     n.style.width = (FULLIG ? W : 1160) + "px"; n.style.padding = (FULLIG ? "26px" : "32px"); n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
     n.querySelectorAll(".seg-card.wide .seg-metrics").forEach(x => { x.style.gridTemplateColumns = "repeat(3,minmax(0,1fr))"; x.style.gap = "28px"; });
     n.querySelectorAll(".seg-card.wide .seg-val").forEach(x => { x.style.gap = "10px"; });
@@ -1528,12 +1530,14 @@ async function makeInfographicBlob(c){
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
-    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
+    h.innerHTML = `<div><p style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${esc(c.name)} <span style="color:#A9550D">(${c.ticker})</span> <span style="color:#55606E;font-weight:600">· ${esc(c.fy)}</span></p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(c.period)} · filed ${esc(c.filed)}</p></div><p style="margin:0;font:600 14px 'IBM Plex Sans',sans-serif;color:#55606E"><span style="white-space:nowrap">10-K Analyzer</span></p>`;
     n.prepend(h);
     host.appendChild(n);
     n.querySelectorAll(".sankey").forEach(box => { box.style.overflow = "visible"; const svg = box.querySelector("svg"); if (!svg) return;
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
+      if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
+        const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
       const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
       const src = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad);
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
