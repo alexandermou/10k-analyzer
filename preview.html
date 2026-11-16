@@ -1332,7 +1332,8 @@ function sparkline(c, it, wide){
   /* tooltip data: period, value and the change from the point before (QoQ; YoY for fiscal years, HoH for half-years; pp when the value is a percentage) */
   const chg = i => { const x = v[i], pv = v[i - 1]; if (i === 0 || x === null || pv === null || pv === undefined) return "";
     if (/%$/.test(F(x))) { const dd = x - pv; return (dd >= 0 ? "+" : "−") + Math.abs(dd).toFixed(1) + " pp"; }
-    if (!pv) return ""; const pc = (x - pv) / Math.abs(pv) * 100; return (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%"; };
+    if (pv > 0 && x > 0) { const pc = (x / pv - 1) * 100; return pc >= 100 ? (x / pv).toFixed(1) + "×" : (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%"; }   // same rule as the chips
+    return pv < 0 && x > 0 ? "n/m · loss to profit" : pv > 0 && x < 0 ? "n/m · profit to loss" : "n/m"; };
   const hits = v.map((x, i) => `<rect x="${(X(i) - (W - 2 * P) / 8).toFixed(1)}" y="0" width="${((W - 2 * P) / 4).toFixed(1)}" height="${H}" class="sp-hit" data-q="${esc(q[i])}" data-v="${esc(x === null ? "n/a" : F(x))}" data-c="${esc(chg(i))}" data-u="${annual ? "YoY" : half ? "HoH" : "QoQ"}"></rect>`).join("");
   const desc = `${annual ? "Fiscal years" : half ? "Last 3 half-years" : "Last 5 quarters"}, ${q[0]} to ${q[last]}: ` + v.map((x, i) => `${q[i]} ${F(x)}`).join(", ");
   const svg = `<svg viewBox="0 0 ${W} ${H}"${wide ? ` preserveAspectRatio="none"` : ` width="${W}" height="${H}"`} role="img" aria-label="${esc(desc)}">${zero}<path d="${d}" class="sp-line"/>${dots}${hits}</svg>`;
@@ -1690,7 +1691,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitN
   function show(h){
     if (cur && cur !== h) cur.classList.remove("sel");
     cur = h; h.classList.add("sel");
-    const c = h.dataset.c, cls = c ? (c.startsWith("+") ? "up" : "dn") : "";
+    const c = h.dataset.c, cls = !c || c.startsWith("n/m") ? "" : (c.startsWith("−") ? "dn" : "up");
     tip.innerHTML = `<span class="t-p">${esc(h.dataset.q)}</span><b>${esc(h.dataset.v)}</b>${c ? `<span class="t-c ${cls}">${esc(c)} ${esc(h.dataset.u)}</span>` : `<span class="t-c t-p">no earlier point</span>`}`;
     tip.style.display = "block";
     const r = h.getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
