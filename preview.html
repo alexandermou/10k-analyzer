@@ -2352,7 +2352,7 @@ function dayList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, opt)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist</h4>${grid(mine)}`;
+  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine)}`;
   for (const [f, title] of FORMS) {
     const list = rest.filter(x => x.form === f);
     if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
