@@ -2170,7 +2170,7 @@ async function openCompany(t, view, period){
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   { const STAR = '<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button>';
     const m = String(c.name).match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i), base = m ? m[1] : String(c.name), w = base.match(/^(.*?)(\S+)$/) || ["", "", base];
-    $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`} <span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+    $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`}<br><span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
     fitName(); requestAnimationFrame(() => { fitName(); setTimeout(fitName, 150); }); }
   wlChanged();   // sets the star next to the name
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(sd(shown.period))}</span><span>Filed ${esc(sd(shown.filed))}</span><span class="mono">CIK ${c.cik}</span>`;
