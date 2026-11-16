@@ -2471,7 +2471,7 @@ async function showWatchlist(){
         return `<tr><td><a class="wl-co" href="${href}" title="Open ${esc(c.name)}'s latest report"><span class="tk">${esc(t)}</span><span class="nm">${esc(c.short)}</span></a><button type="button" class="wl-rm wl-star" data-t="${esc(t)}" aria-label="Remove ${esc(t)} from watchlist" title="Remove ${esc(t)} from watchlist">★</button></td>
           <td>${x ? `<a class="wl-dl" data-t="${esc(t)}" data-p="${esc(x.period || "")}" href="#${t.toLowerCase()}${x.period ? "-" + esc(x.period) : ""}" title="Get the ${esc(x.report)} infographic image">${esc(x.report)}</a>` : ipo ? "IPO" : c.fy ? `<a href="#${t.toLowerCase()}">${esc(c.fy)}</a>` : `<span class="muted">—</span>`}</td>
           <td>${x ? `<span class="wd">${esc(dayName(x.date).slice(0, 3))} </span>${esc(mdy(x.date))}` : `<span class="muted">—</span>`}</td>
-          <td class="num">${n === null ? "" : `<b>${n === 0 ? "Today" : n === -1 ? "Yesterday" : -n + "d ago"}</b>`}</td>
+          <td class="num">${n === null ? "" : `<b>${n === 0 ? "0d" : "-" + (-n) + "d"}</b>`}</td>
 </tr>`; }).join("")
     }</tbody></table></div>
     <p class="sub">Latest report per company, with the date it was filed with the SEC.</p>`;
