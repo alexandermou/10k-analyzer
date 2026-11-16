@@ -142,7 +142,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <div class="tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <section class="card wide"><h2>The offering</h2><div class="tiles"></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Makes specialty chemicals and intermediates to ISO and GMP standards.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">First nine months</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">First nine months</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -162,7 +162,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "VAT-infographic.png", "imgName": "VAT-IPO-S-1A-2026-08-17-infographic.png", "ticker": "VAT", "charts": [{"id": "c_rev_0", "data": [{"k": "9M 2025", "v": 22.102026, "t": "$22.1M", "tip": "$22.1M"}, {"k": "9M 2026", "v": 16.574573, "t": "$16.6M", "tip": "$16.6M"}], "label": "Revenue, first nine months: 9M 2025 $22.1M, 9M 2026 $16.6M"}, {"id": "c_net_0", "data": [{"k": "9M 2025", "v": 7.033044, "t": "$7.0M", "tip": "$7.0M"}, {"k": "9M 2026", "v": 6.786999, "t": "$6.8M", "tip": "$6.8M"}], "label": "Net result, first nine months: 9M 2025 $7.0M, 9M 2026 $6.8M"}]};
+const PAGE = {"img": "VAT-infographic.png", "imgName": "VAT-IPO-S-1A-2026-08-17-infographic.png", "ticker": "VAT", "charts": [{"id": "c_rev_0", "data": [{"k": "9M 2025", "v": 22.102026, "t": "$22.1M", "tip": "$22.1M"}, {"k": "9M 2026", "v": 16.574573, "t": "$16.6M", "tip": "$16.6M"}], "label": "Revenue, 1st 9 months: 9M 2025 $22.1M, 9M 2026 $16.6M"}, {"id": "c_net_0", "data": [{"k": "9M 2025", "v": 7.033044, "t": "$7.0M", "tip": "$7.0M"}, {"k": "9M 2026", "v": 6.786999, "t": "$6.8M", "tip": "$6.8M"}], "label": "Net result, 1st 9 months: 9M 2025 $7.0M, 9M 2026 $6.8M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

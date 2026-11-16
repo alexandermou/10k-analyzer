@@ -142,7 +142,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <div class="tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">3.00M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>BVI company formed in 2024 to combine with Aiways Automobile Europe, an electric-vehicle business; the merger hadn&#x27;t closed at filing.</p></section>
-  <section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">First half</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">First half</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Loss-making: net loss of EUR 44.3K in H1 2026.</li></ul></section>
@@ -162,7 +162,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "EUEV-2-infographic.png", "imgName": "EUEV-2-IPO-F-1-2026-11-10-infographic.png", "ticker": "EUEV", "charts": [{"id": "c_op_0", "data": [{"k": "H1 2025", "v": -0.395266, "t": "\u2212EUR 395.3K", "tip": "\u2212EUR 395.3K"}, {"k": "H1 2026", "v": -0.051755, "t": "\u2212EUR 51.8K", "tip": "\u2212EUR 51.8K"}], "label": "Operating result, first half: H1 2025 \u2212EUR 395.3K, H1 2026 \u2212EUR 51.8K"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": -0.360472, "t": "\u2212EUR 360.5K", "tip": "\u2212EUR 360.5K"}, {"k": "H1 2026", "v": -0.04434, "t": "\u2212EUR 44.3K", "tip": "\u2212EUR 44.3K"}], "label": "Net result, first half: H1 2025 \u2212EUR 360.5K, H1 2026 \u2212EUR 44.3K"}]};
+const PAGE = {"img": "EUEV-2-infographic.png", "imgName": "EUEV-2-IPO-F-1-2026-11-10-infographic.png", "ticker": "EUEV", "charts": [{"id": "c_op_0", "data": [{"k": "H1 2025", "v": -0.395266, "t": "\u2212EUR 395.3K", "tip": "\u2212EUR 395.3K"}, {"k": "H1 2026", "v": -0.051755, "t": "\u2212EUR 51.8K", "tip": "\u2212EUR 51.8K"}], "label": "Operating result, 1st half: H1 2025 \u2212EUR 395.3K, H1 2026 \u2212EUR 51.8K"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": -0.360472, "t": "\u2212EUR 360.5K", "tip": "\u2212EUR 360.5K"}, {"k": "H1 2026", "v": -0.04434, "t": "\u2212EUR 44.3K", "tip": "\u2212EUR 44.3K"}], "label": "Net result, 1st half: H1 2025 \u2212EUR 360.5K, H1 2026 \u2212EUR 44.3K"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {
