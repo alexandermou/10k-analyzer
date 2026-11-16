@@ -1145,8 +1145,14 @@ function trendCard(c, sec){
 /* The quarterly revenue and EPS cards share one section of regular-size cards */
 function renderSections(c){
   let out = "", buf = [], lab = "";
+  /* most companies have no separate quarterly revenue series: build the card from the filed quarterly revenue behind the Total company sparkline */
+  let secs = c.sections; const ql = c.sparkQ, rv = c.sparkTot && c.sparkTot.rev;   // quarterly filers only (half-year filers have no quarters)
+  if (!secs.some(x => x.type === "quarters") && ql && rv && rv.length === ql.length && rv.length >= 2 && rv.every(x => x !== null && x !== undefined)) {
+    let i = secs.findIndex(x => x.type === "eps"); if (i < 0) i = secs.findIndex(x => /^Balance sheet/i.test(x.title || "")); if (i < 0) i = secs.length;
+    secs = [...secs.slice(0, i), {type: "quarters", title: "Quarterly revenue", items: ql.map((q, j) => ({q, v: c.unit === "B" ? rv[j] / 1000 : rv[j]}))}, ...secs.slice(i)];
+  }
   const flush = () => { if (buf.length) out += `<div class="sec"><h3>Quarterly results${lab ? ` <small>\u00b7 ${esc(lab)}</small>` : ""}</h3><div class="grid">${buf.join("")}</div></div>`; buf = []; lab = ""; };
-  c.sections.forEach(sec => {
+  secs.forEach(sec => {
     if (sec.type === "eps" || sec.type === "quarters") { const h = trendCard(c, sec); if (h) { buf.push(h); if (!lab && sec.items && sec.items.length) lab = sec.items[sec.items.length - 1].q; } }
     else { flush(); out += renderSection(c, sec); }
   });
