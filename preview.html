@@ -1663,6 +1663,16 @@ function drawSvgToCanvas(svg, W, H, fscale = 1, padX = 0){
   });
   return cvs;
 }
+/* A company name like "American Assets Trust, Inc." that wraps so "Inc." starts line 2: drop the suffix and its comma, keep the star at the end of line 1 */
+function fitName(){
+  const f = $("#fname"), a = f && f.querySelector(".nm-a"), b = f && f.querySelector(".nm-b"), suf = b && b.querySelector(".nm-suf"), st = $("#starBtn"); if (!a || !suf || !st) return;
+  suf.hidden = false; const cm = a.querySelector(".nm-c"); if (cm) cm.hidden = false; if (st.parentNode !== b) b.appendChild(st); b.hidden = false;
+  if (b.getBoundingClientRect().top > a.getBoundingClientRect().top + 8) {
+    suf.hidden = true; if (cm) cm.hidden = true; a.appendChild(st); b.hidden = true;
+  }
+}
+window.addEventListener("resize", () => fitName());
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitName());
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = "Pinch-zoom to view details";
@@ -2156,7 +2166,10 @@ async function openCompany(t, view, period){
   state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
   setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
-  $("#fname").innerHTML = `${esc(c.name).replace(/(\S+)$/, '<bdi style="white-space:nowrap">$1<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></bdi>')} <span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+  { const STAR = '<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button>';
+    const m = String(c.name).match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i), base = m ? m[1] : String(c.name), w = base.match(/^(.*?)(\S+)$/) || ["", "", base];
+    $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`} <span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
+    fitName(); requestAnimationFrame(() => { fitName(); setTimeout(fitName, 150); }); }
   wlChanged();   // sets the star next to the name
   $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(sd(shown.period))}</span><span>Filed ${esc(sd(shown.filed))}</span><span class="mono">CIK ${c.cik}</span>`;
   renderPeriods(c);
