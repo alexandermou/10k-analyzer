@@ -2647,15 +2647,16 @@ async function showIpo(){
                    : `<a href="${esc(x.url)}" target="_blank" rel="noopener">SEC filings</a>`;
     return `<div class="nr-row"><span class="nr nr-tog ipo-chip">${x.symbol ? `<span class="tk">${esc(x.symbol)}</span>` : ""}<span class="what">${esc(short(x))}</span></span><span class="nr-lk">${lk}</span><button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button></div>`;
   };
+  let first = !mineI.length;   // no watchlist: the first stage starts open
   S.forEach(([k, t, desc], i) => {
     const l0 = k === "spac" ? spacs.slice().sort((a, b) => ord.indexOf(a.stage) - ord.indexOf(b.stage)) : all.filter(x => x.stage === k);
     if (!l0.length) return;
     const l = [...l0.filter(x => wlI.has(String(x.cik))), ...l0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
-    html += grpBox(`${i + 1}. ${t}`, l.length, `<p class="nr-time">${desc}</p><div class="nr-rows">${l.map(mini).join("")}</div>`);
+    html += grpBox(`${i + 1}. ${t}`, l.length, `<p class="nr-time">${desc}</p><div class="nr-rows">${l.map(mini).join("")}</div>`, first); first = false;
   });
   if (!all.length) html += `<p class="sub">No IPO filings found.</p>`;
   html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Each company's page links to its SEC filings.</p>`;
-  const openNow = [...document.querySelectorAll("#ipoBody details.nr-grp")].map(d => d.open);   // keep boxes open across a star tap
+  const openNow = $("#ipoPage").hidden ? [] : [...document.querySelectorAll("#ipoBody details.nr-grp")].map(d => d.open);   // a fresh visit starts from the default   // keep boxes open across a star tap
   $("#ipoBody").innerHTML = html;
   document.querySelectorAll("#ipoBody details.nr-grp").forEach((d, i) => { if (openNow[i]) d.open = true; });
   showPage("ipo", "IPO");
