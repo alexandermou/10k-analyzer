@@ -155,6 +155,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+.nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
 .nr-day h3 label{font-weight:inherit}
@@ -2416,6 +2417,8 @@ const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
 const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); return m ? [m[2] ? 1 : 0, +m[3], m[1] ? +m[1] : 5] : [2, 0, 0]; };
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
+/* One collapsible group of report rows, like the FAQ: closed at first, count beside the title */
+const grpBox = (title, n, body) => `<details class="nr-grp"><summary>${title} <span class="nr-n">${n}</span></summary>${body}</details>`;
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
 /* The date picker element is kept across redraws: replacing it while the phone's picker list is open leaves that list stuck on screen */
 function keepPicker(old, id, onChange){
@@ -2430,13 +2433,13 @@ function dayList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, opt)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine)}`;
+  if (mine.length) html += grpBox("★ Watchlist", mine.length, grid(mine));
   for (const [f, title] of FORMS) {
     const list = rest.filter(x => x.form === f);
-    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
+    if (list.length) html += grpBox(title, list.length, grid(list, {noType: true}));
   }
   const other = rest.filter(x => !FORMS.some(([f]) => f === x.form));
-  if (other.length) html += `<h4 class="nr-sec">Other filings</h4>${grid(other)}`;
+  if (other.length) html += grpBox("Other filings", other.length, grid(other));
   return {html: html + `</div>`, bind: () => {}};
 }
 /* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
@@ -2450,10 +2453,10 @@ function timeList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, {...opt, latestOnly: true})).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine, {noType: true})}`;
+  if (mine.length) html += grpBox("★ Watchlist", mine.length, grid(mine, {noType: true}));
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
-    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
+    if (list.length) html += grpBox(title, list.length, `<p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`);
   }
   return {html: html + `</div>`, bind: () => {}};
 }
