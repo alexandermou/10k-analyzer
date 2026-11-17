@@ -610,7 +610,7 @@ body.home .picker select{max-width:none}
 body.home .tagline{display:block;margin:0 0 14px;text-align:center;font-size:16px;color:var(--muted)}
 .brand h1 a{color:inherit;text-decoration:none}
 /* Home: New / Upcoming / Watchlist links in the top right corner */
-.topicons{display:flex;gap:6px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:max(12px,env(safe-area-inset-right,0px));z-index:2}
+.topicons{display:flex;gap:6px;position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:max(12px,env(safe-area-inset-right,0px));z-index:40}
 body:not(.home) .brand{padding-right:88px}
 .topicons a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line);text-decoration:none}
 .tl-latest,body.home #homeIcon{display:none!important}
@@ -810,6 +810,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
       <p class="img-note">Pinch-zoom for details.</p>
       <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
+        <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
       <div class="img-wait" id="tabWait" role="status" hidden><span class="img-spin" aria-hidden="true"></span><p>Drawing the image…</p><small>One moment</small></div>
@@ -935,19 +936,21 @@ function money(c, v, kind){
   if (v === null || v === undefined) return "—";
   const cur = c.cur || "$";
   if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0).join("");
+  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v)).join("");
   return v < 0 ? "(" + s + ")" : s;
 }
-/* Amounts always start with a non-zero digit: $1.2T, $12.9B, $322M (or $322.4M for companies shown to one decimal),
-   $84.3M, $950K. Takes millions; returns [number text, unit letter]. */
-function scaled(m, dec){
-  const fmt = (x, d) => x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
-  if (m >= 999950) return [fmt(m / 1e6, 1), "T"];
-  if (m >= (dec ? 999.95 : 999.5)) return [fmt(m / 1000, 1), "B"];
-  if (m >= 99.95) return [fmt(m, dec), "M"];
-  if (m >= 0.9995) return [fmt(m, 1), "M"];
+/* Amounts always show three leading digits: $4.58B, $41.0M, $386M, $104B, $1.20T, $950K.
+   Takes millions; returns [number text, unit letter]. */
+function scaled(m){
   if (m === 0) return ["0", ""];
-  return [fmt(Math.round(m * 1000), 0), "K"];
+  for (const [d, u] of [[1e6, "T"], [1e3, "B"], [1, "M"], [1e-3, "K"]]) {
+    const x = m / d;
+    if (x < 0.9995 && u !== "K") continue;
+    if (x >= 999.5 && u !== "T") continue;
+    if (x < 0.9995) return [Math.round(m * 1e6).toLocaleString("en-US"), ""];
+    const dp = x >= 99.95 ? 0 : x >= 9.995 ? 1 : 2;
+    return [x.toLocaleString("en-US", {minimumFractionDigits: dp, maximumFractionDigits: dp}), u];
+  }
 }
 /* Reporting currencies other than the US dollar: the word the narration uses for each symbol */
 const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian dollars", "R$": "Brazilian reais", "R": "rand", "₩": "won", "¥": "yen",
@@ -956,8 +959,8 @@ const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian do
 const curWord = c => CURWORD[c.cur] || "dollars";
 function spoken(c, v){ return spokenUSD(c, v).replace(/dollars$/, curWord(c)); }
 function spokenUSD(c, v){
-  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0);
-  return n.replace(/\.0$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
+  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v));
+  return n.replace(/\.0+$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
 }
 const yr = s => s.replace("FY20", "FY");
 const pctOf = (c, v) => (c.revenue > 0 && Math.abs(v / c.revenue) <= 10) ? (v / c.revenue * 100).toFixed(1) + "%" : "n/m";
@@ -1365,8 +1368,8 @@ function sparkFmt(v, k){
   if (k === "eps") return neg + "$" + a.toFixed(2);
   if (k === "pct") return neg + a.toFixed(1) + "%";
   if (k === "approx") return "≈" + neg + "$" + Math.round(a / 1000) + "B";   // annual figures the company states only as "surpassed $X" and a growth rate
-  if (k === "sh") return neg + Math.round(a).toLocaleString("en-US") + "M";
-  return neg + "$" + (a >= 1e6 ? (a / 1e6).toFixed(2) + "T" : a >= 1000 ? (a / 1000).toFixed(1) + "B" : a >= 10 ? Math.round(a) + "M" : a.toFixed(1) + "M");
+  if (k === "sh") return neg + scaled(a).join("");
+  return neg + "$" + scaled(a).join("");
 }
 const sq = l => String(l).replace(/FY20(\d\d)\b/, "FY$1").replace(/ 20(\d\d)$/, " \u2019$1");   // "Q1 FY2026" -> "Q1 FY26", "Q3 2025" -> "Q3 ’25"
 function sparkline(c, it, wide){
@@ -1584,7 +1587,30 @@ const sd = t => String(t == null ? "" : t).replace(/\b([A-Z][a-z]{2})[a-z]* (\d{
 const shortName = n => String(n).replace(/\bCorporation\b/g, "Corp.").replace(/\bCompany\b/g, "Co.");   // Corporation -> Corp., Company -> Co.
 const igDefault = () => { try { return /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent) || matchMedia("(max-width:700px)").matches ? "tall" : "wide"; } catch (e) { return "wide"; } };   // phone: tall; desktop: wide
 const igLayout = () => { try { const v = localStorage.getItem("igLayout"); return v === "tall" || v === "wide" || v === "compact" ? v : v === "medium" || v === "full" ? "medium" : igDefault(); } catch (e) { return igDefault(); } };
+/* iPhones give a page only so much canvas memory in total. Old pictures that are never released can leave a later canvas blank (the Sankey then comes out empty until the page is reloaded), so every canvas is emptied as soon as it is used, and a blank Sankey is drawn again once. */
+function canvasIsBlank(cv){
+  const t = document.createElement("canvas"); t.width = 48; t.height = 48; const g = t.getContext("2d"); g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, 48, 48); g.drawImage(cv, 0, 0, 48, 48);
+  const d = g.getImageData(0, 0, 48, 48).data; let ink = false; for (let i = 0; i < d.length; i += 4) if (d[i] < 245 || d[i + 1] < 245 || d[i + 2] < 245) { ink = true; break; }
+  t.width = t.height = 0; return !ink;
+}
+/* Each chart canvas is turned into an ordinary picture before the image library sees it. The library reads canvases with toDataURL, which on an iPhone can quietly come back empty (the charts then vanish until the page is reloaded); this way we check that every chart really loaded, and the canvas memory is released at once. */
+async function canvasToImg(cv, urls){
+  const blob = await new Promise(res => cv.toBlob(res, "image/png")), css = cv.style.cssText; cv.width = cv.height = 0;
+  if (!blob) throw new Error("canvas-blank");
+  const url = URL.createObjectURL(blob); urls.push(url);
+  const img = new Image(); img.alt = ""; img.src = url; img.style.cssText = css;
+  try { await img.decode(); } catch (e) { throw new Error("canvas-blank"); }
+  if (!img.naturalWidth) throw new Error("canvas-blank");
+  if (canvasIsBlank(img)) throw new Error("canvas-blank");   // the PNG itself came out empty
+  return img;
+}
+let igSkR = 1.5;   // sharpness of the Sankey canvas; the second attempt uses a smaller, lighter one
 async function makeInfographicBlob(c){
+  try { igSkR = 1.5; return await makeInfographicBlobOnce(c); }
+  catch (e) { if (!e || e.message !== "canvas-blank") throw e; await new Promise(r => setTimeout(r, 700)); igSkR = 1; return await makeInfographicBlobOnce(c); }
+  finally { igSkR = 1.5; }
+}
+async function makeInfographicBlobOnce(c){
   // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
   await loadImgLib();
   const root = document.documentElement, prevTheme = root.getAttribute("data-theme");
@@ -1593,7 +1619,7 @@ async function makeInfographicBlob(c){
   const IGL = igLayout(), FULLIG = IGL !== "compact", TALL = IGL === "tall", WIDE = IGL === "wide", W = TALL ? 600 : WIDE ? 1512 : 756;
   host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (TALL ? 720 : WIDE ? 1640 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
   if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
-  document.body.appendChild(host);
+  document.body.appendChild(host); const blobUrls = [];
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
@@ -1621,28 +1647,36 @@ async function makeInfographicBlob(c){
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
       if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
-        const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
-      const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
-      const src = trimRight(drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), 24 * R);   // no empty space after the last label
+        const c0 = drawSvgToCanvas(svg, Math.round(w0 * (igSkR + 0.5)), Math.round(h0 * (igSkR + 0.5))); if (canvasIsBlank(c0)) { c0.width = c0.height = 0; throw new Error("canvas-blank"); } c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
+      const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = igSkR, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
+      const raw = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), src = trimRight(raw, 24 * R); if (raw !== src) raw.width = raw.height = 0;   // no empty space after the last label
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
-      const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0);
-      cv.style.width = B + "px"; cv.style.height = Math.round(src.width / R) + "px"; cv.style.display = "block";
+      const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); const hPx = Math.round(src.width / R); src.width = src.height = 0;   // (the height is read before the canvas is emptied)
+      if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("canvas-blank"); }
+      cv.style.width = B + "px"; cv.style.height = hPx + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     n.querySelectorAll(".spark svg").forEach(svg => {      // sparklines as plain pictures (the image library can't draw them reliably)
       const w = Math.round(svg.getBoundingClientRect().width) || 300, hgt = Math.round(svg.getBoundingClientRect().height) || 56;
-      const cv = drawSparkToCanvas(svg, w, hgt); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      const cv = drawSparkToCanvas(svg, w, hgt); if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("canvas-blank"); } cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
+    for (const cv of Array.from(n.querySelectorAll("canvas"))) cv.replaceWith(await canvasToImg(cv, blobUrls));
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     const fontEmbedCSS = await getFontEmbedCSS();
     const cw = n.offsetWidth, ch = n.offsetHeight, ratio = Math.max(1, Math.min(2, Math.sqrt(15e6 / (cw * ch)), 16000 / ch));   // keep the picture inside what phones can draw
     window.__igDims = [cw, ch, ratio];
     const opts = {pixelRatio: ratio, backgroundColor: "#F3F5F8", cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})};
-    await window.htmlToImage.toBlob(n, opts).catch(() => null);   // first pass warms fonts and images (Safari)
-    const blob = await window.htmlToImage.toBlob(n, opts);
-    if (!blob) throw new Error("blob");
-    return blob;
+    // The image library leaves its full-size canvas (tens of MB) for the browser to clean up later; on an iPhone those pile up and the next picture comes out with a blank Sankey. So each one is emptied as soon as its PNG is made.
+    const tb = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function (cb, ...a) { const me = this; return tb.call(this, bl => { try { cb(bl); } finally { me.width = me.height = 0; } }, ...a); };
+    try {
+      await window.htmlToImage.toBlob(n, {...opts, pixelRatio: 0.3}).catch(() => null);   // first pass warms fonts and images (Safari), small so it costs little memory
+      const blob = await window.htmlToImage.toBlob(n, opts);
+      if (!blob) throw new Error("blob");
+      return blob;
+    } finally { HTMLCanvasElement.prototype.toBlob = tb; }
   } finally {
-    host.remove();
+    host.querySelectorAll("canvas").forEach(z => { z.width = z.height = 0; });   // give the memory back right away
+    host.remove(); blobUrls.forEach(u => URL.revokeObjectURL(u));
     if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
   }
 }
@@ -1661,8 +1695,8 @@ async function saveShownImage(){
 }
 /* Paints a sparkline (line, points, zero line) onto a canvas at 2x, in the colors the card shows */
 function drawSparkToCanvas(svg, w, h){
-  const vb = svg.viewBox.baseVal, R = 2, sx = w / vb.width, sy = h / vb.height;
-  const cv = document.createElement("canvas"); cv.width = w * R; cv.height = h * R;
+  const vb = svg.viewBox.baseVal, R = 1.5, sx = w / vb.width, sy = h / vb.height;   // 1.5x is sharp enough for the picture and uses 40% less canvas memory than 2x
+  const cv = document.createElement("canvas"); cv.width = Math.round(w * R); cv.height = Math.round(h * R);
   const g = cv.getContext("2d"); g.scale(R, R);
   const line = svg.querySelector(".sp-line"); if (!line) return cv;
   const col = getComputedStyle(line).stroke || "#1D3557", bg = (() => { let e = svg.closest(".card"); const c = e ? getComputedStyle(e).backgroundColor : ""; return c && c !== "rgba(0, 0, 0, 0)" ? c : "#FFFFFF"; })();
@@ -1783,16 +1817,17 @@ async function loadInfoImage(){
   const c = state.shown || LIBRARY[state.ticker]; if (!c) return;
   const key = [c.ticker, c.fy, c.period, c.filed, igLayout()].join("|"), st = $("#imgTabStatus"), img = $("#tabImg");
   if (key === tabImgKey && img.getAttribute("src")) return;
-  tabImgKey = ""; img.hidden = true; st.textContent = ""; $("#tabWait").hidden = false;
+  tabImgKey = ""; img.hidden = true; img.removeAttribute("src"); st.textContent = ""; $("#tabWait").hidden = false;   // the old picture is let go before the next is drawn
   const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
   try {
     const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) { $("#tabWait").hidden = true; return; }
     lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
     img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key; $("#tabWait").hidden = true;
-  } catch (e) { $("#tabWait").hidden = true; st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+  } catch (e) { $("#tabWait").hidden = true; st.textContent = "The picture didn't draw. Tap ↻ to try again."; }
 }
 let ovFromTab = false;
+$("#tabRedraw").addEventListener("click", () => { tabImgKey = ""; loadInfoImage(); });   // if a chart ever comes out empty, one tap draws the picture again
 $("#tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; showImage(lastImgUrl); setImgFs(true); });
 $("#tabShare").addEventListener("click", async () => {
   if (!lastImg) return;
@@ -2436,7 +2471,7 @@ const TOP = [
 const topKeys = {};   // ranking per chart (New page "", Watchlist "W"); default: profit growth YoY
 const topKeyOf = sfx => topKeys[sfx] || "netYoY";
 /* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
-const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
+const fmtM = v => (v < 0 ? "−" : "") + "$" + scaled(Math.abs(v)).join("");
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
 function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
   const topKey = topKeyOf(sfx);
@@ -2558,7 +2593,7 @@ function loadIpoPages(){
     .then(d => { IPO_PAGES = d || {}; IPO_BY_T = {}; for (const v of Object.values(IPO_PAGES)) if (v.ticker) IPO_BY_T[v.ticker] = v; }));
 }
 const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
-const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
+const ipoUsd = v => "$" + scaled(v / 1e6).join("");
 /* IPO watchlist: a separate cookie of CIK numbers (IPO companies often have no ticker yet) */
 const ipoWlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*)/); return m ? decodeURIComponent(m[1]).split(",").filter(x => /^\d{1,10}$/.test(x)) : []; };
 function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(x => x !== cik) : l.concat(cik);
