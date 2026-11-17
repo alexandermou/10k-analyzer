@@ -2618,9 +2618,9 @@ async function showIpo(){
     } else {
       if (x.range) main = `Range $${x.range[0].toFixed(2)}–$${x.range[1].toFixed(2)}`;
       if (x.stage === "cleared") meta.push(`SEC cleared ${ipoDay(x.cleared)}: pricing imminent`);
-      else if (x.expected) meta.push(`<span class="ipo-est">Expected ${x.expectedPast ? "any day (estimate passed " + ipoDay(x.expected) + ")" : "≈ " + ipoDay(x.expected)} · our estimate</span>`);
-      if (x.rangeSet) meta.push(`range filed ${ipoDay(x.rangeSet)}`);
-      if (x.stage === "filed") { main = main || (x.spac ? "" : "No price range yet"); meta.push(`${x.form} filed ${ipoDay(x.filed)}`, `latest filing ${ipoDay(x.lastFiling)}`); }
+      else if (x.expected) meta.push(`<span class="ipo-est">Expected ${x.expectedPast ? "any day" : "≈ " + ipoDay(x.expected)} · our estimate</span>`);
+      if (x.stage === "filed") main = main || (x.spac ? "" : "No price range yet");
+      if (x.lastFiling) meta.push(`latest SEC filing ${ipoDay(x.lastFiling)}`);   // only the newest date, so the card reads as current
     }
     if (ipoStage === "spac" || showStage) meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
