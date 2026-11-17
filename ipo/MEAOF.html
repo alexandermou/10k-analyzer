@@ -88,7 +88,7 @@ body.shot .star-btn{display:none}
 .status{font-size:13px;color:var(--muted)}
 .brand{display:none}
 /* infographic layout (used to draw the PNG) */
-body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView{display:none}
+body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
 body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
@@ -121,13 +121,12 @@ body.shot .chart svg{height:200px}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:600 15px var(--f-body);cursor:pointer}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 [hidden]{display:none!important}
-.img-note{margin:8px 0 0;color:var(--muted);font-size:13px}
-.img-tools{display:flex;align-items:center;gap:10px;padding:6px 0 4px}
+.img-note{margin:0;color:var(--muted);font-size:13px;flex:1;white-space:nowrap}.img-tools .status{flex:0 1 auto}.img-tools .status:empty{display:none}.dash-note{margin:6px 0 -6px}
+.img-tools{display:flex;align-items:center;gap:10px;padding:0 0 4px;margin-top:4px}
 .img-tools .status{flex:1;min-width:0}
 .img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
 #tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 #dashView{display:contents}
-.img-tools{justify-content:flex-end}
 
 .risks li{padding:4px 0 4px 12px}
 .rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
@@ -153,6 +152,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   </header>
   <div class="tabs" role="tablist" aria-label="Views"><button class="tab" role="tab" id="tab-dash" aria-selected="true">Dashboard</button><button class="tab" role="tab" id="tab-img" aria-selected="false">Infographic</button></div>
   <div id="dashView">
+  <p class="img-note dash-note">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">3.00M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Metalens (flat optical lens) company covering equipment, manufacturing and AI, based in Singapore.</p></section>
   
@@ -164,8 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="src">Source: MetaOptics Ltd's <a href="https://www.sec.gov/Archives/edgar/data/2099681/000121390026067164/ea0270354-12.htm" target="_blank" rel="noopener">Form F-1/A, filed with the SEC on Jun 10, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>
-    <p class="img-note">Pinch-zoom for details.</p>
-    <div class="img-tools"><span class="status" id="imgStatus" role="status"></span>
+    <div class="img-tools"><p class="img-note">Pinch-zoom for details.</p><span class="status" id="imgStatus" role="status"></span>
       <button type="button" class="img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       <button type="button" class="img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
     <img id="tabImg" alt="Infographic of this IPO filing">
