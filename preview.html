@@ -810,6 +810,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
       <p class="img-note">Pinch-zoom for details.</p>
       <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
+        <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
       <div class="img-wait" id="tabWait" role="status" hidden><span class="img-spin" aria-hidden="true"></span><p>Drawing the image…</p><small>One moment</small></div>
@@ -1598,11 +1599,14 @@ async function canvasToImg(cv, urls){
   const img = new Image(); img.alt = ""; img.src = url; img.style.cssText = css;
   try { await img.decode(); } catch (e) { throw new Error("canvas-blank"); }
   if (!img.naturalWidth) throw new Error("canvas-blank");
+  if (canvasIsBlank(img)) throw new Error("canvas-blank");   // the PNG itself came out empty
   return img;
 }
+let igSkR = 1.5;   // sharpness of the Sankey canvas; the second attempt uses a smaller, lighter one
 async function makeInfographicBlob(c){
-  try { return await makeInfographicBlobOnce(c); }
-  catch (e) { if (!e || e.message !== "canvas-blank") throw e; await new Promise(r => setTimeout(r, 700)); return await makeInfographicBlobOnce(c); }
+  try { igSkR = 1.5; return await makeInfographicBlobOnce(c); }
+  catch (e) { if (!e || e.message !== "canvas-blank") throw e; await new Promise(r => setTimeout(r, 700)); igSkR = 1; return await makeInfographicBlobOnce(c); }
+  finally { igSkR = 1.5; }
 }
 async function makeInfographicBlobOnce(c){
   // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
@@ -1641,8 +1645,8 @@ async function makeInfographicBlobOnce(c){
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
       if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
-        const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); if (canvasIsBlank(c0)) { c0.width = c0.height = 0; throw new Error("canvas-blank"); } c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
-      const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
+        const c0 = drawSvgToCanvas(svg, Math.round(w0 * (igSkR + 0.5)), Math.round(h0 * (igSkR + 0.5))); if (canvasIsBlank(c0)) { c0.width = c0.height = 0; throw new Error("canvas-blank"); } c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
+      const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = igSkR, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
       const raw = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), src = trimRight(raw, 24 * R); if (raw !== src) raw.width = raw.height = 0;   // no empty space after the last label
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
       const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); const hPx = Math.round(src.width / R); src.width = src.height = 0;   // (the height is read before the canvas is emptied)
@@ -1818,9 +1822,10 @@ async function loadInfoImage(){
     lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
     img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key; $("#tabWait").hidden = true;
-  } catch (e) { $("#tabWait").hidden = true; st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+  } catch (e) { $("#tabWait").hidden = true; st.textContent = "The picture didn't draw. Tap ↻ to try again."; }
 }
 let ovFromTab = false;
+$("#tabRedraw").addEventListener("click", () => { tabImgKey = ""; loadInfoImage(); });   // if a chart ever comes out empty, one tap draws the picture again
 $("#tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; showImage(lastImgUrl); setImgFs(true); });
 $("#tabShare").addEventListener("click", async () => {
   if (!lastImg) return;
