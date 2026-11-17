@@ -936,19 +936,21 @@ function money(c, v, kind){
   if (v === null || v === undefined) return "—";
   const cur = c.cur || "$";
   if (kind === "eps") return (v < 0 ? "−" : "") + cur + Math.abs(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0).join("");
+  const s = cur + scaled(Math.abs(c.unit === "B" ? v * 1000 : v)).join("");
   return v < 0 ? "(" + s + ")" : s;
 }
-/* Amounts always start with a non-zero digit: $1.2T, $12.9B, $322M (or $322.4M for companies shown to one decimal),
-   $84.3M, $950K. Takes millions; returns [number text, unit letter]. */
-function scaled(m, dec){
-  const fmt = (x, d) => x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
-  if (m >= 999950) return [fmt(m / 1e6, 1), "T"];
-  if (m >= (dec ? 999.95 : 999.5)) return [fmt(m / 1000, 1), "B"];
-  if (m >= 99.95) return [fmt(m, dec), "M"];
-  if (m >= 0.9995) return [fmt(m, 1), "M"];
+/* Amounts always show three leading digits: $4.58B, $41.0M, $386M, $104B, $1.20T, $950K.
+   Takes millions; returns [number text, unit letter]. */
+function scaled(m){
   if (m === 0) return ["0", ""];
-  return [fmt(Math.round(m * 1000), 0), "K"];
+  for (const [d, u] of [[1e6, "T"], [1e3, "B"], [1, "M"], [1e-3, "K"]]) {
+    const x = m / d;
+    if (x < 0.9995 && u !== "K") continue;
+    if (x >= 999.5 && u !== "T") continue;
+    if (x < 0.9995) return [Math.round(m * 1e6).toLocaleString("en-US"), ""];
+    const dp = x >= 99.95 ? 0 : x >= 9.995 ? 1 : 2;
+    return [x.toLocaleString("en-US", {minimumFractionDigits: dp, maximumFractionDigits: dp}), u];
+  }
 }
 /* Reporting currencies other than the US dollar: the word the narration uses for each symbol */
 const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian dollars", "R$": "Brazilian reais", "R": "rand", "₩": "won", "¥": "yen",
@@ -957,8 +959,8 @@ const CURWORD = {"NT$": "New Taiwan dollars", "€": "euros", "C$": "Canadian do
 const curWord = c => CURWORD[c.cur] || "dollars";
 function spoken(c, v){ return spokenUSD(c, v).replace(/dollars$/, curWord(c)); }
 function spokenUSD(c, v){
-  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v), c.dec || 0);
-  return n.replace(/\.0$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
+  const [n, u] = scaled(Math.abs(c.unit === "B" ? v * 1000 : v));
+  return n.replace(/\.0+$/, "") + ({T: " trillion", B: " billion", M: " million", K: " thousand", "": ""})[u] + " dollars";
 }
 const yr = s => s.replace("FY20", "FY");
 const pctOf = (c, v) => (c.revenue > 0 && Math.abs(v / c.revenue) <= 10) ? (v / c.revenue * 100).toFixed(1) + "%" : "n/m";
@@ -1366,8 +1368,8 @@ function sparkFmt(v, k){
   if (k === "eps") return neg + "$" + a.toFixed(2);
   if (k === "pct") return neg + a.toFixed(1) + "%";
   if (k === "approx") return "≈" + neg + "$" + Math.round(a / 1000) + "B";   // annual figures the company states only as "surpassed $X" and a growth rate
-  if (k === "sh") return neg + Math.round(a).toLocaleString("en-US") + "M";
-  return neg + "$" + (a >= 1e6 ? (a / 1e6).toFixed(2) + "T" : a >= 1000 ? (a / 1000).toFixed(1) + "B" : a >= 10 ? Math.round(a) + "M" : a.toFixed(1) + "M");
+  if (k === "sh") return neg + scaled(a).join("");
+  return neg + "$" + scaled(a).join("");
 }
 const sq = l => String(l).replace(/FY20(\d\d)\b/, "FY$1").replace(/ 20(\d\d)$/, " \u2019$1");   // "Q1 FY2026" -> "Q1 FY26", "Q3 2025" -> "Q3 ’25"
 function sparkline(c, it, wide){
@@ -2469,7 +2471,7 @@ const TOP = [
 const topKeys = {};   // ranking per chart (New page "", Watchlist "W"); default: profit growth YoY
 const topKeyOf = sfx => topKeys[sfx] || "netYoY";
 /* chart amounts in $ millions with separators, so more digits show: $1,319M, $11,249M, $57.7M */
-const fmtM = v => { const a = Math.abs(v), t = a >= 99.5 ? `$${Math.round(a).toLocaleString("en-US")}M` : `$${a.toFixed(1)}M`; return (v < 0 ? "−" : "") + t; };
+const fmtM = v => (v < 0 ? "−" : "") + "$" + scaled(Math.abs(v)).join("");
 const fmtGrowth = r => r >= 2 ? `${r.toFixed(1)}×` : `${r >= 1 ? "+" : "−"}${Math.abs((r - 1) * 100).toFixed(1)}%`;
 function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each report covers", heading = "Top 10"){
   const topKey = topKeyOf(sfx);
@@ -2591,7 +2593,7 @@ function loadIpoPages(){
     .then(d => { IPO_PAGES = d || {}; IPO_BY_T = {}; for (const v of Object.values(IPO_PAGES)) if (v.ticker) IPO_BY_T[v.ticker] = v; }));
 }
 const ipoDay = iso => { const d = new Date(iso + "T12:00:00"); return d.toLocaleDateString("en-US", {month: "short", day: "numeric"}); };
-const ipoUsd = v => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : `$${(v / 1e6).toFixed(1)}M`;
+const ipoUsd = v => "$" + scaled(v / 1e6).join("");
 /* IPO watchlist: a separate cookie of CIK numbers (IPO companies often have no ticker yet) */
 const ipoWlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*)/); return m ? decodeURIComponent(m[1]).split(",").filter(x => /^\d{1,10}$/.test(x)) : []; };
 function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(x => x !== cik) : l.concat(cik);
