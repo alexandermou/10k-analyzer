@@ -2628,7 +2628,7 @@ function showPage(name, title){
 function showAdd(t){ showPage("add", "Add tickers"); if (t != null) $("#addTicker").value = t; resetAdd(); window.scrollTo(0, 0); }
 function showLayout(){ showPage("layout", "Layout settings"); window.scrollTo(0, 0); }
 function setFinder(on){ document.body.classList.toggle("finding", on); const b = $("#searchToggle"); b.setAttribute("aria-expanded", String(on)); b.setAttribute("aria-label", on ? "Hide the search box" : "Search for a company"); b.title = on ? "Hide search" : "Search"; }
-$("#searchToggle").addEventListener("click", e => { e.preventDefault(); const on = !document.body.classList.contains("finding"); setFinder(on); if (on) refocus($("#ticker")); });
+$("#searchToggle").addEventListener("click", e => { e.preventDefault(); const on = !document.body.classList.contains("finding"); setFinder(on); e.currentTarget.blur(); if (on) refocus($("#ticker")); });
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
 function goHome(){
