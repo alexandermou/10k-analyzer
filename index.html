@@ -176,8 +176,9 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .t10-link{display:grid;grid-template-columns:minmax(0,1fr) 76px;align-items:center;gap:8px;min-height:28px}
 .t10-rank{font-size:12px;color:var(--muted);text-align:right}
 .t10-tk{font-family:var(--f-mono);font-weight:400;font-size:13.5px;white-space:nowrap}.top10-bars a.t10-tk{color:var(--accent)}
-.t10-track{height:16px;display:flex;align-items:center}
-.t10-bar{display:block;height:16px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0}.t10-bar.neg{background:var(--node-neg)}
+.t10-track{height:16px;position:relative}
+.t10-bar{position:absolute;top:0;display:block;height:16px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0}.t10-bar.neg{background:var(--node-neg);border-radius:4px 0 0 4px}
+.t10-zero{position:absolute;top:-4px;bottom:-4px;width:1px;background:var(--muted);opacity:.6}
 .t10-v{font-family:var(--f-mono);font-size:13px;font-weight:400;text-align:right;white-space:nowrap}
 .t10-note{margin-top:8px;font-size:12px;color:var(--muted)}
 @media (max-width:640px){.top10{padding:12px 10px}.top10-bars li{grid-template-columns:18px 46px 20px minmax(0,1fr);gap:4px;padding:0 2px}.t10-link{grid-template-columns:minmax(0,1fr) 62px;gap:6px}.top10-head select{flex:1;min-width:0}}
@@ -582,8 +583,9 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .sl-rows{display:flex;flex-direction:column;gap:12px}
 .sl-row{display:grid;grid-template-columns:320px 1fr 190px;align-items:center;gap:20px;font-size:21px}
 .sl-row b{font-family:var(--f-mono);font-weight:600;text-align:right}
-.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden}
-.sl-track i{display:block;height:100%;background:var(--flow-src);border-radius:6px}
+.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden;position:relative}
+.sl-track i{position:absolute;top:0;display:block;height:100%;background:var(--flow-src);border-radius:6px}.sl-track i.neg{background:var(--node-neg)}
+.sl-track .sl-zero{position:absolute;top:0;bottom:0;width:2px;background:var(--muted)}
 .sl-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .sl-kpi{border:1px solid var(--line);border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:6px}
 .sl-kpi .v{font-family:var(--f-mono);font-size:44px;font-weight:600}
@@ -2080,9 +2082,11 @@ function buildSlides(c){
   add("At a glance", `<h3 class="sl-h">${esc(c.fy)} in four numbers</h3><div class="sl-kpis">${c.kpis.map(k => `<div class="sl-kpi"><span class="l">${esc(k.label)}</span><span class="v">${esc(k.value)}</span><span class="s">${stripPrior(k.sub) ? esc(stripPrior(k.sub)) + " · " : ""}<span class="${k.tone || "up"}">${esc(k.delta)}</span></span></div>`).join("")}</div>`,
     "At a glance. " + c.kpis.map(k => sayify(`${k.label}: ${k.value}, ${k.delta}`)).join(". ") + ".",
     c.kpis.map(k => `${k.label}: ${k.value} (${k.delta})`).join(" · "));
-  const m = Math.max(...c.sources.map(s => s[1]));
-  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="up">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
-    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track"><i style="width:${(v / m * 100).toFixed(1)}%"></i></div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
+  /* two-sided: a negative line (eliminations, losses) goes left of zero in red */
+  const sPos = Math.max(0, ...c.sources.map(s => s[1])), sNeg = Math.max(0, ...c.sources.map(s => -s[1])), sSpan = (sPos + sNeg) || 1, sZ = sNeg / sSpan * 100;
+  const sBar = v => { const w = Math.abs(v) / sSpan * 100; return `<i class="${v < 0 ? "neg" : ""}" style="left:${(v < 0 ? sZ - w : sZ).toFixed(1)}%;width:${w.toFixed(1)}%"></i>${sNeg ? `<b class="sl-zero" style="left:${sZ.toFixed(1)}%"></b>` : ""}`; };
+  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="${c.revenue >= c.revenuePrior ? "up" : "down"}">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
+    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track">${sBar(v)}</div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
   const parts = [[c.cogsLabel.replace("*", ""), c.cogs, "var(--node-neg)"]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? "var(--flow-neg)" : "color-mix(in srgb, var(--flow-neg) 60%, var(--surface))"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, "var(--node-pos)"]] : []);
   const denomS = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
   add("Where each dollar went", `<h3 class="sl-h">${c.opIncome > 0 ? `${pctOf(c, c.opIncome)} of revenue became operating income` : `Costs exceeded revenue: operating margin ${pctOf(c, c.opIncome)}`}</h3><div class="sl-stack">${parts.map(([n, v, col]) => `<i style="display:block;width:${(v / denomS * 100).toFixed(2)}%;background:${col}"></i>`).join("")}</div>
@@ -2489,8 +2493,10 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
   }
   rows.sort((a, b) => b.v - a.v || a.x.ticker.localeCompare(b.x.ticker));
   const top = rows.slice(0, 10);
-  const len = r => kind === "growth" ? Math.max(r.v - 1, 0) : Math.abs(r.v);             // growth bars measure the increase
-  const max = Math.max(...top.map(len), 1e-9);
+  /* two-sided bars: growth measures the change (−38% goes left of zero), amounts their sign; zero sits where the widest loss ends */
+  const sgn = r => kind === "growth" ? r.v - 1 : r.v;
+  const posM = Math.max(0, ...top.map(sgn)), negM = Math.max(0, ...top.map(r => -sgn(r))), span = Math.max(posM + negM, 1e-9), z = negM / span * 100;
+  const barCss = r => { const w = Math.abs(sgn(r)) / span * 100; return `left:${(sgn(r) < 0 ? z - w : z).toFixed(1)}%;width:${w.toFixed(1)}%`; };
   const val = r => kind === "growth" ? fmtGrowth(r.v) : kind === "eps" ? `${r.v < 0 ? "−" : ""}$${Math.abs(r.v).toFixed(2)}` : fmtM(r.v);
   const amt = v => what === "EPS" ? `$${v.toFixed(2)}` : fmtM(v);
   const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
@@ -2501,7 +2507,7 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
     ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
       const fav = wl.has(r.x.ticker);
       return `<li title="${esc(tip(r))}"><span class="t10-rank">${i + 1}</span><span class="t10-name"><a class="t10-tk" href="${href}" aria-label="${esc(tip(r))}">${esc(r.x.ticker)}</a><button type="button" class="nr-star" data-t="${esc(r.x.ticker)}" aria-pressed="${fav}" aria-label="${fav ? "Remove " + esc(r.x.ticker) + " from" : "Add " + esc(r.x.ticker) + " to"} your watchlist" title="${fav ? "Remove from" : "Add to"} your watchlist">${fav ? "★" : "☆"}</button></span>
-        <a class="t10-link" href="${href}" tabindex="-1" aria-hidden="true"><span class="t10-track"><span class="t10-bar${r.v < 0 ? " neg" : ""}" style="width:${(len(r) / max * 100).toFixed(1)}%"></span></span><span class="t10-v">${esc(val(r))}</span></a></li>`; }).join("")}</ol>`
+        <a class="t10-link" href="${href}" tabindex="-1" aria-hidden="true"><span class="t10-track">${negM ? `<i class="t10-zero" style="left:${z.toFixed(1)}%"></i>` : ""}<span class="t10-bar${sgn(r) < 0 ? " neg" : ""}" style="${barCss(r)}"></span></span><span class="t10-v">${esc(val(r))}</span></a></li>`; }).join("")}</ol>`
       : `<p class="sub">No company here has the figures for this ranking.</p>`}
     <p class="t10-note">${note} ${note2}; YoY compares with the same quarter a year earlier, QoQ with the previous quarter. Click a bar to open the report.</p></section>`;
 }
@@ -2555,14 +2561,11 @@ async function showNew(day){
   const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
   const v = dayList(items, wl, head, "No reports filed this day");
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
-  const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>") +
-    `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
-    `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
+    "" : "") + `<div id="newList">${list}</div>`;   // the report types are collapsed boxes, so the list is always shown
   bindTop($("#npBody"), items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>");
   keepPicker(oldNew, "#newDayPick", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
-  const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
 }
 /* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
