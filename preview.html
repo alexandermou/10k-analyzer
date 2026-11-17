@@ -2633,7 +2633,7 @@ async function showIpo(){
     ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
     ["filed", "Filed, waiting", "Public registration filed; no price range in the filings yet."],
     ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
-    ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage: cleared first, then range set, filed and priced."]];
+    ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage."]];
   const STG = {cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced or listed"};
   const n = k => k === "spac" ? spacs.length : all.filter(x => x.stage === k).length;
   const ordAll = ["cleared", "range", "filed", "priced"], mineI = (d.ipos || []).filter(x => wlI.has(String(x.cik))).sort((a, b) => ordAll.indexOf(a.stage) - ordAll.indexOf(b.stage));
@@ -2650,7 +2650,7 @@ async function showIpo(){
   };
   let first = !mineI.length;   // no watchlist: the first stage starts open
   S.forEach(([k, t, desc], i) => {
-    const l0 = k === "spac" ? spacs.slice().sort((a, b) => ord.indexOf(a.stage) - ord.indexOf(b.stage)) : all.filter(x => x.stage === k);
+    const l0 = (k === "spac" ? spacs.slice() : all.filter(x => x.stage === k)).sort((a, b) => short(a).localeCompare(short(b), "en", {sensitivity: "base"}));   // A–Z by the name shown
     if (!l0.length) return;
     const l = [...l0.filter(x => wlI.has(String(x.cik))), ...l0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
     html += grpBox(`${i + 1}. ${t}`, l.length, `<p class="nr-time">${desc}</p><div class="nr-rows">${l.map(mini).join("")}</div>`, first); first = false;
