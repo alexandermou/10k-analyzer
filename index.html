@@ -239,7 +239,12 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .meta b{color:var(--ink);font-weight:600}
 .meta .m-one{white-space:nowrap}   /* one line: form · filed date · period */
+.img-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:52vh;margin-top:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--muted);text-align:center}
+.img-wait[hidden]{display:none}.img-wait p{margin:0;font-size:16px;font-weight:600;color:var(--ink)}.img-wait small{font-size:13px}
+.img-spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:imgspin .9s linear infinite}
+@keyframes imgspin{to{transform:rotate(360deg)}}
 .img-note{margin:-4px 0 0!important;color:var(--muted);font-size:13px!important;line-height:1.3}.img-tools{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:2px 0 4px;margin-bottom:2px;background:var(--bg,#F3F5F8)}.img-tools .info-settings{margin-left:0}.img-tools .status{flex:1;min-width:0}.img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+#view-infographic>.img-note{margin:-4px 0 6px!important}   /* a little room before "Total company" */
 .tabs[hidden]{display:none}.fb-foot{margin:28px 0 8px;font-size:15px}.fb-foot a{color:var(--accent);text-decoration:underline;cursor:pointer}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
 .tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
@@ -687,7 +692,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <p class="tagline">Read public company financials<br>at a glance</p>
     <form class="search" id="searchForm">
       <label for="ticker">Search the library</label>
-      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. AMZN or Apple" maxlength="60">
+      <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. NVDA or Apple" maxlength="60">
       <datalist id="libList"></datalist>
       <button class="btn search-btn" type="submit" aria-label="Search" title="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
     </form>
@@ -786,7 +791,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   <section class="newpage" id="wlPage" hidden aria-labelledby="wlTitle">
     <div class="np-head"><h2 id="wlTitle">Watchlist</h2><p class="sub">To add a company to your watchlist, just click the ☆ next to its name. Saved in this browser only.</p></div>
     <div id="wlBody"></div>
-    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
+    <form class="wl-add" id="wlForm"><label for="wlInput" class="sr-only">Add a company</label><input id="wlInput" list="libList" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="Add a ticker or company, e.g. NVDA or Apple" maxlength="60"><button class="btn" type="submit">Add</button><span class="status" id="wlStatus" role="status"></span></form>
   </section>
   <section class="filing" id="filing">
     <div class="fhead">
@@ -807,6 +812,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+      <div class="img-wait" id="tabWait" role="status" hidden><span class="img-spin" aria-hidden="true"></span><p>Drawing the image…</p><small>One moment</small></div>
       <img id="tabImg" alt="Infographic" hidden>
     </div>
     <div id="view-infographic" role="tabpanel" aria-labelledby="tab-infographic"></div>
@@ -987,7 +993,7 @@ function renderReport(c){
       <div class="card">
         <p class="lbl">Sources</p>
         ${r.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}
-        <p class="sub">${c.footnotes.map(esc).join(" ")}</p>
+        <p class="sub">${c.footnotes.map(esc).join(" ")} SEC CIK ${esc(c.cik)}.</p>
       </div>
     </div>
   </div>`;
@@ -1543,7 +1549,7 @@ function renderInfographic(c){
     </div>
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
-    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
+    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). SEC CIK ${esc(c.cik)}. <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
   }
 
@@ -1777,14 +1783,14 @@ async function loadInfoImage(){
   const c = state.shown || LIBRARY[state.ticker]; if (!c) return;
   const key = [c.ticker, c.fy, c.period, c.filed, igLayout()].join("|"), st = $("#imgTabStatus"), img = $("#tabImg");
   if (key === tabImgKey && img.getAttribute("src")) return;
-  tabImgKey = ""; img.hidden = true; st.textContent = "Drawing the image…";
+  tabImgKey = ""; img.hidden = true; st.textContent = ""; $("#tabWait").hidden = false;
   const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
   try {
-    const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) return;
+    const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) { $("#tabWait").hidden = true; return; }
     lastImg = {blob, name: `${c.ticker}-${c.fy.replace(/\s+/g, "-")}-${kind}-infographic.png`};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
-    img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key;
-  } catch (e) { st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
+    img.src = lastImgUrl; img.hidden = false; st.textContent = ""; tabImgKey = key; $("#tabWait").hidden = true;
+  } catch (e) { $("#tabWait").hidden = true; st.textContent = "The image couldn't be drawn right now. Try again in a moment."; }
 }
 let ovFromTab = false;
 $("#tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; showImage(lastImgUrl); setImgFs(true); });
