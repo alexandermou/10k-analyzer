@@ -155,6 +155,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+#ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
+.nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
 .nr-day h3 label{font-weight:inherit}
@@ -2416,6 +2418,8 @@ const FORM_RANK = f => ({"Earnings release": 0, "10-Q": 1, "10-K": 2})[f] ?? 3;
 const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); return m ? [m[2] ? 1 : 0, +m[3], m[1] ? +m[1] : 5] : [2, 0, 0]; };
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
+/* One collapsible group of report rows, like the FAQ: closed at first, count beside the title */
+const grpBox = (title, n, body, open) => `<details class="nr-grp"${open ? " open" : ""}><summary>${title} <span class="nr-n">${n}</span></summary>${body}</details>`;
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
 /* The date picker element is kept across redraws: replacing it while the phone's picker list is open leaves that list stuck on screen */
 function keepPicker(old, id, onChange){
@@ -2430,13 +2434,13 @@ function dayList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, opt)).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine)}`;
+  if (mine.length) html += grpBox("★ Watchlist", mine.length, grid(mine));
   for (const [f, title] of FORMS) {
     const list = rest.filter(x => x.form === f);
-    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4>${grid(list, {noType: true})}`;
+    if (list.length) html += grpBox(title, list.length, grid(list, {noType: true}));
   }
   const other = rest.filter(x => !FORMS.some(([f]) => f === x.form));
-  if (other.length) html += `<h4 class="nr-sec">Other filings</h4>${grid(other)}`;
+  if (other.length) html += grpBox("Other filings", other.length, grid(other));
   return {html: html + `</div>`, bind: () => {}};
 }
 /* Upcoming: your watchlist companies first (only when there are any), then the rest by time of day */
@@ -2450,10 +2454,11 @@ function timeList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, {...opt, latestOnly: true})).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += `<h4 class="nr-sec">★ Watchlist <span class="nr-n">${mine.length}</span></h4>${grid(mine, {noType: true})}`;
+  let first = true;   // the first group starts open, the rest closed
+  if (mine.length) { html += grpBox("★ Watchlist", mine.length, grid(mine, {noType: true}), first); first = false; }
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
-    if (list.length) html += `<h4 class="nr-sec">${title} <span class="nr-n">${list.length}</span></h4><p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`;
+    if (list.length) { html += grpBox(title, list.length, `<p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`, first); first = false; }
   }
   return {html: html + `</div>`, bind: () => {}};
 }
@@ -2576,7 +2581,7 @@ async function showUpcoming(day){
   const {d, t, days, sched} = await upcomingDays(), wl = new Set(wlGet());
   if (day) upSel = day; if (!days.includes(upSel)) upSel = days[0];
   const opts = days.map(x => `<option value="${x}"${x === upSel ? " selected" : ""}>${dayDiff(x) === -1 ? "Tomorrow · " : ""}${esc(dayName(x))} (${sched(x).length})</option>`).join("");
-  const head = `<label for="upDayPick">Our forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
+  const head = `<label for="upDayPick">Forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
   const oldUp = $("#upDayPick");
   $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
     `<div class="up-notes"><p class="sub"><b>Notes</b></p><p class="sub">Forecast: last year's earnings release for the same quarter (SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date. BMO = before the market opens, AMC = after it closes.</p><p class="sub">Dashboard and Infographic show each company's latest published report.${d.generated ? ` Updated ${esc(mdy(d.generated))}.` : ""}</p></div>` +
@@ -2613,9 +2618,9 @@ async function showIpo(){
     } else {
       if (x.range) main = `Range $${x.range[0].toFixed(2)}–$${x.range[1].toFixed(2)}`;
       if (x.stage === "cleared") meta.push(`SEC cleared ${ipoDay(x.cleared)}: pricing imminent`);
-      else if (x.expected) meta.push(`<span class="ipo-est">Expected ${x.expectedPast ? "any day (estimate passed " + ipoDay(x.expected) + ")" : "≈ " + ipoDay(x.expected)} · our estimate</span>`);
-      if (x.rangeSet) meta.push(`range filed ${ipoDay(x.rangeSet)}`);
-      if (x.stage === "filed") { main = main || (x.spac ? "" : "No price range yet"); meta.push(`${x.form} filed ${ipoDay(x.filed)}`, `latest filing ${ipoDay(x.lastFiling)}`); }
+      else if (x.expected) meta.push(`<span class="ipo-est">Expected ${x.expectedPast ? "any day" : "≈ " + ipoDay(x.expected)} · our estimate</span>`);
+      if (x.stage === "filed") main = main || (x.spac ? "" : "No price range yet");
+      if (x.lastFiling) meta.push(`latest SEC filing ${ipoDay(x.lastFiling)}`);   // only the newest date, so the card reads as current
     }
     if (ipoStage === "spac" || showStage) meta.unshift(`<b>${({cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced"})[x.stage]}</b>`);
     const tags = "" + (x.country ? `<span class="ipo-tag">${esc(x.country)}</span>` : "");
@@ -2628,21 +2633,33 @@ async function showIpo(){
     ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
     ["filed", "Filed, waiting", "Public registration filed; no price range in the filings yet."],
     ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
-    ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage: cleared first, then range set, filed and priced."]];
+    ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage."]];
   const STG = {cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced or listed"};
   const n = k => k === "spac" ? spacs.length : all.filter(x => x.stage === k).length;
-  if (!S.some(([k]) => k === ipoStage)) ipoStage = (S.find(([k]) => n(k)) || S[0])[0];
-  const opts = S.map(([k, t], i) => `<option value="${k}"${k === ipoStage ? " selected" : ""}>${i + 1}. ${t} (${n(k)})</option>`).join("");
   const ordAll = ["cleared", "range", "filed", "priced"], mineI = (d.ipos || []).filter(x => wlI.has(String(x.cik))).sort((a, b) => ordAll.indexOf(a.stage) - ordAll.indexOf(b.stage));
   let html = mineI.length ? `<div class="nr-day"><h4 class="nr-sec">★ Watchlist <span class="nr-n">${mineI.length}</span></h4><div class="ipo-list">${mineI.map(x => row(x, true)).join("")}</div></div>` : "";
-  html += `<div class="nr-day"><h3><label for="ipoPick">Stage</label> <select id="ipoPick" class="day-pick">${opts}</select></h3>`;
-  const [, , desc] = S.find(([k]) => k === ipoStage), ord = ["cleared", "range", "filed", "priced"];
-  const list0 = ipoStage === "spac" ? spacs.slice().sort((a, b) => ord.indexOf(a.stage) - ord.indexOf(b.stage)) : all.filter(x => x.stage === ipoStage), list = [...list0.filter(x => wlI.has(String(x.cik))), ...list0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
-  html += `<p class="nr-time">${desc}</p>` + (list.length ? `<div class="ipo-list">${list.map(x => row(x)).join("")}</div>` : `<p class="sub">None right now.</p>`) + `</div>`;
+  /* each stage: a collapsed box like Upcoming, one short row per company; the details are on its own page */
+  const ord = ["cleared", "range", "filed", "priced"];
+  const short = x => { const v = IPO_PAGES[String(x.cik)], n = (v && v.short) || x.name;   // shortest form that still names the company
+    return n.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|Holdings?|Group|Co)\b\.?.*$/i, "") || n; };
+  const mini = x => {
+    const c = String(x.cik), on = wlI.has(c), vis = IPO_PAGES[c], tip = `${on ? "Remove from" : "Add to"} your watchlist`;
+    const lk = vis ? `<a href="${vis.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(c)}">Infographic</a>`
+                   : `<a href="${esc(x.url)}" target="_blank" rel="noopener">SEC filings</a>`;
+    return `<div class="nr-row"><span class="nr nr-tog ipo-chip">${x.symbol ? `<span class="tk">${esc(x.symbol)}</span>` : ""}<span class="what">${esc(short(x))}</span></span><span class="nr-lk">${lk}</span><button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button></div>`;
+  };
+  let first = !mineI.length;   // no watchlist: the first stage starts open
+  S.forEach(([k, t, desc], i) => {
+    const l0 = (k === "spac" ? spacs.slice() : all.filter(x => x.stage === k)).sort((a, b) => short(a).localeCompare(short(b), "en", {sensitivity: "base"}));   // A–Z by the name shown
+    if (!l0.length) return;
+    const l = [...l0.filter(x => wlI.has(String(x.cik))), ...l0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
+    html += grpBox(`${i + 1}. ${t}`, l.length, `<p class="nr-time">${desc}</p><div class="nr-rows">${l.map(mini).join("")}</div>`, first); first = false;
+  });
   if (!all.length) html += `<p class="sub">No IPO filings found.</p>`;
-  html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Company names link to their SEC filings.</p>`;
-  const oldIpo = $("#ipoPick"); $("#ipoBody").innerHTML = html;
-  keepPicker(oldIpo, "#ipoPick", e => { ipoStage = e.target.value; showIpo().then(() => refocus($("#ipoPick"))); });
+  html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Each company's page links to its SEC filings.</p>`;
+  const openNow = $("#ipoPage").hidden ? [] : [...document.querySelectorAll("#ipoBody details.nr-grp")].map(d => d.open);   // a fresh visit starts from the default   // keep boxes open across a star tap
+  $("#ipoBody").innerHTML = html;
+  document.querySelectorAll("#ipoBody details.nr-grp").forEach((d, i) => { if (openNow[i]) d.open = true; });
   showPage("ipo", "IPO");
 }
 document.addEventListener("click", e => { const b = e.target.closest(".ipo-star"); if (!b) return; e.preventDefault(); const y = window.scrollY; ipoWlToggle(b.dataset.cik); showIpo().then(() => window.scrollTo(0, y)); });
