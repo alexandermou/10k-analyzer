@@ -993,7 +993,7 @@ function renderReport(c){
       <div class="card">
         <p class="lbl">Sources</p>
         ${r.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}
-        <p class="sub">${c.footnotes.map(esc).join(" ")}</p>
+        <p class="sub">${c.footnotes.map(esc).join(" ")} SEC CIK ${esc(c.cik)}.</p>
       </div>
     </div>
   </div>`;
@@ -1549,7 +1549,7 @@ function renderInfographic(c){
     </div>
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
-    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
+    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). SEC CIK ${esc(c.cik)}. <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
   }
 
