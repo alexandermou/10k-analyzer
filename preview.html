@@ -155,7 +155,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
-.ipo-chip .what{max-width:96px;overflow:hidden;text-overflow:ellipsis}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
+#ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
@@ -2640,7 +2640,8 @@ async function showIpo(){
   let html = mineI.length ? `<div class="nr-day"><h4 class="nr-sec">★ Watchlist <span class="nr-n">${mineI.length}</span></h4><div class="ipo-list">${mineI.map(x => row(x, true)).join("")}</div></div>` : "";
   /* each stage: a collapsed box like Upcoming, one short row per company; the details are on its own page */
   const ord = ["cleared", "range", "filed", "priced"];
-  const short = x => { const v = IPO_PAGES[String(x.cik)]; return (v && v.short) || x.name.replace(/,? (Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|Holdings?|Group|Co)\b\.?.*$/i, ""); };
+  const short = x => { const v = IPO_PAGES[String(x.cik)], n = (v && v.short) || x.name;   // shortest form that still names the company
+    return n.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|Holdings?|Group|Co)\b\.?.*$/i, "") || n; };
   const mini = x => {
     const c = String(x.cik), on = wlI.has(c), vis = IPO_PAGES[c], tip = `${on ? "Remove from" : "Add to"} your watchlist`;
     const lk = vis ? `<a href="${vis.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(c)}">Infographic</a>`
