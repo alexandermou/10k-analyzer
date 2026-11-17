@@ -911,6 +911,10 @@ const brief = t => t
   .replace(/\b(One|Two|Three|Four|Five|Six|Nine|Twelve|one|two|three|four|five|six|nine|twelve) (months|quarters|half-years|years|weeks)\b/g, (m, n, u) => NUMW[n.toLowerCase()] + " " + u)
   .replace(/\b(First|Second|Third|Fourth|first|second|third|fourth)([ -])(quarters?|half|halves)\b/g, (m, o, sep, u) => ORDW[o.toLowerCase()] + sep + u);
 const esc = s => brief(String(s)).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+/* Link to the company's filings on SEC EDGAR: the filing itself when we hold its accession number, else the company's list of that form */
+function secUrl(c){ const hit = ((c.report && c.report.sources) || []).find(x => /sec\.gov\/Archives\/edgar\/data\//.test(x[1])); if (hit) return hit[1]; const cik = String(parseInt(c.cik, 10)); const f = c.form || "10-K";
+  if (c.accession) return `https://www.sec.gov/Archives/edgar/data/${cik}/${c.accession.replace(/-/g, "")}/`;
+  return `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=${encodeURIComponent(f)}&dateb=&owner=include&count=40`; }
 function money(c, v, kind){
   if (v === null || v === undefined) return "—";
   const cur = c.cur || "$";
@@ -1529,7 +1533,7 @@ function renderInfographic(c){
     </div>
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
-    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}).</p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
+    <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
   }
 
