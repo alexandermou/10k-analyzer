@@ -2418,7 +2418,7 @@ const labelKey = l => { const m = /^(?:Q(\d) )?(FY)?(\d{4})$/.exec(l || ""); ret
 const byLabel = (a, b) => { const x = labelKey(a.label), y = labelKey(b.label); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; };
 const byForm = (a, b) => FORM_RANK(a.form) - FORM_RANK(b.form) || byLabel(a, b) || a.ticker.localeCompare(b.ticker);
 /* One collapsible group of report rows, like the FAQ: closed at first, count beside the title */
-const grpBox = (title, n, body) => `<details class="nr-grp"><summary>${title} <span class="nr-n">${n}</span></summary>${body}</details>`;
+const grpBox = (title, n, body, open) => `<details class="nr-grp"${open ? " open" : ""}><summary>${title} <span class="nr-n">${n}</span></summary>${body}</details>`;
 const FORMS = [["Earnings release", "Earnings releases (ER)"], ["10-Q", "10-Q quarterly reports"], ["10-K", "10-K annual reports"]];
 /* The date picker element is kept across redraws: replacing it while the phone's picker list is open leaves that list stuck on screen */
 function keepPicker(old, id, onChange){
@@ -2453,10 +2453,11 @@ function timeList(items, wl, head, emptyText){
   const grid = (list, opt) => `<div class="nr-rows">${list.map(x => nrRow(x, wl, {...opt, latestOnly: true})).join("")}</div>`;
   let html = `<div class="nr-day"><h3>${head}</h3>`;
   if (!sorted.length) html += `<p class="sub">${emptyText}.</p>`;
-  if (mine.length) html += grpBox("★ Watchlist", mine.length, grid(mine, {noType: true}));
+  let first = true;   // the first group starts open, the rest closed
+  if (mine.length) { html += grpBox("★ Watchlist", mine.length, grid(mine, {noType: true}), first); first = false; }
   for (const [k, title, desc] of TIMES) {
     const list = rest.filter(x => (x.time || "") === k);
-    if (list.length) html += grpBox(title, list.length, `<p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`);
+    if (list.length) { html += grpBox(title, list.length, `<p class="nr-time">${desc}</p>${grid(list, {noType: true, noTime: true})}`, first); first = false; }
   }
   return {html: html + `</div>`, bind: () => {}};
 }
@@ -2579,7 +2580,7 @@ async function showUpcoming(day){
   const {d, t, days, sched} = await upcomingDays(), wl = new Set(wlGet());
   if (day) upSel = day; if (!days.includes(upSel)) upSel = days[0];
   const opts = days.map(x => `<option value="${x}"${x === upSel ? " selected" : ""}>${dayDiff(x) === -1 ? "Tomorrow · " : ""}${esc(dayName(x))} (${sched(x).length})</option>`).join("");
-  const head = `<label for="upDayPick">Our forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
+  const head = `<label for="upDayPick">Forecast ER date</label> <select id="upDayPick" class="day-pick">${opts}</select>`;
   const oldUp = $("#upDayPick");
   $("#upBody").innerHTML = timeList(sched(upSel), wl, head, "No releases forecast for this day").html +
     `<div class="up-notes"><p class="sub"><b>Notes</b></p><p class="sub">Forecast: last year's earnings release for the same quarter (SEC Form 8-K, Item 2.02) plus 52 weeks, at the same time of day. Companies don't always keep last year's date. BMO = before the market opens, AMC = after it closes.</p><p class="sub">Dashboard and Infographic show each company's latest published report.${d.generated ? ` Updated ${esc(mdy(d.generated))}.` : ""}</p></div>` +
