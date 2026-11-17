@@ -155,6 +155,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:hover{color:var(--accent);background:var(--accent-soft)}.nr-star[aria-pressed="true"]{color:var(--accent)}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+.ipo-chip .what{max-width:96px;overflow:hidden;text-overflow:ellipsis}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
@@ -2635,18 +2636,28 @@ async function showIpo(){
     ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage: cleared first, then range set, filed and priced."]];
   const STG = {cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced or listed"};
   const n = k => k === "spac" ? spacs.length : all.filter(x => x.stage === k).length;
-  if (!S.some(([k]) => k === ipoStage)) ipoStage = (S.find(([k]) => n(k)) || S[0])[0];
-  const opts = S.map(([k, t], i) => `<option value="${k}"${k === ipoStage ? " selected" : ""}>${i + 1}. ${t} (${n(k)})</option>`).join("");
   const ordAll = ["cleared", "range", "filed", "priced"], mineI = (d.ipos || []).filter(x => wlI.has(String(x.cik))).sort((a, b) => ordAll.indexOf(a.stage) - ordAll.indexOf(b.stage));
   let html = mineI.length ? `<div class="nr-day"><h4 class="nr-sec">★ Watchlist <span class="nr-n">${mineI.length}</span></h4><div class="ipo-list">${mineI.map(x => row(x, true)).join("")}</div></div>` : "";
-  html += `<div class="nr-day"><h3><label for="ipoPick">Stage</label> <select id="ipoPick" class="day-pick">${opts}</select></h3>`;
-  const [, , desc] = S.find(([k]) => k === ipoStage), ord = ["cleared", "range", "filed", "priced"];
-  const list0 = ipoStage === "spac" ? spacs.slice().sort((a, b) => ord.indexOf(a.stage) - ord.indexOf(b.stage)) : all.filter(x => x.stage === ipoStage), list = [...list0.filter(x => wlI.has(String(x.cik))), ...list0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
-  html += `<p class="nr-time">${desc}</p>` + (list.length ? `<div class="ipo-list">${list.map(x => row(x)).join("")}</div>` : `<p class="sub">None right now.</p>`) + `</div>`;
+  /* each stage: a collapsed box like Upcoming, one short row per company; the details are on its own page */
+  const ord = ["cleared", "range", "filed", "priced"];
+  const short = x => { const v = IPO_PAGES[String(x.cik)]; return (v && v.short) || x.name.replace(/,? (Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|Holdings?|Group|Co)\b\.?.*$/i, ""); };
+  const mini = x => {
+    const c = String(x.cik), on = wlI.has(c), vis = IPO_PAGES[c], tip = `${on ? "Remove from" : "Add to"} your watchlist`;
+    const lk = vis ? `<a href="${vis.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${vis.img}" class="ipo-info" data-t="${esc(c)}">Infographic</a>`
+                   : `<a href="${esc(x.url)}" target="_blank" rel="noopener">SEC filings</a>`;
+    return `<div class="nr-row"><span class="nr nr-tog ipo-chip">${x.symbol ? `<span class="tk">${esc(x.symbol)}</span>` : ""}<span class="what">${esc(short(x))}</span></span><span class="nr-lk">${lk}</span><button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button></div>`;
+  };
+  S.forEach(([k, t, desc], i) => {
+    const l0 = k === "spac" ? spacs.slice().sort((a, b) => ord.indexOf(a.stage) - ord.indexOf(b.stage)) : all.filter(x => x.stage === k);
+    if (!l0.length) return;
+    const l = [...l0.filter(x => wlI.has(String(x.cik))), ...l0.filter(x => !wlI.has(String(x.cik)))];   // watched companies first
+    html += grpBox(`${i + 1}. ${t}`, l.length, `<p class="nr-time">${desc}</p><div class="nr-rows">${l.map(mini).join("")}</div>`);
+  });
   if (!all.length) html += `<p class="sub">No IPO filings found.</p>`;
-  html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Company names link to their SEC filings.</p>`;
-  const oldIpo = $("#ipoPick"); $("#ipoBody").innerHTML = html;
-  keepPicker(oldIpo, "#ipoPick", e => { ipoStage = e.target.value; showIpo().then(() => refocus($("#ipoPick"))); });
+  html += `<p class="sub">From SEC EDGAR filings only${d.generated ? ` · updated ${esc(mdy(d.generated.slice(0, 10)))}` : ""}. Each company's page links to its SEC filings.</p>`;
+  const openNow = [...document.querySelectorAll("#ipoBody details.nr-grp")].map(d => d.open);   // keep boxes open across a star tap
+  $("#ipoBody").innerHTML = html;
+  document.querySelectorAll("#ipoBody details.nr-grp").forEach((d, i) => { if (openNow[i]) d.open = true; });
   showPage("ipo", "IPO");
 }
 document.addEventListener("click", e => { const b = e.target.closest(".ipo-star"); if (!b) return; e.preventDefault(); const y = window.scrollY; ipoWlToggle(b.dataset.cik); showIpo().then(() => window.scrollTo(0, y)); });
