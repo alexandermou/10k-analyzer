@@ -1590,6 +1590,16 @@ function canvasIsBlank(cv){
   const d = g.getImageData(0, 0, 48, 48).data; let ink = false; for (let i = 0; i < d.length; i += 4) if (d[i] < 245 || d[i + 1] < 245 || d[i + 2] < 245) { ink = true; break; }
   t.width = t.height = 0; return !ink;
 }
+/* Each chart canvas is turned into an ordinary picture before the image library sees it. The library reads canvases with toDataURL, which on an iPhone can quietly come back empty (the charts then vanish until the page is reloaded); this way we check that every chart really loaded, and the canvas memory is released at once. */
+async function canvasToImg(cv, urls){
+  const blob = await new Promise(res => cv.toBlob(res, "image/png")), css = cv.style.cssText; cv.width = cv.height = 0;
+  if (!blob) throw new Error("canvas-blank");
+  const url = URL.createObjectURL(blob); urls.push(url);
+  const img = new Image(); img.alt = ""; img.src = url; img.style.cssText = css;
+  try { await img.decode(); } catch (e) { throw new Error("canvas-blank"); }
+  if (!img.naturalWidth) throw new Error("canvas-blank");
+  return img;
+}
 async function makeInfographicBlob(c){
   try { return await makeInfographicBlobOnce(c); }
   catch (e) { if (!e || e.message !== "canvas-blank") throw e; await new Promise(r => setTimeout(r, 700)); return await makeInfographicBlobOnce(c); }
@@ -1603,7 +1613,7 @@ async function makeInfographicBlobOnce(c){
   const IGL = igLayout(), FULLIG = IGL !== "compact", TALL = IGL === "tall", WIDE = IGL === "wide", W = TALL ? 600 : WIDE ? 1512 : 756;
   host.style.cssText = "position:fixed;left:-20000px;top:0;width:" + (TALL ? 720 : WIDE ? 1640 : FULLIG ? 880 : 1224) + "px;pointer-events:none";
   if (c.quarter) host.className = "is-qtr";   // wider label column for "Q2 2026" in the bar cards
-  document.body.appendChild(host);
+  document.body.appendChild(host); const blobUrls = [];
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
@@ -1643,6 +1653,7 @@ async function makeInfographicBlobOnce(c){
       const w = Math.round(svg.getBoundingClientRect().width) || 300, hgt = Math.round(svg.getBoundingClientRect().height) || 56;
       const cv = drawSparkToCanvas(svg, w, hgt); if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("canvas-blank"); } cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
+    for (const cv of Array.from(n.querySelectorAll("canvas"))) cv.replaceWith(await canvasToImg(cv, blobUrls));
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     const fontEmbedCSS = await getFontEmbedCSS();
     const cw = n.offsetWidth, ch = n.offsetHeight, ratio = Math.max(1, Math.min(2, Math.sqrt(15e6 / (cw * ch)), 16000 / ch));   // keep the picture inside what phones can draw
@@ -1659,7 +1670,7 @@ async function makeInfographicBlobOnce(c){
     } finally { HTMLCanvasElement.prototype.toBlob = tb; }
   } finally {
     host.querySelectorAll("canvas").forEach(z => { z.width = z.height = 0; });   // give the memory back right away
-    host.remove();
+    host.remove(); blobUrls.forEach(u => URL.revokeObjectURL(u));
     if (prevTheme === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", prevTheme);
   }
 }
@@ -1800,7 +1811,7 @@ async function loadInfoImage(){
   const c = state.shown || LIBRARY[state.ticker]; if (!c) return;
   const key = [c.ticker, c.fy, c.period, c.filed, igLayout()].join("|"), st = $("#imgTabStatus"), img = $("#tabImg");
   if (key === tabImgKey && img.getAttribute("src")) return;
-  tabImgKey = ""; img.hidden = true; st.textContent = ""; $("#tabWait").hidden = false;
+  tabImgKey = ""; img.hidden = true; img.removeAttribute("src"); st.textContent = ""; $("#tabWait").hidden = false;   // the old picture is let go before the next is drawn
   const kind = c.quarter ? (/10-Q/.test(c.form || "") ? "10Q" : "earnings") : "10K";
   try {
     const blob = await makeInfographicBlob(c); if ((state.shown || LIBRARY[state.ticker]) !== c) { $("#tabWait").hidden = true; return; }
