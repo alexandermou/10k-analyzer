@@ -106,9 +106,9 @@ button,input{font:inherit}
 
 /* Shelf */
 .shelf{display:flex;flex-direction:column;gap:14px}
-.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
-.brand h1 span{color:var(--accent)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:0 12px;flex-wrap:wrap}
+.brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.brand h1 span{color:inherit}
 .brand p{color:var(--muted);font-size:14px}
 .search{display:flex;gap:8px;flex-wrap:wrap}
 .search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -238,6 +238,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
 .meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .meta b{color:var(--ink);font-weight:600}
+.meta .m-one{white-space:nowrap}   /* one line: form · filed date · period */
 .img-note{margin:-4px 0 0!important;color:var(--muted);font-size:13px!important;line-height:1.3}.img-tools{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:2px 0 4px;margin-bottom:2px;background:var(--bg,#F3F5F8)}.img-tools .info-settings{margin-left:0}.img-tools .status{flex:1;min-width:0}.img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 .tabs[hidden]{display:none}.fb-foot{margin:28px 0 8px;font-size:15px}.fb-foot a{color:var(--accent);text-decoration:underline;cursor:pointer}
 .tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:12px;width:max-content;max-width:100%}
@@ -260,7 +261,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .fb-row .btn{height:44px}
 .fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-@media (max-width:640px){.tabs{width:100%}.tab{flex:1 1 auto;padding:0 6px;font-size:14px;min-width:0}}
+@media (max-width:640px){.tabs{width:calc(var(--n,4) * (100% - 4px) / 4 + 4px)}.tab{flex:1 1 0;padding:0 6px;font-size:14px;min-width:0}}   /* each tab is a quarter of the row; the shaded bar shrinks to fit the tabs shown */
 .fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
 /* Filing strip: the annual report and the latest quarters */
 .periods{display:flex;gap:8px;flex-wrap:wrap}.periods[hidden],.tab[hidden]{display:none}
@@ -431,6 +432,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
 .sankey svg[data-rot]{min-width:0;max-width:560px;margin:0 auto}
 .sankey svg.sk-flat{display:none}#filing.lay-wide .sankey svg.sk-flat{display:block}#filing.lay-wide .sankey svg[data-rot]{display:none}
+@media (min-width:900px) and (hover:hover){.sankey svg.sk-flat{display:block}.sankey svg[data-rot]{display:none}}   /* desktop: the flow runs left to right at any layout setting */
 #filing.lay-wide .grid{grid-template-columns:repeat(2,minmax(0,1fr))}@container sec (min-width:1000px){#filing.lay-wide .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
 .ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
@@ -594,7 +596,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .sl-foot{margin-top:auto;display:flex;justify-content:space-between;font-size:16px;color:var(--muted);font-family:var(--f-mono)}
 .notes #snote{font-size:15px;line-height:1.6;max-width:72ch}
 /* Home: only the search box and the company selector; everything else appears once a company or list is opened */
-body.home .brand,body.home .views,body.home #filing{display:none}
+body.home .views,body.home #filing{display:none}
+body.home .brand{display:block;position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:0;right:0;text-align:center;pointer-events:none}body.home .brand a{pointer-events:auto}   /* home: title and subtitle centered at the very top */
 body.home .wrap{min-height:calc(100svh - 120px);justify-content:center}
 body.home .shelf{width:100%;max-width:560px;margin:0 auto}
 body.home .picker select{max-width:none}
@@ -624,6 +627,12 @@ body:not(.haswl) #wlIcon,body:not(.haswl) #wlBtn,body:not(.haswl) .homelinks a[h
 .topicons a[aria-current]{color:var(--accent)}
 #wlIcon{display:none!important}   /* the watchlist is in the ☰ menu */
 body.company .views{display:none}
+/* Company page: the search box and company selector stay folded away until the magnifier is tapped */
+#searchToggle{display:none}body.company #searchToggle{display:grid}
+body.company:not(.finding) #searchForm,body.company:not(.finding) .picker{display:none}
+#searchToggle .i-close{display:none}body.finding #searchToggle .i-open{display:none}body.finding #searchToggle .i-close{display:block}
+body.company .brand{padding-right:134px}
+.topicons #searchToggle:hover,.topicons #searchToggle:focus,.topicons #searchToggle:focus-visible,.topicons #searchToggle:active{color:var(--ink);border-color:var(--line);outline:none}   /* no highlight, expanded or not */
 .ipo-list{display:flex;flex-direction:column;gap:8px}
 .ipo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
 .ipo-top{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
@@ -667,15 +676,15 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="#" id="searchToggle" role="button" aria-label="Search for a company" aria-expanded="false" title="Search"><svg class="i-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><svg class="i-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
       <h1><a href="./" id="homeLink" title="Home">10-K <span>Analyzer</span></a></h1>
-      <p>Figures from SEC filings.</p>
+      <p>Decode SEC filings</p>
     </div>
-    <p class="tagline">Visualize public company financials.<br>Decode SEC filings.</p>
+    <p class="tagline">Read public company financials<br>at a glance</p>
     <form class="search" id="searchForm">
       <label for="ticker">Search the library</label>
       <input id="ticker" name="ticker" list="libList" enterkeyhint="search" autocomplete="off" spellcheck="false" placeholder="Ticker or name, e.g. AMZN or Apple" maxlength="60">
@@ -908,6 +917,7 @@ const $ = s => document.querySelector(s);
 const NUMW = {one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, nine: 9, twelve: 12};
 const ORDW = {first: "1st", second: "2nd", third: "3rd", fourth: "4th"};
 const brief = t => t
+  .replace(/\((?:[Ff]ourth|4th) quarter, from the 10-K\)/g, "(Q4, from the 10-K)")
   .replace(/\b(One|Two|Three|Four|Five|Six|Nine|Twelve|one|two|three|four|five|six|nine|twelve) (months|quarters|half-years|years|weeks)\b/g, (m, n, u) => NUMW[n.toLowerCase()] + " " + u)
   .replace(/\b(First|Second|Third|Fourth|first|second|third|fourth)([ -])(quarters?|half|halves)\b/g, (m, o, sep, u) => ORDW[o.toLowerCase()] + sep + u);
 const esc = s => brief(String(s)).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
@@ -2275,7 +2285,7 @@ async function openCompany(t, view, period){
     else shown = Object.assign({quarter: true}, shown);
   }
   const fresh = state.ticker !== t || !$("#view-report").innerHTML;
-  state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company");
+  state.ticker = t; state.period = period; state.shown = shown; hideNew(); document.body.classList.add("company"); setFinder(false);
   setFbSubject();
   try { localStorage.setItem("10k-last-ticker", t); } catch (e) {} $("#missing").hidden = true; $("#filing").hidden = false;
   { const STAR = '<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button>';
@@ -2283,13 +2293,13 @@ async function openCompany(t, view, period){
     $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`}<br><span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
     fitName(); requestAnimationFrame(() => { fitName(); setTimeout(fitName, 150); }); }
   wlChanged();   // sets the star next to the name
-  $("#fmeta").innerHTML = `<span><b>${shown.form || "Form 10-K"}</b> · ${esc(shown.fy)}</span><span>${esc(sd(shown.period))}</span><span>Filed ${esc(sd(shown.filed))}</span><span class="mono">CIK ${c.cik}</span>`;
+  $("#fmeta").innerHTML = `<span class="m-one"><b>${esc(shown.form || "Form 10-K")}</b> · Filed ${esc(sd(shown.filed))} · ${esc(sd(shown.period).replace(/\s*\(.*\)\s*$/, ""))}</span>`;
   renderPeriods(c);
   $("#view-infographic").classList.toggle("is-qtr", !!period);
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });   // the written report, slides and video are for the annual report
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; }); $(".tabs").style.setProperty("--n", period ? 2 : 4);   // the written report, slides and video are for the annual report
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
@@ -2501,10 +2511,10 @@ async function showNew(day){
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
-  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>") +
+  $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>") +
     `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
     `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
-  bindTop($("#npBody"), items, wl, "", note, "Daily Top 10 <small class=\"t10-q\">Quarterly figures</small>");
+  bindTop($("#npBody"), items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>");
   keepPicker(oldNew, "#newDayPick", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
   const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
@@ -2620,6 +2630,8 @@ function showPage(name, title){
 }
 function showAdd(t){ showPage("add", "Add tickers"); if (t != null) $("#addTicker").value = t; resetAdd(); window.scrollTo(0, 0); }
 function showLayout(){ showPage("layout", "Layout settings"); window.scrollTo(0, 0); }
+function setFinder(on){ document.body.classList.toggle("finding", on); const b = $("#searchToggle"); b.setAttribute("aria-expanded", String(on)); b.setAttribute("aria-label", on ? "Hide the search box" : "Search for a company"); b.title = on ? "Hide search" : "Search"; }
+$("#searchToggle").addEventListener("click", e => { e.preventDefault(); const on = !document.body.classList.contains("finding"); setFinder(on); e.currentTarget.blur(); if (on) refocus($("#ticker")); });
 function showFaq(){ showPage("faq", "FAQ"); window.scrollTo(0, 0); }
 /* Home: just the search box and the company selector */
 function goHome(){
