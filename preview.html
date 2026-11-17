@@ -156,6 +156,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
+.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
@@ -716,7 +717,8 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     <div id="npBody"></div>
   </section>
   <section class="newpage" id="ipoPage" hidden aria-labelledby="ipoTitle">
-    <div class="np-head"><h2 id="ipoTitle">IPO</h2><p class="sub">Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).</p></div>
+    <div class="np-head"><h2 id="ipoTitle">IPO</h2><p class="sub" id="ipoSub"></p></div>
+    <div class="tabs ipo-tabs" role="tablist" aria-label="IPO lists" style="--n:2"><a class="tab" role="tab" id="ipoTabToday" href="#ipo" aria-selected="true">Today</a><a class="tab" role="tab" id="ipoTabFiled" href="#ipo-filed" aria-selected="false">Filed</a></div>
     <div id="ipoBody"></div>
   </section>
   <section class="newpage" id="layoutPage" hidden aria-labelledby="layTitle">
@@ -777,7 +779,8 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p>
         <p>The quarter label (such as Q3) comes from the company's fiscal year end and last year's release date. A few companies can't be labelled, so they show an ER tag (earnings release) instead.</p></details>
       <details><summary>Where does the IPO list come from?</summary>
-        <p>The SEC has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
+        <p>The <b>Today</b> tab comes from the IPO calendars of Nasdaq and the NYSE: which companies start trading on each day, their exchange, offer price, shares and offer amount. The company pages it links to are built from SEC filings.</p>
+        <p>The <b>Filed</b> tab comes from the SEC. It has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
         <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
         <p>On business days we check the SEC for new filings before the market opens, through the day and after the close, and new reports appear on the Latest page. Every night the whole library is rebuilt from the SEC's data.</p></details>
@@ -2606,7 +2609,55 @@ const ipoUsd = v => "$" + scaled(v / 1e6).join("");
 const ipoWlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*)/); return m ? decodeURIComponent(m[1]).split(",").filter(x => /^\d{1,10}$/.test(x)) : []; };
 function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(x => x !== cik) : l.concat(cik);
   document.cookie = `wlipo=${encodeURIComponent(n.join(","))}; max-age=${n.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; }
-async function showIpo(){
+/* IPO page: two tabs. Today = listings starting to trade (exchange calendars); Filed = the SEC pipeline */
+let ipoTab = "today", ipoDaySel = "", IPO_TODAY = null;
+async function showIpo(tab){
+  if (tab) ipoTab = tab;
+  $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs by first trading day, from the Nasdaq and NYSE IPO calendars. Company details come from SEC filings."
+    : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
+  return ipoTab === "today" ? showIpoToday() : showIpoFiled();
+}
+async function showIpoToday(day){
+  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
+  if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
+  await loadIpoPages();
+  const t = todayISO(), D = IPO_TODAY.days || {}, wlI = new Set(ipoWlGet());
+  const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
+  const days = Object.keys(D).sort().reverse(); if (!days.includes(t)) days.push(t); days.sort().reverse();
+  if (day) ipoDaySel = day;
+  if (!days.includes(ipoDaySel)) ipoDaySel = (D[t] || []).length ? t : (days.find(x => x < t && (D[x] || []).length) || t);
+  const items = D[ipoDaySel] || [], future = ipoDaySel > t;
+  const opts = days.map(x => `<option value="${x}"${x === ipoDaySel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}${x > t ? " · expected" : ""} (${(D[x] || []).length})</option>`).join("");
+  const usd = v => v ? "$" + scaled(v / 1e6).join("") : "—";
+  const px = x => x.expected ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
+  let html = `<div class="nr-day"><h3><label for="ipoDayPick">First trading day</label> <select id="ipoDayPick" class="day-pick">${opts}</select></h3>`;
+  if (!items.length) html += `<p class="sub">${ipoDaySel === t ? "No US IPOs start trading today." : "No US IPOs on this day."} Pick another day above.</p>`;
+  else {
+    /* Top 10 by money raised */
+    const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
+    if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised${future ? " <small class=\"t10-q\">expected</small>" : ""}</h4></div><ol class="top10-bars">${top.map((x, i) => {
+      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${usd(x.amount)}`;
+      return `<li title="${esc(tip)}"><span class="t10-rank">${i + 1}</span><span class="t10-name">${href ? `<a class="t10-tk" href="${href}">${esc(x.sym)}</a>` : `<span class="t10-tk">${esc(x.sym)}</span>`}<span></span></span>
+        <span class="t10-link"><span class="t10-track"><span class="t10-bar" style="left:0;width:${(x.amount / mx * 100).toFixed(1)}%"></span></span><span class="t10-v">${usd(x.amount)}</span></span></li>`; }).join("")}</ol>
+      <p class="t10-note">Offer amount = offer price × shares offered${future ? "; for expected listings, the calendar's figure at the price range" : ""}. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
+    /* one closed box per exchange, as usual */
+    const ORD = ["Nasdaq", "NYSE", "NYSE American", "NYSE Arca", "Other"];
+    const row = x => { const c = cikOf[x.sym], on = c && wlI.has(c), v = IPO_BY_T[x.sym] || (c && IPO_PAGES[c]), tip = `${on ? "Remove from" : "Add to"} your watchlist`;
+      const lk = v ? `<a href="${v.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${v.img}" class="ipo-info" data-t="${esc(c || "")}">Infographic</a>` : `<span class="ipo-px">${esc(px(x))}${px(x) ? " · " : ""}${usd(x.amount)}</span>`;
+      const nm = x.name.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|AG|Holdings?|Group|Co)\b\.?.*$/i, "") || x.name;
+      return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
+    for (const ex of ORD) {
+      const l = items.filter(x => x.exchange === ex).sort((a, b) => (wlI.has(cikOf[b.sym]) - wlI.has(cikOf[a.sym])) || a.name.localeCompare(b.name, "en", {sensitivity: "base"}));
+      if (l.length) html += grpBox(ex, l.length, `<div class="nr-rows">${l.map(row).join("")}</div>`);
+    }
+  }
+  html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}. Company pages: SEC filings.</p>`;
+  const old = $("#ipoDayPick"); $("#ipoBody").innerHTML = html;
+  keepPicker(old, "#ipoDayPick", e => showIpoToday(e.target.value).then(() => refocus($("#ipoDayPick"))));
+  showPage("ipo", "IPO");
+}
+async function showIpoFiled(){
   if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
   await loadIpoPages();
   const d = ipoData, all = (d.ipos || []).filter(x => !x.spac), spacs = (d.ipos || []).filter(x => x.spac);
@@ -2665,7 +2716,7 @@ async function showIpo(){
   document.querySelectorAll("#ipoBody details.nr-grp").forEach((d, i) => { if (openNow[i]) d.open = true; });
   showPage("ipo", "IPO");
 }
-document.addEventListener("click", e => { const b = e.target.closest(".ipo-star"); if (!b) return; e.preventDefault(); const y = window.scrollY; ipoWlToggle(b.dataset.cik); showIpo().then(() => window.scrollTo(0, y)); });
+document.addEventListener("click", e => { const b = e.target.closest(".ipo-star"); if (!b) return; e.preventDefault(); const y = window.scrollY; ipoWlToggle(b.dataset.cik); (ipoTab === "today" ? showIpoToday() : showIpoFiled()).then(() => window.scrollTo(0, y)); });
 /* IPO card "Infographic" link: the same viewer as the company infographics (save, share, close) */
 document.addEventListener("click", async e => {
   const a = e.target.closest(".ipo-info"); if (!a) return;
@@ -3018,7 +3069,7 @@ $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); })
 $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); window.scrollTo(0, 0); });
 /* Close button on the menu pages: back to the page the menu was opened from */
 (function(){
-  const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
+  const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#ipo-today", "#ipo-filed", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
   let back = "";
   window.addEventListener("hashchange", e => { if (!MENU.has(location.hash.toLowerCase())) return; let old = ""; try { old = new URL(e.oldURL).hash; } catch (x) {} if (!MENU.has(old.toLowerCase())) back = old; });
   $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
@@ -3035,7 +3086,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   window.addEventListener("hashchange", () => set(false));
 })();
 
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#layout-settings") { showLayout(); return; } if (hh === "#ipo" || hh === "#ipos") { showIpo(); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#layout-settings") { showLayout(); return; } if (hh === "#ipo" || hh === "#ipos" || hh === "#ipo-today") { showIpo("today"); return; } if (hh === "#ipo-filed") { showIpo("filed"); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -3045,7 +3096,8 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   if (location.hash.toLowerCase() === "#faq") { showFaq(); return; } if (location.hash.toLowerCase() === "#add-tickers") { showAdd(); return; } if (location.hash.toLowerCase() === "#layout-settings") { showLayout(); return; }
-  if (["#ipo", "#ipos"].includes(location.hash.toLowerCase())) { await showIpo(); return; }
+  if (["#ipo", "#ipos", "#ipo-today"].includes(location.hash.toLowerCase())) { await showIpo("today"); return; }
+  if (location.hash.toLowerCase() === "#ipo-filed") { await showIpo("filed"); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
   /* Default: home (search box and company selector only) */
