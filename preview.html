@@ -1648,10 +1648,15 @@ async function makeInfographicBlobOnce(c){
     const cw = n.offsetWidth, ch = n.offsetHeight, ratio = Math.max(1, Math.min(2, Math.sqrt(15e6 / (cw * ch)), 16000 / ch));   // keep the picture inside what phones can draw
     window.__igDims = [cw, ch, ratio];
     const opts = {pixelRatio: ratio, backgroundColor: "#F3F5F8", cacheBust: false, ...(fontEmbedCSS ? {fontEmbedCSS} : {})};
-    await window.htmlToImage.toBlob(n, opts).catch(() => null);   // first pass warms fonts and images (Safari)
-    const blob = await window.htmlToImage.toBlob(n, opts);
-    if (!blob) throw new Error("blob");
-    return blob;
+    // The image library leaves its full-size canvas (tens of MB) for the browser to clean up later; on an iPhone those pile up and the next picture comes out with a blank Sankey. So each one is emptied as soon as its PNG is made.
+    const tb = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function (cb, ...a) { const me = this; return tb.call(this, bl => { try { cb(bl); } finally { me.width = me.height = 0; } }, ...a); };
+    try {
+      await window.htmlToImage.toBlob(n, {...opts, pixelRatio: 0.3}).catch(() => null);   // first pass warms fonts and images (Safari), small so it costs little memory
+      const blob = await window.htmlToImage.toBlob(n, opts);
+      if (!blob) throw new Error("blob");
+      return blob;
+    } finally { HTMLCanvasElement.prototype.toBlob = tb; }
   } finally {
     host.querySelectorAll("canvas").forEach(z => { z.width = z.height = 0; });   // give the memory back right away
     host.remove();
