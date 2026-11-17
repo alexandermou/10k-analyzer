@@ -156,7 +156,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
-.img-set{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
+.img-set{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
 .ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
@@ -809,7 +809,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       </div>
     </div>
     <div class="periods" id="periods" role="tablist" aria-label="Filing" hidden></div>
-    <div class="tabs" role="tablist" aria-label="Views">
+    <div class="tabs" id="viewTabs" role="tablist" aria-label="Views">
       <button class="tab" role="tab" id="tab-infographic" data-view="infographic" aria-selected="true">Dashboard</button>
       <button class="tab" role="tab" id="tab-image" data-view="image" aria-selected="false">Infographic</button>
       <button class="tab" role="tab" id="tab-media" data-view="media" aria-selected="false" aria-controls="mediaBar">Media</button>
@@ -2350,7 +2350,7 @@ async function openCompany(t, view, period){
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; }); $(".tabs").style.setProperty("--n", period ? 2 : 4);   // the written report, slides and video are for the annual report
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; }); $("#viewTabs").style.setProperty("--n", period ? 2 : 4);   // the written report, slides and video are for the annual report
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
