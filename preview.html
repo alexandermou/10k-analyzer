@@ -431,6 +431,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .sankey svg{display:block;width:100%;min-width:760px;height:auto;font-family:var(--f-body)}
 .sankey svg[data-rot]{min-width:0;max-width:560px;margin:0 auto}
 .sankey svg.sk-flat{display:none}#filing.lay-wide .sankey svg.sk-flat{display:block}#filing.lay-wide .sankey svg[data-rot]{display:none}
+@media (min-width:900px) and (hover:hover){.sankey svg.sk-flat{display:block}.sankey svg[data-rot]{display:none}}   /* desktop: the flow runs left to right at any layout setting */
 #filing.lay-wide .grid{grid-template-columns:repeat(2,minmax(0,1fr))}@container sec (min-width:1000px){#filing.lay-wide .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .fs{fill:var(--flow-src);fill-opacity:.42}.fp{fill:var(--flow-pos);fill-opacity:.38}.fn{fill:var(--flow-neg);fill-opacity:.34}
 .ln{fill:none;stroke:var(--flow-neg);stroke-width:1.2}
