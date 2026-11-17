@@ -1592,7 +1592,7 @@ function canvasIsBlank(cv){
 }
 async function makeInfographicBlob(c){
   try { return await makeInfographicBlobOnce(c); }
-  catch (e) { if (!e || e.message !== "sankey-blank") throw e; await new Promise(r => setTimeout(r, 400)); return await makeInfographicBlobOnce(c); }
+  catch (e) { if (!e || e.message !== "canvas-blank") throw e; await new Promise(r => setTimeout(r, 700)); return await makeInfographicBlobOnce(c); }
 }
 async function makeInfographicBlobOnce(c){
   // Draws the infographic as a PNG in the browser: desktop width, light theme, with a title header (no stored images)
@@ -1631,17 +1631,17 @@ async function makeInfographicBlobOnce(c){
       // the flow is turned 90 degrees (top to bottom) so the card is tall and the text can be bigger
       svg.style.minWidth = "0";
       if (WIDE) { const vb0 = svg.viewBox.baseVal, w0 = box.clientWidth || W, h0 = Math.round(w0 * vb0.height / vb0.width);
-        const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); if (canvasIsBlank(c0)) { c0.width = c0.height = 0; throw new Error("sankey-blank"); } c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
+        const c0 = drawSvgToCanvas(svg, w0 * 2, h0 * 2); if (canvasIsBlank(c0)) { c0.width = c0.height = 0; throw new Error("canvas-blank"); } c0.style.width = w0 + "px"; c0.style.height = h0 + "px"; c0.style.display = "block"; svg.replaceWith(c0); return; }
       const vb = svg.viewBox.baseVal, B = box.clientWidth || (FULLIG ? W : 1160), sc = B / vb.height, R = 2, fs = TALL ? 1.25 : FULLIG ? 1.15 : 1, pad = Math.round(150 * sc * R * fs);
       const raw = drawSvgToCanvas(svg, Math.round(vb.width * sc * R), Math.round(vb.height * sc * R), fs, pad), src = trimRight(raw, 24 * R); if (raw !== src) raw.width = raw.height = 0;   // no empty space after the last label
       const cv = document.createElement("canvas"); cv.width = src.height; cv.height = src.width;
-      const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); src.width = src.height = 0;
-      if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("sankey-blank"); }
-      cv.style.width = B + "px"; cv.style.height = Math.round(src.width / R) + "px"; cv.style.display = "block";
+      const g = cv.getContext("2d"); g.translate(cv.width, 0); g.rotate(Math.PI / 2); g.drawImage(src, 0, 0); const hPx = Math.round(src.width / R); src.width = src.height = 0;   // (the height is read before the canvas is emptied)
+      if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("canvas-blank"); }
+      cv.style.width = B + "px"; cv.style.height = hPx + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     n.querySelectorAll(".spark svg").forEach(svg => {      // sparklines as plain pictures (the image library can't draw them reliably)
       const w = Math.round(svg.getBoundingClientRect().width) || 300, hgt = Math.round(svg.getBoundingClientRect().height) || 56;
-      const cv = drawSparkToCanvas(svg, w, hgt); cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
+      const cv = drawSparkToCanvas(svg, w, hgt); if (canvasIsBlank(cv)) { cv.width = cv.height = 0; throw new Error("canvas-blank"); } cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.style.display = "block";
       svg.replaceWith(cv); });
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     const fontEmbedCSS = await getFontEmbedCSS();
@@ -1678,8 +1678,8 @@ async function saveShownImage(){
 }
 /* Paints a sparkline (line, points, zero line) onto a canvas at 2x, in the colors the card shows */
 function drawSparkToCanvas(svg, w, h){
-  const vb = svg.viewBox.baseVal, R = 2, sx = w / vb.width, sy = h / vb.height;
-  const cv = document.createElement("canvas"); cv.width = w * R; cv.height = h * R;
+  const vb = svg.viewBox.baseVal, R = 1.5, sx = w / vb.width, sy = h / vb.height;   // 1.5x is sharp enough for the picture and uses 40% less canvas memory than 2x
+  const cv = document.createElement("canvas"); cv.width = Math.round(w * R); cv.height = Math.round(h * R);
   const g = cv.getContext("2d"); g.scale(R, R);
   const line = svg.querySelector(".sp-line"); if (!line) return cv;
   const col = getComputedStyle(line).stroke || "#1D3557", bg = (() => { let e = svg.closest(".card"); const c = e ? getComputedStyle(e).backgroundColor : ""; return c && c !== "rgba(0, 0, 0, 0)" ? c : "#FFFFFF"; })();
