@@ -2555,14 +2555,11 @@ async function showNew(day){
   const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
   const v = dayList(items, wl, head, "No reports filed this day");
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
-  const linkText = newOpen ? "Hide the list of companies" : `Click to view ${items.length.toLocaleString("en-US")} ${items.length === 1 ? "company that" : "companies that"} filed ${isToday ? "today" : "on " + esc(dayName(newSel))}`;
   const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>") +
-    `<p class="nr-more"><button type="button" class="linkbtn" id="newMore" aria-expanded="${newOpen}" aria-controls="newList">${linkText}</button></p>` : "") +
-    `<div id="newList"${items.length && !newOpen ? " hidden" : ""}>${list}</div>`;
+    "" : "") + `<div id="newList">${list}</div>`;   // the report types are collapsed boxes, so the list is always shown
   bindTop($("#npBody"), items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>");
   keepPicker(oldNew, "#newDayPick", e => showNew(e.target.value).then(() => refocus($("#newDayPick"))));
-  const more = $("#newMore"); if (more) more.addEventListener("click", () => { newOpen = !newOpen; showNew().then(() => $("#newMore").focus()); });
   showPage("new", "Latest reports");
 }
 /* Upcoming: today's scheduled releases that haven't been filed yet (they move to New as they file),
