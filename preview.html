@@ -260,7 +260,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .fb-row .btn{height:44px}
 .fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-@media (max-width:640px){.tabs{width:100%}.tab{flex:0 0 calc((100% - 12px) / 4);padding:0 6px;font-size:14px;min-width:0}}
+@media (max-width:640px){.tabs{width:calc(var(--n,4) * (100% - 4px) / 4 + 4px)}.tab{flex:1 1 0;padding:0 6px;font-size:14px;min-width:0}}   /* each tab is a quarter of the row; the shaded bar shrinks to fit the tabs shown */
 .fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
 /* Filing strip: the annual report and the latest quarters */
 .periods{display:flex;gap:8px;flex-wrap:wrap}.periods[hidden],.tab[hidden]{display:none}
@@ -2290,7 +2290,7 @@ async function openCompany(t, view, period){
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
   if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; });   // the written report, slides and video are for the annual report
+  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; }); $(".tabs").style.setProperty("--n", period ? 2 : 4);   // the written report, slides and video are for the annual report
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
