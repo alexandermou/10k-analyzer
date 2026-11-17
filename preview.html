@@ -156,6 +156,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
+.img-set{margin:0 0 6px}.img-set .info-settings{margin-left:0}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
 .ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
@@ -816,8 +817,9 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
     </div>
     <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
       <p class="img-note">Pinch-zoom for details.</p>
-      <div class="img-tools"><a class="info-settings" href="#layout-settings">Settings</a><span class="status" id="imgTabStatus" role="status"></span>
-        <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button>
+      <p class="img-set"><a class="info-settings" href="#layout-settings">Settings</a></p>
+      <div class="img-tools">
+        <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button><span class="img-hint">Refresh if a chart is incomplete</span><span class="status" id="imgTabStatus" role="status"></span>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button type="button" class="ic-btn img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
       <div class="img-wait" id="tabWait" role="status" hidden><span class="img-spin" aria-hidden="true"></span><p>Drawing the image…</p><small>One moment</small></div>
