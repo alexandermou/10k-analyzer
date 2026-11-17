@@ -583,8 +583,9 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .sl-rows{display:flex;flex-direction:column;gap:12px}
 .sl-row{display:grid;grid-template-columns:320px 1fr 190px;align-items:center;gap:20px;font-size:21px}
 .sl-row b{font-family:var(--f-mono);font-weight:600;text-align:right}
-.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden}
-.sl-track i{display:block;height:100%;background:var(--flow-src);border-radius:6px}
+.sl-track{height:22px;background:var(--sunk);border-radius:6px;overflow:hidden;position:relative}
+.sl-track i{position:absolute;top:0;display:block;height:100%;background:var(--flow-src);border-radius:6px}.sl-track i.neg{background:var(--node-neg)}
+.sl-track .sl-zero{position:absolute;top:0;bottom:0;width:2px;background:var(--muted)}
 .sl-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 .sl-kpi{border:1px solid var(--line);border-radius:14px;padding:20px 24px;display:flex;flex-direction:column;gap:6px}
 .sl-kpi .v{font-family:var(--f-mono);font-size:44px;font-weight:600}
@@ -2081,9 +2082,11 @@ function buildSlides(c){
   add("At a glance", `<h3 class="sl-h">${esc(c.fy)} in four numbers</h3><div class="sl-kpis">${c.kpis.map(k => `<div class="sl-kpi"><span class="l">${esc(k.label)}</span><span class="v">${esc(k.value)}</span><span class="s">${stripPrior(k.sub) ? esc(stripPrior(k.sub)) + " · " : ""}<span class="${k.tone || "up"}">${esc(k.delta)}</span></span></div>`).join("")}</div>`,
     "At a glance. " + c.kpis.map(k => sayify(`${k.label}: ${k.value}, ${k.delta}`)).join(". ") + ".",
     c.kpis.map(k => `${k.label}: ${k.value} (${k.delta})`).join(" · "));
-  const m = Math.max(...c.sources.map(s => s[1]));
-  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="up">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
-    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track"><i style="width:${(v / m * 100).toFixed(1)}%"></i></div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
+  /* two-sided: a negative line (eliminations, losses) goes left of zero in red */
+  const sPos = Math.max(0, ...c.sources.map(s => s[1])), sNeg = Math.max(0, ...c.sources.map(s => -s[1])), sSpan = (sPos + sNeg) || 1, sZ = sNeg / sSpan * 100;
+  const sBar = v => { const w = Math.abs(v) / sSpan * 100; return `<i class="${v < 0 ? "neg" : ""}" style="left:${(v < 0 ? sZ - w : sZ).toFixed(1)}%;width:${w.toFixed(1)}%"></i>${sNeg ? `<b class="sl-zero" style="left:${sZ.toFixed(1)}%"></b>` : ""}`; };
+  add("Revenue", `<div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><p class="sl-big">${f(c.revenue)}</p><p class="sl-sub"><span class="${c.revenue >= c.revenuePrior ? "up" : "down"}">${yoyStr(c.revenue, c.revenuePrior)}</span> vs ${f(c.revenuePrior)} in ${c.fyPrior}</p></div>
+    <p class="lbl" style="font-size:18px">${esc(c.sourceTitle)}</p><div class="sl-rows">${c.sources.map(([n, v]) => `<div class="sl-row"><span>${esc(n)}</span><div class="sl-track">${sBar(v)}</div><b>${f(v)} · ${pctOf(c, v)}</b></div>`).join("")}</div>`, sc[1].say, sc[1].cap);
   const parts = [[c.cogsLabel.replace("*", ""), c.cogs, "var(--node-neg)"]].concat(c.opex.map((o, i) => [o[0], o[1], i % 2 ? "var(--flow-neg)" : "color-mix(in srgb, var(--flow-neg) 60%, var(--surface))"])).concat(c.opIncome > 0 ? [["Operating income", c.opIncome, "var(--node-pos)"]] : []);
   const denomS = Math.max(c.revenue, parts.reduce((a, q) => a + q[1], 0));
   add("Where each dollar went", `<h3 class="sl-h">${c.opIncome > 0 ? `${pctOf(c, c.opIncome)} of revenue became operating income` : `Costs exceeded revenue: operating margin ${pctOf(c, c.opIncome)}`}</h3><div class="sl-stack">${parts.map(([n, v, col]) => `<i style="display:block;width:${(v / denomS * 100).toFixed(2)}%;background:${col}"></i>`).join("")}</div>
