@@ -88,7 +88,7 @@ body.shot .star-btn{display:none}
 .status{font-size:13px;color:var(--muted)}
 .brand{display:none}
 /* infographic layout (used to draw the PNG) */
-body.shot .top,body.shot .tools{display:none}
+body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
 body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
@@ -117,6 +117,18 @@ body.shot .chart svg{height:200px}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 
+.tabs{display:flex;gap:4px;background:var(--n-bg);padding:4px;border-radius:12px;width:max-content;max-width:100%;margin-top:4px}
+.tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:600 15px var(--f-body);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+[hidden]{display:none!important}
+.img-note{margin:8px 0 0;color:var(--muted);font-size:13px}
+.img-tools{display:flex;align-items:center;gap:10px;padding:6px 0 4px}
+.img-tools .status{flex:1;min-width:0}
+.img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+#dashView{display:contents}
+.img-tools{justify-content:flex-end}
+
 .risks li{padding:4px 0 4px 12px}
 .rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
 .rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
@@ -139,7 +151,8 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     
     <div class="chips"><span class="chip">ACCV · Nasdaq</span><span class="chip">424B4</span><span class="chip go">Priced Sep 29, 2026</span></div>
   </header>
-  <div class="tools"><button class="btn dl-btn" type="button" id="dlInfo" aria-label="Download infographic (PNG)" title="Download infographic (PNG)"><span>Infographic</span><svg class="dl-ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="status" id="infoStatus" role="status"></span></div>
+  <div class="tabs" role="tablist" aria-label="Views"><button class="tab" role="tab" id="tab-dash" aria-selected="true">Dashboard</button><button class="tab" role="tab" id="tab-img" aria-selected="false">Infographic</button></div>
+  <div id="dashView">
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Final price</div><div class="v">$18.00</div><div class="s">per share, from the final prospectus</div></div><div class="tile"><div class="l">Shares offered</div><div class="v">30.00M</div><div class="s">+4.50M over-allotment option</div></div><div class="tile"><div class="l">Raise at the final price</div><div class="v">$540.0M</div><div class="s">30,000,000 × $18, before fees</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Designs, makes and installs power-distribution and other infrastructure products for data centers and other mission-critical sites.</p></section>
   <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
@@ -152,6 +165,14 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier and show the change in size; green is better for the company, red worse; n/m where the sign flips.</p></section>
   <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Consider the risks and uncertainties described below, together with the financial and other information contained</li><li>Only ones we face. Additional risks and uncertainties that we are unaware of, or that we currently believe are not</li><li>Material, may also become important factors that affect us</li><li>Financial condition, results of operations, cash flows and prospects could be materially adversely affected</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Accelevation Holdings Corp.'s <a href="https://www.sec.gov/Archives/edgar/data/2141406/000162828026064097/accelevationllc-424b4.htm" target="_blank" rel="noopener">Form 424B4, filed with the SEC on Oct 1, 2026</a>  (final prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
+  </div>
+  <div id="imgView" hidden>
+    <p class="img-note">Pinch-zoom for details.</p>
+    <div class="img-tools"><span class="status" id="imgStatus" role="status"></span>
+      <button type="button" class="img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button type="button" class="img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+    <img id="tabImg" alt="Infographic of this IPO filing">
+  </div>
   <div class="brand"><span>10-K Analyzer</span><span>alexandermou.github.io/10k-analyzer</span></div>
 </div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
@@ -164,20 +185,28 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "ACCV-infographic.png", "imgName": "ACCV-IPO-424B4-2026-10-01-infographic.png", "ticker": "ACCV", "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 158.63, "t": "$158.6M", "tip": "$158.6M"}, {"k": "H1 2026", "v": 437.451, "t": "$437.5M", "tip": "$437.5M"}], "label": "Revenue, 1st half: H1 2025 $158.6M, H1 2026 $437.5M"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": -8.711, "t": "\u2212$8.7M", "tip": "\u2212$8.7M"}, {"k": "H1 2026", "v": 19.325, "t": "$19.3M", "tip": "$19.3M"}], "label": "Net result, 1st half: H1 2025 \u2212$8.7M, H1 2026 $19.3M"}]};
+const PAGE = {"img": "ACCV-infographic.png", "imgName": "ACCV-IPO-424B4-2026-10-01-infographic.png", "ticker": "ACCV", "cik": 2141406, "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 158.63, "t": "$158.6M", "tip": "$158.6M"}, {"k": "H1 2026", "v": 437.451, "t": "$437.5M", "tip": "$437.5M"}], "label": "Revenue, 1st half: H1 2025 $158.6M, H1 2026 $437.5M"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": -8.711, "t": "\u2212$8.7M", "tip": "\u2212$8.7M"}, {"k": "H1 2026", "v": 19.325, "t": "$19.3M", "tip": "$19.3M"}], "label": "Net result, 1st half: H1 2025 \u2212$8.7M, H1 2026 $19.3M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {
-  const W = 360, H = 190, padL = 6, padR = 6, top = 22, base = 150;
-  const max = Math.max(...data.map(d => Math.abs(d.v))) * 1.05;
+  /* One zero line: bars rise above it for gains and hang below it for losses. All gains: the line is at the bottom; all losses: at the top. */
+  const W = 360, H = 190, padL = 6, padR = 6, base = 150;
+  const hi = Math.max(0, ...data.map(d => d.v)), lo = Math.min(0, ...data.map(d => d.v));
+  const top = hi > 0 ? 22 : 16, bot = lo < 0 ? base - 18 : base;      // room for value labels above gains / below losses
+  const y0 = hi - lo ? top + hi / (hi - lo) * (bot - top) : base, k = (bot - top) / ((hi - lo) || 1);
   const bw = Math.min(70, (W - padL - padR) / data.length * 0.5), step = (W - padL - padR) / data.length;
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">`;
-  s += `<line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="var(--line)" stroke-width="1"/>`;
+  s += `<line x1="0" x2="${W}" y1="${y0}" y2="${y0}" stroke="var(--line)" stroke-width="1"/>`;
   data.forEach((d, i) => {
-    const h = Math.abs(d.v) / max * (base - top), x = padL + step * i + (step - bw) / 2, y = base - h;
+    const h = Math.abs(d.v) * k, r = Math.min(4, h), x = padL + step * i + (step - bw) / 2;
     const col = d.v < 0 ? "var(--negbar)" : (i === data.length - 1 ? "var(--bar)" : "var(--bar2)");
-    s += `<path d="M${x},${base} V${y + 4} q0,-4 4,-4 h${bw - 8} q4,0 4,4 V${base} Z" fill="${col}"/>`;
-    s += `<text class="val" x="${x + bw / 2}" y="${y - 6}" text-anchor="middle">${d.t}</text>`;
+    if (d.v < 0) {
+      s += `<path d="M${x},${y0} V${y0 + h - r} q0,${r} ${r},${r} h${bw - 2 * r} q${r},0 ${r},-${r} V${y0} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${x + bw / 2}" y="${y0 + h + 15}" text-anchor="middle">${d.t}</text>`;
+    } else {
+      s += `<path d="M${x},${y0} V${y0 - h + r} q0,-${r} ${r},-${r} h${bw - 2 * r} q${r},0 ${r},${r} V${y0} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${x + bw / 2}" y="${y0 - h - 6}" text-anchor="middle">${d.t}</text>`;
+    }
     s += `<text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle">${d.k}</text>`;
     if (d.s) s += `<text x="${x + bw / 2}" y="${base + 34}" text-anchor="middle">${d.s}</text>`;
     s += `<rect class="hit" x="${padL + step * i}" y="${top - 16}" width="${step}" height="${H - top}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
@@ -197,15 +226,21 @@ const IMG = {url: PAGE.img, name: PAGE.imgName};
 let lastImg = null, lastImgUrl = null;
 const shareFileOf = () => lastImg ? new File([lastImg.blob], lastImg.name, {type: "image/png"}) : null;
 function canShareImage(){ try { const f = shareFileOf(); return !!(f && navigator.share && navigator.canShare && navigator.canShare({files: [f]})); } catch (e) { return false; } }
-$("dlInfo").addEventListener("click", async () => {
-  const btn = $("dlInfo"), st = $("infoStatus"); btn.disabled = true; st.textContent = "Loading the image…";
-  try {
-    if (!lastImg) { const r = await fetch(IMG.url, {cache: "no-cache"}); if (!r.ok) throw 0; lastImg = {blob: await r.blob(), name: IMG.name}; lastImgUrl = URL.createObjectURL(lastImg.blob); }
-    st.textContent = ""; const ov = $("imgOverlay"); $("ovImg").src = lastImgUrl; ov.hidden = false;
-    $("ovStatus").textContent = "Double-tap: full screen or back"; $("ovShare").hidden = !canShareImage(); document.querySelector("#imgOverlay .ov-box").focus({preventScroll: true});
-  } catch (e) { st.textContent = "The image couldn't be loaded right now. Try again in a moment."; }
-  finally { btn.disabled = false; }
-});
+const loadImg = async () => { if (!lastImg) { const r = await fetch(IMG.url, {cache: "no-cache"}); if (!r.ok) throw 0; lastImg = {blob: await r.blob(), name: IMG.name}; lastImgUrl = URL.createObjectURL(lastImg.blob); } return lastImgUrl; };
+/* Menu bar: Dashboard (this page) and Infographic (the picture, with full screen and share) */
+function setTab(v){
+  $("dashView").hidden = v === "image"; $("imgView").hidden = v !== "image";
+  $("tab-dash").setAttribute("aria-selected", v !== "image"); $("tab-img").setAttribute("aria-selected", v === "image");
+  if (v === "image" && !$("tabImg").getAttribute("src")) { $("imgStatus").textContent = "Loading the image…"; loadImg().then(u => { $("tabImg").src = u; $("imgStatus").textContent = ""; }).catch(() => { $("imgStatus").textContent = "The image couldn't be loaded right now. Try again in a moment."; }); }
+  try { history.replaceState(null, "", v === "image" ? "#infographic" : location.pathname + location.search); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+$("tab-dash").addEventListener("click", () => setTab("dash")); $("tab-img").addEventListener("click", () => setTab("image"));
+let ovFromTab = false;
+$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").textContent = "Pinch-zoom for details"; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
+$("tabShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return;
+  if (canShareImage()) { try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) {} return; }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove(); });
 $("ovFs").addEventListener("click", () => setImgFs(true));   // full screen in place of the old save button (saving is in the share sheet)
 $("ovShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return; try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) { if (!e || e.name !== "AbortError") $("ovStatus").textContent = "Sharing isn't available here. Use the save button instead."; } });
 const ov = $("imgOverlay"), ovFsReal = () => (document.fullscreenElement || document.webkitFullscreenElement) === ov;
@@ -215,26 +250,25 @@ function setImgFs(on){
   else if (ovFsReal()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
 }
 const toggleImgFs = () => setImgFs(!ov.classList.contains("img-fs"));
-$("ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); });   // the exit button sits outside the picture, so it never ends up in a saved image
+$("ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); if (ovFromTab) { ovFromTab = false; $("ovImg").removeAttribute("src"); ov.hidden = true; } });   // the exit button sits outside the picture, so it never ends up in a saved image
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ovFsReal() && ov.classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement) && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) ov.classList.remove("img-fs"); }));
 let lastTap = {t: 0, x: 0, y: 0}, lastToggle = 0;
 $("ovImg").addEventListener("pointerup", e => { if (e.pointerType === "mouse") return; const now = Date.now();
   if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) { e.preventDefault(); lastTap.t = 0; lastToggle = now; toggleImgFs(); } else lastTap = {t: now, x: e.clientX, y: e.clientY}; });
 $("ovImg").addEventListener("dblclick", e => { e.preventDefault(); if (Date.now() - lastToggle > 500) toggleImgFs(); });
-$("ovClose").addEventListener("click", () => { setImgFs(false); $("ovImg").removeAttribute("src"); ov.hidden = true; $("dlInfo").focus(); });
+$("ovClose").addEventListener("click", () => { setImgFs(false); $("ovImg").removeAttribute("src"); ov.hidden = true; ovFromTab = false; });
 ov.addEventListener("click", e => { if (e.target === e.currentTarget) $("ovClose").click(); });
 document.addEventListener("keydown", e => { if (e.key !== "Escape" || ov.hidden) return; if (ov.classList.contains("img-fs")) setImgFs(false); else $("ovClose").click(); });
 
-/* Watchlist star: the same cookie the main site uses (path = the site folder, one level up) */
-const TICKER = PAGE.ticker, WL_PATH = location.pathname.replace(/ipo\/[^/]*$/, "") || "/";
-function wlGet(){ const m = document.cookie.match(/(?:^|;\s*)wl=([^;]*)/); if (!m) return [];
-  try { return [...new Set(decodeURIComponent(m[1]).split(",").map(t => t.trim().toUpperCase()).filter(t => /^[A-Z0-9.\-]{1,10}$/.test(t)))]; } catch (e) { return []; } }
-function wlSet(list){ document.cookie = `wl=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; wlShow(); }
-function wlShow(){ document.body.classList.toggle("haswl", wlGet().length > 0); const on = wlGet().includes(TICKER), b = $("starBtn"); if (!b) return;
-  b.setAttribute("aria-pressed", on); b.textContent = on ? "★" : "☆"; b.title = on ? `Remove ${TICKER} from your watchlist` : `Add ${TICKER} to your watchlist`; b.setAttribute("aria-label", b.title);
-  document.body.classList.toggle("haswl", wlGet().length > 0); }
-if (TICKER) $("starBtn").addEventListener("click", () => { const l = wlGet(); wlSet(l.includes(TICKER) ? l.filter(t => t !== TICKER) : l.concat(TICKER)); });
+/* Watchlist star: the IPO watchlist (a cookie of SEC registration numbers, shared with the site's IPO list; path = the site folder, one level up) */
+const CIK = String(PAGE.cik), WL_PATH = location.pathname.replace(/ipo\/[^/]*$/, "") || "/";
+const wlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*)/); return m ? decodeURIComponent(m[1]).split(",").filter(x => /^\d{1,10}$/.test(x)) : []; };
+function wlSet(list){ document.cookie = `wlipo=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; wlShow(); }
+function wlShow(){ const on = wlGet().includes(CIK), b = $("starBtn"); if (!b) return;
+  b.setAttribute("aria-pressed", on); b.textContent = on ? "★" : "☆"; b.title = on ? "Remove from your watchlist" : "Add to your watchlist"; b.setAttribute("aria-label", b.title); }
+$("starBtn").addEventListener("click", () => { const l = wlGet(); wlSet(l.includes(CIK) ? l.filter(t => t !== CIK) : l.concat(CIK)); });
 wlShow();
+if (location.hash === "#infographic") setTab("image");
 if (new URLSearchParams(location.search).has("shot")) document.body.classList.add("shot");
 
 </script>

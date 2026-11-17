@@ -626,11 +626,11 @@ body:not(.haswl) #wlIcon,body:not(.haswl) #wlBtn,body:not(.haswl) .homelinks a[h
 body.company .views{display:none}
 .ipo-list{display:flex;flex-direction:column;gap:8px}
 .ipo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:4px}
-.ipo-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ipo-top{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
 .ipo-top .ipo-name{flex:1;min-width:0}
-.ipo-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:none;max-width:60%}
+.ipo-right{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 8px;max-width:100%}
 .ipo-right .ipo-tag{margin-left:0;white-space:nowrap}
-.ipo-top .ipo-sym{padding-top:2px;text-align:right}
+.ipo-top .ipo-sym{text-align:left}
 .ipo-name{font-weight:600;color:var(--ink);text-decoration:none}
 .ipo-name:hover{color:var(--accent);text-decoration:underline}
 .ipo-sym{font-family:var(--f-mono);font-size:13px;color:var(--muted);white-space:nowrap}
