@@ -2630,21 +2630,22 @@ async function showIpoToday(day){
   const items = D[ipoDaySel] || [], future = ipoDaySel > t;
   const opts = days.map(x => `<option value="${x}"${x === ipoDaySel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}${x > t ? " · expected" : ""} (${(D[x] || []).length})</option>`).join("");
   const usd = v => v ? "$" + scaled(v / 1e6).join("") : "—";
+  const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
   const px = x => x.expected ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
   let html = `<div class="nr-day"><h3><label for="ipoDayPick">First trading day</label> <select id="ipoDayPick" class="day-pick">${opts}</select></h3>`;
   if (!items.length) html += `<p class="sub">${ipoDaySel === t ? "No US IPOs start trading today." : "No US IPOs on this day."} Pick another day above.</p>`;
   else {
     /* Top 10 by money raised */
     const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
-    if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised${future ? " <small class=\"t10-q\">expected</small>" : ""}</h4></div><ol class="top10-bars">${top.map((x, i) => {
-      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${usd(x.amount)}`;
+    if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised</h4></div><ol class="top10-bars">${top.map((x, i) => {
+      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${amt(x)}`;
       return `<li title="${esc(tip)}"><span class="t10-rank">${i + 1}</span><span class="t10-name">${href ? `<a class="t10-tk" href="${href}">${esc(x.sym)}</a>` : `<span class="t10-tk">${esc(x.sym)}</span>`}<span></span></span>
-        <span class="t10-link"><span class="t10-track"><span class="t10-bar" style="left:0;width:${(x.amount / mx * 100).toFixed(1)}%"></span></span><span class="t10-v">${usd(x.amount)}</span></span></li>`; }).join("")}</ol>
-      <p class="t10-note">Offer amount = offer price × shares offered${future ? "; for expected listings, the calendar's figure at the price range" : ""}. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
+        <span class="t10-link"><span class="t10-track"><span class="t10-bar" style="left:0;width:${(x.amount / mx * 100).toFixed(1)}%"></span></span><span class="t10-v">${amt(x)}</span></span></li>`; }).join("")}</ol>
+      <p class="t10-note">Money raised = final offer price × shares offered. Until the final price is out, it's an estimate (est.): the top of the price range × shares offered; it's updated once the IPO prices. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
     /* one closed box per exchange, as usual */
     const ORD = ["Nasdaq", "NYSE", "NYSE American", "NYSE Arca", "Other"];
     const row = x => { const c = cikOf[x.sym], on = c && wlI.has(c), v = IPO_BY_T[x.sym] || (c && IPO_PAGES[c]), tip = `${on ? "Remove from" : "Add to"} your watchlist`;
-      const lk = v ? `<a href="${v.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${v.img}" class="ipo-info" data-t="${esc(c || "")}">Infographic</a>` : `<span class="ipo-px">${esc(px(x))}${px(x) ? " · " : ""}${usd(x.amount)}</span>`;
+      const lk = v ? `<a href="${v.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${v.img}" class="ipo-info" data-t="${esc(c || "")}">Infographic</a>` : `<span class="ipo-px">${esc(px(x))}${px(x) ? " · " : ""}${amt(x)}</span>`;
       const nm = x.name.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|AG|Holdings?|Group|Co)\b\.?.*$/i, "") || x.name;
       return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
     for (const ex of ORD) {
