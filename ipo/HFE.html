@@ -236,7 +236,7 @@ function setTab(v){
 }
 $("tab-dash").addEventListener("click", () => setTab("dash")); $("tab-img").addEventListener("click", () => setTab("image"));
 let ovFromTab = false;
-$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").textContent = "Pinch-zoom for details"; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
+$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").textContent = "Pinch-zoom for details."; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
 $("tabShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return;
   if (canShareImage()) { try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) {} return; }
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove(); });
