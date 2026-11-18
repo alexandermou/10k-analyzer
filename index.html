@@ -160,6 +160,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-star:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
+@media (hover:hover) and (pointer:fine){.pz{display:none!important}}   /* mouse and trackpad: no pinch */
 .img-set{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
 .ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}.ipo-rows4{grid-template-columns:minmax(0,max-content) max-content max-content max-content!important}.ipo-ex{justify-self:start;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 4px;white-space:nowrap}#ipoBody .ipo-rows4{column-gap:6px}
 .ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
@@ -774,7 +775,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>Foreign companies listed in the US (foreign private issuers) don't file 10-Ks or 10-Qs. They file an annual report on Form 20-F (Form 40-F for many Canadian companies), and their interim results, if any, are furnished on Form 6-K.</p>
         <p>SEC rules already allow them to report every half-year instead of every quarter, and many only file annual results in tagged form. That's why some of them have half-year charts or no interim charts at all.</p></details>
       <details><summary>What do the tabs on a company page show?</summary>
-        <ul><li><b>Dashboard:</b> the key charts for the period.</li><li><b>Infographic:</b> one shareable image of the results. Pinch-zoom for details.</li><li><b>Media:</b> the same results as slides or a short video.</li><li><b>Summary:</b> a written recap.</li></ul></details>
+        <ul><li><b>Dashboard:</b> the key charts for the period.</li><li><b>Infographic:</b> one shareable image of the results.<span class="pz"> Pinch-zoom for details.</span></li><li><b>Media:</b> the same results as slides or a short video.</li><li><b>Summary:</b> a written recap.</li></ul></details>
       <details><summary>What do the small line charts show?</summary>
         <ul><li>On a quarterly report: the last 5 quarters.</li>
         <li>On an annual report: the last 5 quarters leading up to the year end, so you can see the trend inside the year.</li>
@@ -786,7 +787,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p>
         <p>The quarter label (such as Q3) comes from the company's fiscal year end and last year's release date. A few companies can't be labelled, so they show an ER tag (earnings release) instead.</p></details>
       <details><summary>Where does the IPO list come from?</summary>
-        <p>The <b>New</b> tab lists IPOs that started trading in the last 30 days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
+        <p>The <b>New</b> tab lists IPOs that started trading in the last 60 days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
         <p>The <b>Filed</b> tab comes from the SEC. It has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
         <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
@@ -822,7 +823,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Summary</button>
     </div>
     <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
-      <div class="img-set"><p class="img-note">Pinch-zoom for details.</p><a class="info-settings" href="#layout-settings">Settings</a></div>
+      <div class="img-set"><p class="img-note"><span class="pz">Pinch-zoom for details.</span></p><a class="info-settings" href="#layout-settings">Settings</a></div>
       <div class="img-tools">
         <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button><span class="img-hint">Refresh if a chart is incomplete</span><span class="status" id="imgTabStatus" role="status"></span>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -897,7 +898,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 <div class="cx-ov" id="cxOv" hidden role="dialog" aria-modal="true" aria-label="Card, full screen"><button type="button" class="cx-shrink" id="cxShrink" aria-label="Shrink" title="Shrink"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/></svg></button><div class="cx-stage" id="cxStage"></div></div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box" tabindex="-1">
-    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Pinch-zoom for details.</p></div>
+    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status"><span class="pz">Pinch-zoom for details.</span></p></div>
       <div class="ov-acts"><button class="ov-ic" type="button" id="ovFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
     <button class="ov-exitfs" type="button" id="ovExitFs" aria-label="Exit full screen" title="Exit full screen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
     <img id="ovImg" alt="Infographic">
@@ -1556,7 +1557,7 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<p class="img-note">Pinch-zoom for details.</p>
+  $("#view-infographic").innerHTML = `<p class="img-note pz">Pinch-zoom for details.</p>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
@@ -1850,7 +1851,7 @@ $("#tabShare").addEventListener("click", async () => {
 });
 function showImage(url, title){
   const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
-  $("#ovStatus").innerHTML = "Pinch-zoom for details.";
+  $("#ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>';
   $("#ovShare").hidden = !canShareImage();
   $("#imgOverlay .ov-box").focus({preventScroll: true});   // focus the dialog, not a button, so no button looks selected
 }
@@ -2624,14 +2625,14 @@ async function showIpo(tab){
   $("#ipoTabToday").innerHTML = `New <span class="nr-n">${ipoNewItems().items.length}</span>`;
   $("#ipoTabFiled").innerHTML = `Filed <span class="nr-n">${(ipoData.ipos || []).length}</span>`;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
-  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that raised money and started trading in the last 30 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Direct listings, which raise no money, are left out. Company details come from SEC filings."
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that raised money and started trading in the last 60 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Direct listings, which raise no money, are left out. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
 function ipoNewItems(){   // IPOs that started trading in the last 30 days: the exchange calendars plus EDGAR-only listings
   const t = todayISO(), D = (IPO_TODAY && IPO_TODAY.days) || {};
-  /* the last 30 days, today included; nothing in the future */
-  const from = (d => (d.setDate(d.getDate() - 30), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
+  /* the last 60 days, today included; nothing in the future */
+  const from = (d => (d.setDate(d.getDate() - 60), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
   let items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
   const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
   /* the exchange calendars leave out SPACs and some small listings: add Nasdaq/NYSE IPOs whose final prospectus is on EDGAR.
@@ -2662,8 +2663,8 @@ async function showIpoToday(){
   const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
   const px = x => x.est ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
   const exTag = e => ({"NYSE American": "NYSE Am.", "NYSE Arca": "Arca"})[e] || e;
-  let html = `<div class="nr-day"><h3>Last 30 days <span class="nr-n">${items.length}</span></h3>`;   // counted after the SEC additions
-  if (!items.length) html += `<p class="sub">No US IPOs in the last 30 days.</p>`;
+  let html = `<div class="nr-day"><h3>Last 60 days <span class="nr-n">${items.length}</span></h3>`;   // counted after the SEC additions
+  if (!items.length) html += `<p class="sub">No US IPOs in the last 60 days.</p>`;
   else {
     const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
     if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised</h4></div><ol class="top10-bars">${top.map((x, i) => {
@@ -2714,7 +2715,7 @@ async function showIpoFiled(){
   const S = [["cleared", "Cleared by the SEC", "Registration declared effective; pricing is imminent and the final prospectus usually follows the next business day."],
     ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
     ["filed", "Filed, waiting", "Public registration filed; no price range in the filings yet."],
-    ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
+    ["priced", "Priced or listed (last 60 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
     ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage."]];
   const STG = {cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced or listed"};
   const n = k => k === "spac" ? spacs.length : all.filter(x => x.stage === k).length;
@@ -2898,7 +2899,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   function open(card){
     stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note pz"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
       stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
       const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
