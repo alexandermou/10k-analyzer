@@ -1794,6 +1794,7 @@ function pageLock(){
   const h = document.documentElement, phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
   let fs = false; try { fs = !!(document.fullscreenElement || document.webkitFullscreenElement) && !($("#cxOv") && !$("#cxOv").hidden); } catch (e) {}
   try { if (typeof fsActive === "function" && fsActive()) fs = true; } catch (e) {}
+  if ($("#cxOv") && !$("#cxOv").hidden) fs = true;   // an enlarged card follows the phone: turned sideways it fills the landscape screen
   const on = phone && innerWidth > innerHeight && !fs; rotLocked = on;
   h.classList.toggle("rot-lock", on);
   if (on) {
@@ -2896,24 +2897,21 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   /* Income flow in full screen: not turned with the phone. Portrait shows the top-to-bottom drawing; landscape shows the flat drawing, so the chart looks the same way up whichever way the phone is held */
   function layoutSk(){ stage.style.cssText = `width:${pw() - 24}px`; delete stage.dataset.rot; }
   const isSk = () => ov.classList.contains("cx-sk");
-  window.addEventListener("resize", () => { if (!ov.hidden && isSk()) layoutSk(); });
+  function fitCard(){ const LW = pw() < 700 ? 360 : 560; stage.style.zoom = 1; stage.style.width = LW + "px";
+    const h = stage.getBoundingClientRect().height; stage.style.zoom = Math.max(1, Math.min(3, (pw() - 24) / LW, (ph() - 72) / h)); }   // as big as fits the screen
+  const relayout = () => { if (ov.hidden) return; pageLock(); if (isSk()) layoutSk(); else fitCard(); };
+  ["resize", "orientationchange"].forEach(ev => window.addEventListener(ev, () => { relayout(); setTimeout(relayout, 300); }));
   function open(card){
     stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
     if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note pz"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
-      stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
-    else {
-      const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
-      stage.style.zoom = 1; stage.style.width = LW + "px"; stage.replaceChildren(k);
-      ov.hidden = false; document.body.style.overflow = "hidden";
-      const h = stage.getBoundingClientRect().height;
-      stage.style.zoom = Math.max(1, Math.min(3, (pw() - 24) / LW, (ph() - 72) / h));   // as big as fits the screen
-    }
+      stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; pageLock(); layoutSk(); }
+    else { stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; pageLock(); fitCard(); }   // layout width 360/560: wide enough that every dot gets its value
     ov.scrollTop = 0; from = document.activeElement; $("#cxShrink").focus({preventScroll: true});
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;   // real full screen where the browser allows it
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
   }
-  function close(){ if (ov.hidden) return; ov.hidden = true; stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk", "cx-skv"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
+  function close(){ if (ov.hidden) return; ov.hidden = true; setTimeout(() => { pageLock(); setBst(); }, 0); stage.replaceChildren(); stage.style.cssText = ""; ov.classList.remove("cx-sk", "cx-skv"); try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {} document.body.style.overflow = "";
     if (realFs()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
     if (from && from.focus) from.focus({preventScroll: true}); }
   ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ov.hidden && !document.fullscreenElement && !document.webkitFullscreenElement && ov.dataset.fs) close(); if (realFs()) ov.dataset.fs = "1"; else delete ov.dataset.fs; }));
