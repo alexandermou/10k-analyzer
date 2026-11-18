@@ -1566,10 +1566,10 @@ function renderInfographic(c){
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
-    <div class="card sk-card" style="padding:18px 20px">
+    ${c.noFlow ? "" : `<div class="card sk-card" style="padding:18px 20px">
       <div class="barhead" style="flex-wrap:wrap"><h3 style="font-size:22px">Income statement flow</h3><p class="sub" style="font-weight:400">${esc(c.sourceTitle)} · expenses as % of revenue</p></div>
       <div class="sankey">${rotSvg(sankey(c))}${sankey(c).replace("<svg ", "<svg class=\"sk-flat\" ")}</div>
-    </div>
+    </div>`}
     ${renderSections(c)}
     ${c.quarter ? "" : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). SEC CIK ${esc(c.cik)}. <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
@@ -2520,6 +2520,7 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
   const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
   const noFig = items.filter(x => !x.m && x.form === "Earnings release").length;   // a release ahead of its 10-Q: the SEC's data has no figures for it yet
   const note = (kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`) +
+    (items.some(x => x.m && x.m.src === "release") ? " Figures for an earnings release are read from the release itself (unaudited) until the 10-Q or 10-K is filed." : "") +
     (noFig ? ` Not ranked yet: ${noFig} earnings release${noFig > 1 ? "s" : ""} without figures in the SEC's data; they arrive with the company's 10-Q or 10-K.` : "");
   return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">${heading}</h4>
     <label class="sr-only" for="topPick${sfx}">Rank by</label><select id="topPick${sfx}" class="top-pick">${opts}</select></div>
