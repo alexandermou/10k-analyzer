@@ -134,6 +134,8 @@ body.shot .chart svg{height:200px}
 #tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 #dashView{display:contents}
 
+@media (hover:hover) and (pointer:fine){.pz{display:none!important}}
+
 .risks li{padding:4px 0 4px 12px}
 .rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
 .rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
@@ -159,7 +161,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   </header>
   <div class="tabs" role="tablist" aria-label="Views"><button class="tab" role="tab" id="tab-dash" aria-selected="true">Dashboard</button><button class="tab" role="tab" id="tab-img" aria-selected="false">Infographic</button></div>
   <div id="dashView">
-  <p class="img-note dash-note">Pinch-zoom for details.</p>
+  <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Price range</div><div class="v">$4.5–$5.5</div><div class="s">per share</div></div><div class="tile"><div class="l">Shares offered</div><div class="v">4.00M</div><div class="s">+600K over-allotment option</div></div><div class="tile"><div class="l">Raise at $5 midpoint</div><div class="v">$20.0M</div><div class="s">4,000,000 × $5, before fees</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Software and computer programming services (SEC classification).</p></section>
   
@@ -171,7 +173,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="src">Source: Skubbs Holdings Ltd's <a href="https://www.sec.gov/Archives/edgar/data/1977251/000149315226043327/formf-1a.htm" target="_blank" rel="noopener">Form F-1/A, filed with the SEC on Sep 18, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>
-    <div class="img-tools"><p class="img-note">Pinch-zoom for details.</p><span class="status" id="imgStatus" role="status"></span>
+    <div class="img-tools"><p class="img-note"><span class="pz">Pinch-zoom for details.</span></p><span class="status" id="imgStatus" role="status"></span>
       <button type="button" class="img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       <button type="button" class="img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
     <img id="tabImg" alt="Infographic of this IPO filing">
@@ -240,7 +242,7 @@ function setTab(v){
 }
 $("tab-dash").addEventListener("click", () => setTab("dash")); $("tab-img").addEventListener("click", () => setTab("image"));
 let ovFromTab = false;
-$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").textContent = "Pinch-zoom for details."; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
+$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>'; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
 $("tabShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return;
   if (canShareImage()) { try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) {} return; }
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove(); });
