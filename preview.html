@@ -580,7 +580,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
 .ov.ov-sk #ovTitle{display:none}.ov.ov-sk .ov-box img{width:auto;max-width:100%;max-height:calc(100svh - 110px);margin:0 auto}   /* turned income flow: the title is in the picture; as big as the screen allows */
-.ov.ov-sk.img-fs .ov-box img{max-height:none;width:100%}
+.ov.ov-sk.img-fs .ov-box{height:100%;justify-content:center}.ov.ov-sk.img-fs .ov-box img{max-height:100svh;max-width:100%;width:auto;margin:auto}
 
 /* Slides (authored at 1280x720, scaled to fit) */
 .stage{position:relative;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
@@ -1796,7 +1796,7 @@ function pageLock(){
   const h = document.documentElement, phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
   let fs = false; try { fs = !!(document.fullscreenElement || document.webkitFullscreenElement) && !($("#cxOv") && !$("#cxOv").hidden); } catch (e) {}
   try { if (typeof fsActive === "function" && fsActive()) fs = true; } catch (e) {}
-  if ($("#imgOverlay") && !$("#imgOverlay").hidden && $("#imgOverlay").classList.contains("ov-sk")) fs = false;   // the turned income flow picture never turns with the phone
+  if ($("#imgOverlay") && !$("#imgOverlay").hidden && $("#imgOverlay").classList.contains("ov-sk")) fs = true;   // the income flow picture keeps its place on the screen by itself (skOrient)
   const on = phone && innerWidth > innerHeight && !fs; rotLocked = on;
   h.classList.toggle("rot-lock", on);
   if (on) {
@@ -1854,7 +1854,7 @@ $("#tabShare").addEventListener("click", async () => {
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove();   // no share sheet here: save the picture
 });
 function showImage(url, title){
-  const ov = $("#imgOverlay"); ov.classList.remove("ov-sk"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
+  const ov = $("#imgOverlay"); ov.classList.remove("ov-sk"); $("#ovImg").style.transform = ""; $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>';
   $("#ovShare").hidden = !canShareImage();
   $("#imgOverlay .ov-box").focus({preventScroll: true});   // focus the dialog, not a button, so no button looks selected
@@ -1910,7 +1910,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); img.style.transform = ""; $("#imgOverlay").hidden = true; $("#imgOverlay").classList.remove("ov-sk"); ovFromTab = false; pageLock(); setBst(); });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -2929,30 +2929,44 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
        title at the top left: the page and the picture never turn with the phone, so turning the phone sideways shows it the right way up, big. */
     const svg = card.querySelector("svg.sk-flat") || card.querySelector(".sankey svg"); if (!svg) return open(card);
     const c = state.shown || LIBRARY[state.ticker] || {}, base = LIBRARY[state.ticker] || c, vb = svg.viewBox.baseVal, k = Math.min(3, 3000 / vb.width);
-    const W = Math.round(vb.width * k), CH = Math.round(vb.height * k), band = Math.round(56 * k), pad = Math.round(14 * k);
+    const CW = Math.round(vb.width * k), CH = Math.round(vb.height * k), band = Math.round(56 * k), pad = Math.round(14 * k), lead = Math.round(28 * k), W = CW + lead;   // lead: room before the flow starts
     const phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
     /* Flat picture: the flow on top, a text band under it (title and report at the left, 10kdecoder.com at the right).
        On a phone it is turned a quarter turn clockwise: the flow runs top to bottom, the title sits at the top left and the
        site name at the bottom left; turned sideways the title is at the lower left under the flow, the site name at the lower right. */
-    const chart = drawSvgToCanvas(svg, W, CH, 1);
+    const chart = drawSvgToCanvas(svg, CW, CH, 1);
     const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = CH + band; const g = cvs.getContext("2d");
-    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, CH + band); g.drawImage(chart, 0, 0); chart.width = chart.height = 0;
+    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, CH + band); g.drawImage(chart, lead, 0); chart.width = chart.height = 0;
     const FAM = '"IBM Plex Sans", Helvetica, Arial, sans-serif', report = c.form || (/^Q\d/.test(c.fy || "") ? "10-Q" : "10-K");
     g.textBaseline = "alphabetic"; g.textAlign = "left";
     g.fillStyle = "#15202B"; g.font = `700 ${Math.round(20 * k)}px ${FAM}`;
     g.fillText(`Income statement flow · ${base.name || c.name || ""}`, pad, CH + Math.round(24 * k));
     g.fillStyle = "#5B6573"; g.font = `500 ${Math.round(13 * k)}px ${FAM}`;
-    g.fillText([base.ticker || c.ticker, report, c.fy, c.period].filter(Boolean).join(" · "), pad, CH + Math.round(44 * k));
+    const NUM = {One: 1, Two: 2, Three: 3, Four: 4, Five: 5, Six: 6, Seven: 7, Eight: 8, Nine: 9, Ten: 10, Eleven: 11, Twelve: 12};
+    const per = (c.period || "").replace(/\b(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Eleven|Twelve)\b/g, w => NUM[w]);   // "3 months ended", short
+    g.fillText([base.ticker || c.ticker, report, c.fy, per].filter(Boolean).join(" · "), pad, CH + Math.round(44 * k));
     g.textAlign = "right"; g.font = `600 ${Math.round(14 * k)}px ${FAM}`; g.fillText("10kdecoder.com", W - pad, CH + Math.round(44 * k));
-    let out = cvs;
-    if (phone) { out = document.createElement("canvas"); out.width = cvs.height; out.height = cvs.width; const o = out.getContext("2d");
-      o.translate(out.width, 0); o.rotate(Math.PI / 2); o.drawImage(cvs, 0, 0); cvs.width = cvs.height = 0; }   // quarter turn clockwise
-    const blob = await new Promise(r => out.toBlob(r, "image/png")); out.width = out.height = 0; if (!blob) return open(card);
-    lastImg = {blob, name: `${base.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
-    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
+    const toUrl = cv => new Promise(r => cv.toBlob(b => r(b), "image/png"));
+    const flatBlob = await toUrl(cvs); let portBlob = null;
+    if (phone) { const out = document.createElement("canvas"); out.width = cvs.height; out.height = cvs.width; const o = out.getContext("2d");
+      o.translate(out.width, 0); o.rotate(Math.PI / 2); o.drawImage(cvs, 0, 0); portBlob = await toUrl(out); out.width = out.height = 0; }   // quarter turn clockwise
+    cvs.width = cvs.height = 0; if (!flatBlob) return open(card);
+    lastImg = {blob: portBlob || flatBlob, name: `${base.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(lastImg.blob);
+    for (const u of skUrls) URL.revokeObjectURL(u); skUrls = portBlob ? [lastImgUrl, URL.createObjectURL(flatBlob)] : [];
     showImage(lastImgUrl, "Income statement flow");
-    $("#imgOverlay").classList.toggle("ov-sk", phone);
+    $("#imgOverlay").classList.toggle("ov-sk", phone); if (phone) { pageLock(); skOrient(); }
   }
+  /* The picture keeps its place on the phone's screen whichever way the phone is held: upright it is the turned picture;
+     turned sideways the browser turns its view, so the flat picture is shown (upside down when turned the other way). */
+  let skUrls = [];
+  function skOrient(){
+    const ov = $("#imgOverlay"), img = $("#ovImg"); if (ov.hidden || !ov.classList.contains("ov-sk") || skUrls.length < 2) return;
+    const land = innerWidth > innerHeight, ang = screen.orientation && typeof screen.orientation.angle === "number" ? screen.orientation.angle : (typeof window.orientation === "number" ? (window.orientation + 360) % 360 : 90);
+    const want = land ? skUrls[1] : skUrls[0]; if (img.getAttribute("src") !== want) img.src = want;
+    img.style.transform = land && ang === 270 ? "rotate(180deg)" : "";
+  }
+  ["resize", "orientationchange"].forEach(ev => window.addEventListener(ev, () => { skOrient(); setTimeout(skOrient, 300); }));
   const openAny = card => card.classList.contains("sk-card") ? openSkImage(card) : open(card);
   document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); openAny(b.closest(".card")); } });
   let last = null;
