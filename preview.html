@@ -786,7 +786,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p>
         <p>The quarter label (such as Q3) comes from the company's fiscal year end and last year's release date. A few companies can't be labelled, so they show an ER tag (earnings release) instead.</p></details>
       <details><summary>Where does the IPO list come from?</summary>
-        <p>The <b>New</b> tab lists IPOs that started trading in the last 30 days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
+        <p>The <b>New</b> tab lists IPOs that started trading in the last 60 days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
         <p>The <b>Filed</b> tab comes from the SEC. It has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
         <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
@@ -2624,14 +2624,14 @@ async function showIpo(tab){
   $("#ipoTabToday").innerHTML = `New <span class="nr-n">${ipoNewItems().items.length}</span>`;
   $("#ipoTabFiled").innerHTML = `Filed <span class="nr-n">${(ipoData.ipos || []).length}</span>`;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
-  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that raised money and started trading in the last 30 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Direct listings, which raise no money, are left out. Company details come from SEC filings."
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that raised money and started trading in the last 60 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Direct listings, which raise no money, are left out. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
 function ipoNewItems(){   // IPOs that started trading in the last 30 days: the exchange calendars plus EDGAR-only listings
   const t = todayISO(), D = (IPO_TODAY && IPO_TODAY.days) || {};
-  /* the last 30 days, today included; nothing in the future */
-  const from = (d => (d.setDate(d.getDate() - 30), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
+  /* the last 60 days, today included; nothing in the future */
+  const from = (d => (d.setDate(d.getDate() - 60), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
   let items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
   const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
   /* the exchange calendars leave out SPACs and some small listings: add Nasdaq/NYSE IPOs whose final prospectus is on EDGAR.
@@ -2662,8 +2662,8 @@ async function showIpoToday(){
   const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
   const px = x => x.est ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
   const exTag = e => ({"NYSE American": "NYSE Am.", "NYSE Arca": "Arca"})[e] || e;
-  let html = `<div class="nr-day"><h3>Last 30 days <span class="nr-n">${items.length}</span></h3>`;   // counted after the SEC additions
-  if (!items.length) html += `<p class="sub">No US IPOs in the last 30 days.</p>`;
+  let html = `<div class="nr-day"><h3>Last 60 days <span class="nr-n">${items.length}</span></h3>`;   // counted after the SEC additions
+  if (!items.length) html += `<p class="sub">No US IPOs in the last 60 days.</p>`;
   else {
     const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
     if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised</h4></div><ol class="top10-bars">${top.map((x, i) => {
@@ -2714,7 +2714,7 @@ async function showIpoFiled(){
   const S = [["cleared", "Cleared by the SEC", "Registration declared effective; pricing is imminent and the final prospectus usually follows the next business day."],
     ["range", "Price range set", `Expected date = the day the price range was filed + ${d.medianDaysRangeToPricing || "?"} days, the median for IPOs priced recently. Our estimate, not the company's.`],
     ["filed", "Filed, waiting", "Public registration filed; no price range in the filings yet."],
-    ["priced", "Priced or listed (last 45 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
+    ["priced", "Priced or listed (last 60 days)", "Final price from the final prospectus (424B4). Listings without an offering price are shown as filed."],
     ["spac", "SPAC", "Special purpose acquisition companies (blank-check shells), at every stage."]];
   const STG = {cleared: "Cleared by the SEC", range: "Price range set", filed: "Filed, waiting", priced: "Priced or listed"};
   const n = k => k === "spac" ? spacs.length : all.filter(x => x.stage === k).length;
