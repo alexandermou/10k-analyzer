@@ -133,6 +133,9 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 #tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
 #dashView{display:contents}
 @media (hover:hover) and (pointer:fine){.pz{display:none!important}}
+.chart tspan.sub{font-size:11px}
+.chart .chg{font-family:var(--f-mono);font-size:11px;font-weight:600}.chg-note{margin:2px 0 0;font-size:11px;color:var(--muted)}.chart .chg.up{fill:var(--pos)}.chart .chg.down{fill:var(--neg)}
+body.shot .chart svg{height:auto!important}
 </style>
 </head>
 <body>
@@ -302,41 +305,43 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {
-  /* One zero line: bars rise above it for gains and hang below it for losses. All gains: the line is at the bottom; all losses: at the top. */
-  const W = 360, H = 190, padL = 6, padR = 6, base = 150;
-  const hi = Math.max(0, ...data.map(d => d.v)), lo = Math.min(0, ...data.map(d => d.v));
-  const top = hi > 0 ? 22 : 16, bot = lo < 0 ? base - 18 : base;      // room for value labels above gains / below losses
-  const y0 = hi - lo ? top + hi / (hi - lo) * (bot - top) : base, k = (bot - top) / ((hi - lo) || 1);
-  const bw = Math.min(70, (W - padL - padR) / data.length * 0.5), step = (W - padL - padR) / data.length;
+  /* Horizontal bars, newest period on top (opt.keep: as given). One zero line: gains go right of it, losses left, in red.
+     Each value carries its change vs the row below (the same period a year earlier); a bigger loss is a negative change; n/m when the sign flips. */
+  const rows = opt.keep ? data.slice() : data.slice().reverse(), chg = !opt.noChg && rows.length > 1;
+  const W = 360, rowH = 32, bh = 18, labW = opt.labW || 66, valW = chg ? 104 : 60, H = rows.length * rowH + 6;
+  const hi = Math.max(0, ...rows.map(d => d.v)), lo = Math.min(0, ...rows.map(d => d.v));
+  const pL = labW + (lo < 0 ? valW : 0), pR = W - 4 - (hi > 0 ? valW : 0), k = (pR - pL) / ((hi - lo) || 1), z = pL - lo * k;
+  const pct = (d, o) => { if (!chg || !o) return ""; const c = o.v && (d.v < 0) === (o.v < 0) ? (d.v - o.v) / Math.abs(o.v) * 100 : null;
+    const t = c === null ? "n/m" : (c >= 0 ? "+" : "−") + (Math.abs(c) >= 100 ? Math.round(Math.abs(c)).toLocaleString("en-US") : Math.abs(c).toFixed(1)) + "%";
+    return `<tspan class="chg ${c === null ? "" : c >= 0 ? "up" : "down"}">${t}</tspan>`; };
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">`;
-  s += `<line x1="0" x2="${W}" y1="${y0}" y2="${y0}" stroke="var(--line)" stroke-width="1"/>`;
-  data.forEach((d, i) => {
-    const h = Math.abs(d.v) * k, r = Math.min(4, h), x = padL + step * i + (step - bw) / 2;
-    const col = d.v < 0 ? "var(--negbar)" : (i === data.length - 1 ? "var(--bar)" : "var(--bar2)");
+  rows.forEach((d, i) => {
+    const y = 4 + i * rowH, cy = y + rowH / 2, w = Math.abs(d.v) * k, r = Math.min(4, w / 2), by = cy - bh / 2;
+    const col = d.v < 0 ? "var(--negbar)" : (i === 0 && !opt.keep ? "var(--bar)" : "var(--bar2)"), p = pct(d, rows[i + 1]);
+    s += `<text x="0" y="${cy + 4}" text-anchor="start">${d.k}${d.s && !opt.noSub ? ` <tspan class="sub">${d.s}</tspan>` : ""}</text>`;
     if (d.v < 0) {
-      s += `<path d="M${x},${y0} V${y0 + h - r} q0,${r} ${r},${r} h${bw - 2 * r} q${r},0 ${r},-${r} V${y0} Z" fill="${col}"/>`;
-      s += `<text class="val" x="${x + bw / 2}" y="${y0 + h + 15}" text-anchor="middle">${d.t}</text>`;
+      s += `<path d="M${z},${by} H${z - w + r} q-${r},0 -${r},${r} V${by + bh - r} q0,${r} ${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z - w - 6}" y="${cy + 4}" text-anchor="end">${p}${p ? "<tspan> </tspan>" : ""}${d.t}</text>`;
     } else {
-      s += `<path d="M${x},${y0} V${y0 - h + r} q0,-${r} ${r},-${r} h${bw - 2 * r} q${r},0 ${r},${r} V${y0} Z" fill="${col}"/>`;
-      s += `<text class="val" x="${x + bw / 2}" y="${y0 - h - 6}" text-anchor="middle">${d.t}</text>`;
+      s += `<path d="M${z},${by} H${z + w - r} q${r},0 ${r},${r} V${by + bh - r} q0,${r} -${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z + w + 6}" y="${cy + 4}" text-anchor="start">${d.t}${p ? "<tspan> </tspan>" + p : ""}</text>`;
     }
-    s += `<text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle">${d.k}</text>`;
-    if (d.s) s += `<text x="${x + bw / 2}" y="${base + 34}" text-anchor="middle">${d.s}</text>`;
-    s += `<rect class="hit" x="${padL + step * i}" y="${top - 16}" width="${step}" height="${H - top}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
+    s += `<rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
   });
-  el.innerHTML = s + `</svg><div class="tip"></div>`;
+  s += `<line x1="${z}" x2="${z}" y1="2" y2="${H - 2}" stroke="var(--line)" stroke-width="1"/>`;
+  el.innerHTML = s + `</svg>${chg ? '<p class="chg-note">% = change vs the same period a year earlier</p>' : ""}<div class="tip"></div>`;
   const tip = el.querySelector(".tip");
   el.querySelectorAll(".hit").forEach(r => {
-    r.addEventListener("pointerenter", () => { const b = r.getBoundingClientRect(), p = el.getBoundingClientRect(); tip.textContent = r.dataset.tip; tip.style.left = (b.left - p.left + b.width / 2) + "px"; tip.style.top = "30px"; tip.style.opacity = 1; });
+    r.addEventListener("pointerenter", () => { const b = r.getBoundingClientRect(), p = el.getBoundingClientRect(); tip.textContent = r.dataset.tip; tip.style.left = (p.width / 2) + "px"; tip.style.top = (b.top - p.top - 6) + "px"; tip.style.opacity = 1; });
     r.addEventListener("pointerleave", () => tip.style.opacity = 0);
   });
 }
 const $ = id => document.getElementById(id);
-bars($("revFY"), [{k: "FY2024", v: 12.157, t: "$12.2M", s: "GM 32.0%"}, {k: "FY2025", v: 30.209, t: "$30.2M", s: "GM 74.2%"}], {label: "Net revenue FY2024 $12.2M, FY2025 $30.2M"});
-bars($("revH"), [{k: "H1 2025", v: 9.088, t: "$9.1M", s: "GM 51.4%"}, {k: "H1 2026", v: 28.558, t: "$28.6M", s: "GM 86.4%"}], {label: "Net revenue H1 2025 $9.1M, H1 2026 $28.6M"});
+bars($("revFY"), [{k: "FY2024", v: 12.157, t: "$12.2M", s: "GM 32.0%"}, {k: "FY2025", v: 30.209, t: "$30.2M", s: "GM 74.2%"}], {label: "Net revenue FY2024 $12.2M, FY2025 $30.2M", labW: 116});
+bars($("revH"), [{k: "H1 2025", v: 9.088, t: "$9.1M", s: "GM 51.4%"}, {k: "H1 2026", v: 28.558, t: "$28.6M", s: "GM 86.4%"}], {label: "Net revenue H1 2025 $9.1M, H1 2026 $28.6M", labW: 116});
 bars($("lossFY"), [{k: "FY2024", v: -34.737, t: "−$34.7M"}, {k: "FY2025", v: -56.447, t: "−$56.4M"}], {label: "Net loss FY2024 $34.7M, FY2025 $56.4M"});
 bars($("lossH"), [{k: "H1 2025", v: -32.057, t: "−$32.1M"}, {k: "H1 2026", v: -27.807, t: "−$27.8M"}], {label: "Net loss H1 2025 $32.1M, H1 2026 $27.8M"});
-bars($("cash"), [{k: "Jun 30, 2026", v: 28.974, t: "$29.0M", s: "actual"}, {k: "After the IPO", v: 195.161, t: "$195.2M", s: "pro forma as adjusted"}], {label: "Cash $29.0M before, $195.2M pro forma after the IPO"});
+bars($("cash"), [{k: "Jun 30, 2026", v: 28.974, t: "$29.0M", s: "actual"}, {k: "After the IPO", v: 195.161, t: "$195.2M", s: "pro forma as adjusted"}], {label: "Cash $29.0M before, $195.2M pro forma after the IPO", keep: true, noChg: true, noSub: true, labW: 96});
 const PAGE = {"img": "VVVV-infographic.png", "imgName": "VVVV-IPO-F-1A-2026-11-12-infographic.png", "ticker": "VVVV", "cik": 1907709, "charts": []};
 /* Infographic: a PNG drawn from this page's figures (same layout, desktop width, light theme), shown with save / share */
 const IMG = {url: PAGE.img, name: PAGE.imgName};
