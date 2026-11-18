@@ -57,7 +57,11 @@ html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .cx-sk .cx-shrink{background:#1B2B45;box-shadow:0 0 0 2px #fff}
 .cx-sk .cx-shrink:hover,.cx-sk .cx-shrink:focus-visible{background:#2A3F63}
 </style></head><body>
-<title>10-K Analyzer</title>
+<title>10-K Analyzer: public company financials at a glance, from SEC filings</title>
+<meta name="description" content="Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."><link rel="canonical" href="https://alexandermou.github.io/10k-analyzer/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="10-K Analyzer"><meta property="og:title" content="10-K Analyzer: public company financials at a glance">
+<meta property="og:description" content="Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."><meta property="og:url" content="https://alexandermou.github.io/10k-analyzer/"><meta property="og:image" content="https://alexandermou.github.io/10k-analyzer/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="sitemap" type="application/xml" href="sitemap.xml"><script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "10-K Analyzer", "url": "https://alexandermou.github.io/10k-analyzer/", "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}, {"@type": "WebApplication", "name": "10-K Analyzer", "url": "https://alexandermou.github.io/10k-analyzer/", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}]}</script>
 <link rel="canonical" href="https://alexandermou.github.io/10k-analyzer/">
 <script data-goatcounter="https://10kanalyzer.goatcounter.com/count" data-goatcounter-settings='{"no_onload":true}' async src="//gc.zgo.at/count.js"></script>
 <script>/* Open the site once with ?nocount to stop counting your own visits on this browser; ?count turns counting back on */
@@ -157,7 +161,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
 .img-set{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
-.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
+.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}.ipo-rows4{grid-template-columns:minmax(0,max-content) max-content max-content max-content!important}.ipo-ex{justify-self:start;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 4px;white-space:nowrap}#ipoBody .ipo-rows4{column-gap:6px}
+.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
@@ -687,8 +692,9 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 .faq .src{font-size:13px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="#" id="searchToggle" role="button" aria-label="Search for a company" aria-expanded="false" title="Search"><svg class="i-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><svg class="i-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
+<nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="#" id="searchToggle" role="button" aria-label="Search for a company" aria-expanded="false" title="Search"><svg class="i-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><svg class="i-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="c/index.html">All companies A–Z</a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
 
+<noscript><p>10-K Analyzer needs JavaScript for its dashboards. Browse the plain pages instead: <a href="c/index.html">all companies A–Z</a> · <a href="llms.txt">about this site</a>.</p></noscript>
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
@@ -719,7 +725,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
   </section>
   <section class="newpage" id="ipoPage" hidden aria-labelledby="ipoTitle">
     <div class="np-head"><h2 id="ipoTitle">IPO</h2><p class="sub" id="ipoSub"></p></div>
-    <div class="tabs ipo-tabs" role="tablist" aria-label="IPO lists" style="--n:2"><a class="tab" role="tab" id="ipoTabToday" href="#ipo" aria-selected="true">Today</a><a class="tab" role="tab" id="ipoTabFiled" href="#ipo-filed" aria-selected="false">Filed</a></div>
+    <div class="tabs ipo-tabs" role="tablist" aria-label="IPO lists" style="--n:2"><a class="tab" role="tab" id="ipoTabToday" href="#ipo" aria-selected="true">New</a><a class="tab" role="tab" id="ipoTabFiled" href="#ipo-filed" aria-selected="false">Filed</a></div>
     <div id="ipoBody"></div>
   </section>
   <section class="newpage" id="layoutPage" hidden aria-labelledby="layTitle">
@@ -780,7 +786,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p>
         <p>The quarter label (such as Q3) comes from the company's fiscal year end and last year's release date. A few companies can't be labelled, so they show an ER tag (earnings release) instead.</p></details>
       <details><summary>Where does the IPO list come from?</summary>
-        <p>The <b>Today</b> tab comes from the IPO calendars of Nasdaq and the NYSE: which companies start trading on each day, their exchange, offer price, shares and offer amount. The company pages it links to are built from SEC filings.</p>
+        <p>The <b>New</b> tab lists IPOs that started trading in the last 30 days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
         <p>The <b>Filed</b> tab comes from the SEC. It has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
         <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
@@ -2611,52 +2617,72 @@ const ipoWlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*
 function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(x => x !== cik) : l.concat(cik);
   document.cookie = `wlipo=${encodeURIComponent(n.join(","))}; max-age=${n.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; }
 /* IPO page: two tabs. Today = listings starting to trade (exchange calendars); Filed = the SEC pipeline */
-let ipoTab = "today", ipoDaySel = "", IPO_TODAY = null;
+let ipoTab = "today", IPO_TODAY = null;
 async function showIpo(tab){
   if (tab) ipoTab = tab;
+  await ipoLoadAll();   // counts on both tabs
+  $("#ipoTabToday").innerHTML = `New <span class="nr-n">${ipoNewItems().items.length}</span>`;
+  $("#ipoTabFiled").innerHTML = `Filed <span class="nr-n">${(ipoData.ipos || []).length}</span>`;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
-  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs by first trading day, from the Nasdaq and NYSE IPO calendars. Company details come from SEC filings."
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that raised money and started trading in the last 30 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Direct listings, which raise no money, are left out. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
-async function showIpoToday(day){
+function ipoNewItems(){   // IPOs that started trading in the last 30 days: the exchange calendars plus EDGAR-only listings
+  const t = todayISO(), D = (IPO_TODAY && IPO_TODAY.days) || {};
+  /* the last 30 days, today included; nothing in the future */
+  const from = (d => (d.setDate(d.getDate() - 30), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
+  let items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
+  const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
+  /* the exchange calendars leave out SPACs and some small listings: add Nasdaq/NYSE IPOs whose final prospectus is on EDGAR.
+     They start trading the business day after the SEC declares them effective. */
+  const seen = new Set(items.map(x => x.sym)), nextBd = d => { const x = new Date(d + "T12:00:00"); do x.setDate(x.getDate() + 1); while (!(x.getDay() % 6)); return x.toISOString().slice(0, 10); };
+  for (const x of ipoData.ipos || []) {
+    if (x.stage !== "priced" || !x.priced || !x.symbol || seen.has(x.symbol) || seen.has(x.symbol + "U") || !/^(Nasdaq|NYSE)/.test(x.exchange || "")) continue;   // SPAC units trade as …U on the calendars
+    const d = nextBd(x.priced); if (d < from || d > t) continue;
+    items.push({sym: x.symbol, name: x.name, exchange: x.exchange.startsWith("NYSE American") ? "NYSE American" : x.exchange.startsWith("NYSE") ? "NYSE" : "Nasdaq",
+      price: x.price || null, shares: x.shares || null, amount: x.price && x.shares ? x.price * x.shares : null, date: d, src: "SEC"});
+  }
+  /* regular IPOs only: keep listings our SEC tracker follows (S-1 / F-1 to 424B4); bank conversions, Reg A+ and uplistings drop out */
+  const inTracker = x => cikOf[x.sym] || (x.sym.endsWith("U") && cikOf[x.sym.slice(0, -1)]);
+  items = items.filter(inTracker).filter(x => x.amount > 0);   // and money actually raised: direct listings and resale registrations (GBC, NWCL, OPAY, PBT) drop out
+  for (const x of items) if (!cikOf[x.sym]) cikOf[x.sym] = cikOf[x.sym.slice(0, -1)];
+  return {items, cikOf, t};
+}
+async function ipoLoadAll(){
+  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
+  if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
+}
+async function showIpoToday(){
   if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
   if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
   await loadIpoPages();
-  const t = todayISO(), D = IPO_TODAY.days || {}, wlI = new Set(ipoWlGet());
-  const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
-  const days = Object.keys(D).sort().reverse(); if (!days.includes(t)) days.push(t); days.sort().reverse();
-  if (day) ipoDaySel = day;
-  if (!days.includes(ipoDaySel)) ipoDaySel = (D[t] || []).length ? t : (days.find(x => x < t && (D[x] || []).length) || t);
-  const items = D[ipoDaySel] || [], future = ipoDaySel > t;
-  const opts = days.map(x => `<option value="${x}"${x === ipoDaySel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}${x > t ? " · expected" : ""} (${(D[x] || []).length})</option>`).join("");
+  const wlI = new Set(ipoWlGet()), {items, cikOf, t} = ipoNewItems();
   const usd = v => v ? "$" + scaled(v / 1e6).join("") : "—";
   const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
-  const px = x => x.expected ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
-  let html = `<div class="nr-day"><h3><label for="ipoDayPick">First trading day</label> <select id="ipoDayPick" class="day-pick">${opts}</select></h3>`;
-  if (!items.length) html += `<p class="sub">${ipoDaySel === t ? "No US IPOs start trading today." : "No US IPOs on this day."} Pick another day above.</p>`;
+  const px = x => x.est ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
+  const exTag = e => ({"NYSE American": "NYSE Am.", "NYSE Arca": "Arca"})[e] || e;
+  let html = `<div class="nr-day"><h3>Last 30 days <span class="nr-n">${items.length}</span></h3>`;   // counted after the SEC additions
+  if (!items.length) html += `<p class="sub">No US IPOs in the last 30 days.</p>`;
   else {
-    /* Top 10 by money raised */
     const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
     if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised</h4></div><ol class="top10-bars">${top.map((x, i) => {
-      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${amt(x)}`;
+      const v = IPO_BY_T[x.sym] || IPO_PAGES[cikOf[x.sym]], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${dayName(x.date)} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${amt(x)}`;
       return `<li title="${esc(tip)}"><span class="t10-rank">${i + 1}</span><span class="t10-name">${href ? `<a class="t10-tk" href="${href}">${esc(x.sym)}</a>` : `<span class="t10-tk">${esc(x.sym)}</span>`}<span></span></span>
         <span class="t10-link"><span class="t10-track"><span class="t10-bar" style="left:0;width:${(x.amount / mx * 100).toFixed(1)}%"></span></span><span class="t10-v">${amt(x)}</span></span></li>`; }).join("")}</ol>
-      <p class="t10-note">Money raised = final offer price × shares offered. Until the final price is out, it's an estimate (est.): the top of the price range × shares offered; it's updated once the IPO prices. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
-    /* one closed box per exchange, as usual */
-    const ORD = ["Nasdaq", "NYSE", "NYSE American", "NYSE Arca", "Other"];
+      <p class="t10-note">Money raised = final offer price × shares offered. Until the final price is out, it's an estimate (est.): the top of the price range × shares offered. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
+    /* one list, newest day first; the exchange is a tag */
     const row = x => { const c = cikOf[x.sym], on = c && wlI.has(c), v = IPO_BY_T[x.sym] || (c && IPO_PAGES[c]), tip = `${on ? "Remove from" : "Add to"} your watchlist`;
       const lk = v ? `<a href="${v.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${v.img}" class="ipo-info" data-t="${esc(c || "")}">Infographic</a>` : `<span class="ipo-px">${esc(px(x))}${px(x) ? " · " : ""}${amt(x)}</span>`;
       const nm = x.name.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|AG|Holdings?|Group|Co)\b\.?.*$/i, "") || x.name;
-      return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
-    for (const ex of ORD) {
-      const l = items.filter(x => x.exchange === ex).sort((a, b) => (wlI.has(cikOf[b.sym]) - wlI.has(cikOf[a.sym])) || a.name.localeCompare(b.name, "en", {sensitivity: "base"}));
-      if (l.length) html += grpBox(ex, l.length, `<div class="nr-rows">${l.map(row).join("")}</div>`);
+      return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="ipo-ex">${esc(exTag(x.exchange))}</span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
+    for (const d of [...new Set(items.map(x => x.date))].sort().reverse()) {
+      const l = items.filter(x => x.date === d).sort((a, b) => (wlI.has(cikOf[b.sym]) - wlI.has(cikOf[a.sym])) || a.name.localeCompare(b.name, "en", {sensitivity: "base"}));
+      html += `<h4 class="nr-sec">${d === t ? "Today · " : ""}${esc(dayName(d))} <span class="nr-n">${l.length}</span></h4><div class="nr-rows ipo-rows4">${l.map(row).join("")}</div>`;
     }
   }
-  html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}. Company pages: SEC filings.</p>`;
-  const old = $("#ipoDayPick"); $("#ipoBody").innerHTML = html;
-  keepPicker(old, "#ipoDayPick", e => showIpoToday(e.target.value).then(() => refocus($("#ipoDayPick"))));
+  html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}, plus SEC final prospectuses (424B4) for listings the calendars miss. Company pages: SEC filings.</p>`;
+  $("#ipoBody").innerHTML = html;
   showPage("ipo", "IPO");
 }
 async function showIpoFiled(){
@@ -3071,7 +3097,7 @@ $("#homeLink").addEventListener("click", e => { e.preventDefault(); goHome(); })
 $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); window.scrollTo(0, 0); });
 /* Close button on the menu pages: back to the page the menu was opened from */
 (function(){
-  const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#ipo-today", "#ipo-filed", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
+  const MENU = new Set(["#latest", "#new", "#upcoming", "#ipo", "#ipos", "#ipo-today", "#ipo-new", "#ipo-filed", "#watchlist", "#faq", "#add-tickers", "#layout-settings"]);
   let back = "";
   window.addEventListener("hashchange", e => { if (!MENU.has(location.hash.toLowerCase())) return; let old = ""; try { old = new URL(e.oldURL).hash; } catch (x) {} if (!MENU.has(old.toLowerCase())) back = old; });
   $("#closeIcon").addEventListener("click", e => { e.preventDefault(); if (back) location.hash = back; else { history.pushState(null, "", location.pathname + location.search); goHome(); window.scrollTo(0, 0); } });
@@ -3088,7 +3114,7 @@ $("#homeIcon").addEventListener("click", e => { e.preventDefault(); goHome(); wi
   window.addEventListener("hashchange", () => set(false));
 })();
 
-window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#layout-settings") { showLayout(); return; } if (hh === "#ipo" || hh === "#ipos" || hh === "#ipo-today") { showIpo("today"); return; } if (hh === "#ipo-filed") { showIpo("filed"); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
+window.addEventListener("hashchange", () => { const hh = location.hash.toLowerCase(); if (!hh || hh === "#") { goHome(); return; } if (hh === "#latest" || hh === "#new") { showNew(); return; } if (hh === "#upcoming") { showUpcoming(); return; } if (hh === "#watchlist") { showWatchlist(); return; } if (hh === "#faq") { showFaq(); return; } if (hh === "#add-tickers") { showAdd(); return; } if (hh === "#layout-settings") { showLayout(); return; } if (hh === "#ipo" || hh === "#ipos" || hh === "#ipo-today" || hh === "#ipo-new") { showIpo("today"); return; } if (hh === "#ipo-filed") { showIpo("filed"); return; } const h = readHash(); if (h && LIBRARY[h.t]) openCompany(h.t, h.v, h.p); });
 if (!location.hash || location.hash === "#") { document.body.classList.add("home"); $("#filing").hidden = true; }
 (async () => {
   try { await loadIndex(); } catch (e) { $("#fname").textContent = "The library couldn't load. Refresh the page to try again."; return; }
@@ -3098,7 +3124,7 @@ if (!location.hash || location.hash === "#") { document.body.classList.add("home
   if (location.hash.toLowerCase() === "#upcoming") { await showUpcoming(); return; }
   if (location.hash.toLowerCase() === "#watchlist") { await showWatchlist(); return; }
   if (location.hash.toLowerCase() === "#faq") { showFaq(); return; } if (location.hash.toLowerCase() === "#add-tickers") { showAdd(); return; } if (location.hash.toLowerCase() === "#layout-settings") { showLayout(); return; }
-  if (["#ipo", "#ipos", "#ipo-today"].includes(location.hash.toLowerCase())) { await showIpo("today"); return; }
+  if (["#ipo", "#ipos", "#ipo-today", "#ipo-new"].includes(location.hash.toLowerCase())) { await showIpo("today"); return; }
   if (location.hash.toLowerCase() === "#ipo-filed") { await showIpo("filed"); return; }
   const start = readHash();
   if (start && LIBRARY[start.t]) { await openCompany(start.t, start.v, start.p); return; }
