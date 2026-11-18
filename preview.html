@@ -157,7 +157,8 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
 .img-set{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
-.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
+.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-rows4{grid-template-columns:minmax(0,max-content) max-content max-content max-content!important}.ipo-ex{justify-self:start;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 4px;white-space:nowrap}#ipoBody .ipo-rows4{column-gap:6px}
+.ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
 .day-pick{height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px;font-weight:600;margin-left:4px}
@@ -2611,52 +2612,49 @@ const ipoWlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*
 function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(x => x !== cik) : l.concat(cik);
   document.cookie = `wlipo=${encodeURIComponent(n.join(","))}; max-age=${n.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; }
 /* IPO page: two tabs. Today = listings starting to trade (exchange calendars); Filed = the SEC pipeline */
-let ipoTab = "today", ipoDaySel = "", IPO_TODAY = null;
+let ipoTab = "today", IPO_TODAY = null;
 async function showIpo(tab){
   if (tab) ipoTab = tab;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
-  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs by first trading day, from the Nasdaq and NYSE IPO calendars. Company details come from SEC filings."
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that started trading in the last 10 business days, from the Nasdaq and NYSE IPO calendars. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
-async function showIpoToday(day){
+async function showIpoToday(){
   if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
   if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
   await loadIpoPages();
   const t = todayISO(), D = IPO_TODAY.days || {}, wlI = new Set(ipoWlGet());
+  /* the last 10 business days, today included; nothing in the future */
+  const bd = []; for (let d = new Date(t + "T12:00:00"); bd.length < 10; d.setDate(d.getDate() - 1)) if (d.getDay() % 6) bd.push(d.toISOString().slice(0, 10));
+  const from = bd[bd.length - 1];
+  const items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
   const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
-  const days = Object.keys(D).sort().reverse(); if (!days.includes(t)) days.push(t); days.sort().reverse();
-  if (day) ipoDaySel = day;
-  if (!days.includes(ipoDaySel)) ipoDaySel = (D[t] || []).length ? t : (days.find(x => x < t && (D[x] || []).length) || t);
-  const items = D[ipoDaySel] || [], future = ipoDaySel > t;
-  const opts = days.map(x => `<option value="${x}"${x === ipoDaySel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}${x > t ? " · expected" : ""} (${(D[x] || []).length})</option>`).join("");
   const usd = v => v ? "$" + scaled(v / 1e6).join("") : "—";
   const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
-  const px = x => x.expected ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
-  let html = `<div class="nr-day"><h3><label for="ipoDayPick">First trading day</label> <select id="ipoDayPick" class="day-pick">${opts}</select></h3>`;
-  if (!items.length) html += `<p class="sub">${ipoDaySel === t ? "No US IPOs start trading today." : "No US IPOs on this day."} Pick another day above.</p>`;
+  const px = x => x.est ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
+  const exTag = e => ({"NYSE American": "NYSE Am.", "NYSE Arca": "Arca"})[e] || e;
+  let html = `<div class="nr-day"><h3>Last 10 business days <span class="nr-n">${items.length}</span></h3>`;
+  if (!items.length) html += `<p class="sub">No US IPOs in the last 10 business days.</p>`;
   else {
-    /* Top 10 by money raised */
     const top = items.filter(x => x.amount > 0).sort((a, b) => b.amount - a.amount).slice(0, 10), mx = Math.max(...top.map(x => x.amount), 1);
     if (top.length) html += `<section class="top10"><div class="top10-head"><h4>Top 10 by money raised</h4></div><ol class="top10-bars">${top.map((x, i) => {
-      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${amt(x)}`;
+      const v = IPO_BY_T[x.sym], href = v ? v.href : "", tip = `${x.name} · ${x.exchange} · ${dayName(x.date)} · ${px(x)}${x.shares ? " × " + Math.round(x.shares).toLocaleString("en-US") + " shares" : ""} = ${amt(x)}`;
       return `<li title="${esc(tip)}"><span class="t10-rank">${i + 1}</span><span class="t10-name">${href ? `<a class="t10-tk" href="${href}">${esc(x.sym)}</a>` : `<span class="t10-tk">${esc(x.sym)}</span>`}<span></span></span>
         <span class="t10-link"><span class="t10-track"><span class="t10-bar" style="left:0;width:${(x.amount / mx * 100).toFixed(1)}%"></span></span><span class="t10-v">${amt(x)}</span></span></li>`; }).join("")}</ol>
-      <p class="t10-note">Money raised = final offer price × shares offered. Until the final price is out, it's an estimate (est.): the top of the price range × shares offered; it's updated once the IPO prices. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
-    /* one closed box per exchange, as usual */
-    const ORD = ["Nasdaq", "NYSE", "NYSE American", "NYSE Arca", "Other"];
+      <p class="t10-note">Money raised = final offer price × shares offered. Until the final price is out, it's an estimate (est.): the top of the price range × shares offered. Listings only on the NYSE calendar include the over-allotment.</p></section>`;
+    /* one list, newest day first; the exchange is a tag */
     const row = x => { const c = cikOf[x.sym], on = c && wlI.has(c), v = IPO_BY_T[x.sym] || (c && IPO_PAGES[c]), tip = `${on ? "Remove from" : "Add to"} your watchlist`;
       const lk = v ? `<a href="${v.href}">Dashboard</a><span aria-hidden="true">·</span><a href="${v.img}" class="ipo-info" data-t="${esc(c || "")}">Infographic</a>` : `<span class="ipo-px">${esc(px(x))}${px(x) ? " · " : ""}${amt(x)}</span>`;
       const nm = x.name.replace(/,? (Acquisition|Inc|Corp|Corporation|Ltd|Limited|PBC|plc|N\.V|S\.A|AG|Holdings?|Group|Co)\b\.?.*$/i, "") || x.name;
-      return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
-    for (const ex of ORD) {
-      const l = items.filter(x => x.exchange === ex).sort((a, b) => (wlI.has(cikOf[b.sym]) - wlI.has(cikOf[a.sym])) || a.name.localeCompare(b.name, "en", {sensitivity: "base"}));
-      if (l.length) html += grpBox(ex, l.length, `<div class="nr-rows">${l.map(row).join("")}</div>`);
+      return `<div class="nr-row"><span class="nr nr-tog ipo-chip"><span class="tk">${esc(x.sym)}</span><span class="what">${esc(nm)}</span></span><span class="ipo-ex">${esc(exTag(x.exchange))}</span><span class="nr-lk">${lk}</span>${c ? `<button type="button" class="ipo-star ipo-star-s" data-cik="${esc(c)}" aria-pressed="${!!on}" aria-label="${tip}" title="${tip}">${on ? "★" : "☆"}</button>` : "<span></span>"}</div>`; };
+    for (const d of [...new Set(items.map(x => x.date))].sort().reverse()) {
+      const l = items.filter(x => x.date === d).sort((a, b) => (wlI.has(cikOf[b.sym]) - wlI.has(cikOf[a.sym])) || a.name.localeCompare(b.name, "en", {sensitivity: "base"}));
+      html += `<h4 class="nr-sec">${d === t ? "Today · " : ""}${esc(dayName(d))} <span class="nr-n">${l.length}</span></h4><div class="nr-rows ipo-rows4">${l.map(row).join("")}</div>`;
     }
   }
   html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}. Company pages: SEC filings.</p>`;
-  const old = $("#ipoDayPick"); $("#ipoBody").innerHTML = html;
-  keepPicker(old, "#ipoDayPick", e => showIpoToday(e.target.value).then(() => refocus($("#ipoDayPick"))));
+  $("#ipoBody").innerHTML = html;
   showPage("ipo", "IPO");
 }
 async function showIpoFiled(){
