@@ -2920,12 +2920,24 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   $("#cxShrink").addEventListener("click", close);
   ov.addEventListener("click", e => { if (!e.target.closest(".cx-stage") && !e.target.closest(".cx-shrink")) close(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
-  document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); open(b.closest(".card")); } });
+  /* The income statement flow opens as a picture, like the infographic: title on top, the chart below, with Full screen, Share and Close */
+  async function openSkImage(card){
+    const svg = card.querySelector("svg.sk-flat") || card.querySelector(".sankey svg"); if (!svg) return open(card);
+    const c = state.shown || LIBRARY[state.ticker] || {}, vb = svg.viewBox.baseVal, k = Math.min(3, 3200 / vb.width);
+    const cvs = drawSvgToCanvas(svg, Math.round(vb.width * k), Math.round(vb.height * k), 1);
+    const blob = await new Promise(r => cvs.toBlob(r, "image/png")); cvs.width = cvs.height = 0; if (!blob) return open(card);
+    lastImg = {blob, name: `${c.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
+    showImage(lastImgUrl, "Income statement flow");
+    $("#ovStatus").innerHTML = `${esc([c.ticker, c.fy].filter(Boolean).join(" · "))}<span class="pz"> · Pinch-zoom for details.</span>`;
+  }
+  const openAny = card => card.classList.contains("sk-card") ? openSkImage(card) : open(card);
+  document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); openAny(b.closest(".card")); } });
   let last = null;
   document.addEventListener("pointerup", e => {
     const card = e.target.closest && e.target.closest(SEL); if (!card || e.target.closest("a,button,input,select,summary,.sp-hit")) { last = null; return; }
     const now = Date.now();
-    if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); open(card); }
+    if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); openAny(card); }
     else last = {card, t: now, x: e.clientX, y: e.clientY};
   });
 })();
