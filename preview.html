@@ -781,7 +781,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>They're our forecast, not the company's announcement. We take the date of last year's earnings release for the same quarter (its Form 8-K, Item 2.02) and add 52 weeks, keeping the same day of the week and time of day. Companies sometimes move their dates, so check the company's own announcement before relying on one.</p>
         <p>The quarter label (such as Q3) comes from the company's fiscal year end and last year's release date. A few companies can't be labelled, so they show an ER tag (earnings release) instead.</p></details>
       <details><summary>Where does the IPO list come from?</summary>
-        <p>The <b>New</b> tab lists IPOs that started trading in the last 10 business days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars leave out, such as SPACs, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
+        <p>The <b>New</b> tab lists IPOs that started trading in the last 10 business days. It comes from the IPO calendars of Nasdaq and the NYSE (exchange, first trading day, offer price, shares and amount), plus listings the calendars miss, taken from their final prospectus on EDGAR. The company pages it links to are built from SEC filings.</p>
         <p>The <b>Filed</b> tab comes from the SEC. It has no IPO calendar, so we build one from EDGAR. Each step of an IPO leaves a filing: the registration (S-1, or F-1 for foreign companies), an amendment with the price range, the SEC's notice that the registration is effective (EFFECT), and the final prospectus with the offering price (424B4).</p>
         <p>No filing gives the pricing date in advance. The "Expected" date is our estimate: the day the latest price range was filed plus the median number of days recent IPOs took from that filing to pricing.</p></details>
       <details><summary>How often is the site updated?</summary>
@@ -2616,7 +2616,7 @@ let ipoTab = "today", IPO_TODAY = null;
 async function showIpo(tab){
   if (tab) ipoTab = tab;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
-  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that started trading in the last 10 business days, today included: the Nasdaq and NYSE IPO calendars, plus listings (such as SPACs) whose final prospectus is on EDGAR. Company details come from SEC filings."
+  $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that started trading in the last 10 business days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
@@ -2634,7 +2634,7 @@ async function showIpoToday(){
      They start trading the business day after the SEC declares them effective. */
   const seen = new Set(items.map(x => x.sym)), nextBd = d => { const x = new Date(d + "T12:00:00"); do x.setDate(x.getDate() + 1); while (!(x.getDay() % 6)); return x.toISOString().slice(0, 10); };
   for (const x of ipoData.ipos || []) {
-    if (x.stage !== "priced" || !x.priced || !x.symbol || seen.has(x.symbol) || !/^(Nasdaq|NYSE)/.test(x.exchange || "")) continue;
+    if (x.stage !== "priced" || !x.priced || !x.symbol || seen.has(x.symbol) || seen.has(x.symbol + "U") || !/^(Nasdaq|NYSE)/.test(x.exchange || "")) continue;   // SPAC units trade as …U on the calendars
     const d = nextBd(x.priced); if (d < from || d > t) continue;
     items.push({sym: x.symbol, name: x.name, exchange: x.exchange.startsWith("NYSE American") ? "NYSE American" : x.exchange.startsWith("NYSE") ? "NYSE" : "Nasdaq",
       price: x.price || null, shares: x.shares || null, amount: x.price && x.shares ? x.price * x.shares : null, date: d, src: "SEC"});
@@ -2662,7 +2662,7 @@ async function showIpoToday(){
       html += `<h4 class="nr-sec">${d === t ? "Today · " : ""}${esc(dayName(d))} <span class="nr-n">${l.length}</span></h4><div class="nr-rows ipo-rows4">${l.map(row).join("")}</div>`;
     }
   }
-  html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}, plus SEC final prospectuses (424B4) for listings the calendars leave out, such as SPACs. Company pages: SEC filings.</p>`;
+  html += `</div><p class="sub">Listings, first trading days, prices and offer amounts: the ${(IPO_TODAY.sources || ["Nasdaq", "NYSE"]).join(" and ")} IPO calendars${IPO_TODAY.generated ? ` · updated ${esc(mdy(IPO_TODAY.generated.slice(0, 10)))}` : ""}, plus SEC final prospectuses (424B4) for listings the calendars miss. Company pages: SEC filings.</p>`;
   $("#ipoBody").innerHTML = html;
   showPage("ipo", "IPO");
 }
