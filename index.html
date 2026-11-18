@@ -2518,7 +2518,9 @@ function topChart(items, wl, sfx = "", note2 = "Figures are for the quarter each
   const amt = v => what === "EPS" ? `$${v.toFixed(2)}` : fmtM(v);
   const tip = r => `${r.x.name} · ${r.x.m.of} · ${title}: ${val(r)}` + (kind === "growth" ? ` (${what} ${amt(r.cur)} vs ${amt(r.base)})` : "");
   const opts = TOP.map(t => `<option value="${t[0]}"${t[0] === topKey ? " selected" : ""}>${esc(t[1])}</option>`).join("");
-  const note = kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`;
+  const noFig = items.filter(x => !x.m && x.form === "Earnings release").length;   // a release ahead of its 10-Q: the SEC's data has no figures for it yet
+  const note = (kind === "growth" ? `Top ${top.length} of ${rows.length} companies with a positive ${what} in both quarters.` : `Top ${top.length} of ${rows.length} companies.`) +
+    (noFig ? ` Not ranked yet: ${noFig} earnings release${noFig > 1 ? "s" : ""} without figures in the SEC's data; they arrive with the company's 10-Q or 10-K.` : "");
   return `<section class="top10" aria-labelledby="topTitle${sfx}"><div class="top10-head"><h4 id="topTitle${sfx}">${heading}</h4>
     <label class="sr-only" for="topPick${sfx}">Rank by</label><select id="topPick${sfx}" class="top-pick">${opts}</select></div>
     ${top.length ? `<ol class="top10-bars">${top.map((r, i) => { const href = "#" + r.x.ticker.toLowerCase() + (r.x.period ? "-" + r.x.period : "");
@@ -2576,7 +2578,8 @@ async function showNew(day){
   const items = all.filter(x => x.date === newSel), isToday = newSel === t;
   const opts = days.map(x => `<option value="${x}"${x === newSel ? " selected" : ""}>${x === t ? "Today · " : ""}${esc(dayName(x))}</option>`).join("");
   const head = `<label for="newDayPick">Filed</label> <select id="newDayPick" class="day-pick">${opts}</select>`;
-  const v = dayList(items, wl, head, "No reports filed this day");
+  const gen = Date.parse(((l && l.generated) || "").replace(/Z$/, ":00Z")), chk = isNaN(gen) ? "" : `; last checked ${new Date(gen).toLocaleTimeString([], {hour: "numeric", minute: "2-digit"})}`;
+  const v = dayList(items, wl, head, isToday ? `Nothing filed yet today. We check the SEC every hour${chk}` : "No 10-K, 10-Q or earnings release was filed this day");   // today: say it's early, not that it failed
   const note = "Figures are for the quarter each report covers (for a 10-K, the fiscal year's fourth quarter)";
   const [top, list] = v.html.split("</h3>"), oldNew = $("#newDayPick");
   $("#npBody").innerHTML = top + "</h3>" + (items.length ? topChart(items, wl, "", note, "Top 10 of the Day <small class=\"t10-q\">Quarterly figures</small>") +
