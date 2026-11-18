@@ -157,7 +157,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .nr-time{margin:2px 0 8px;font-size:13px;color:var(--muted)}
 #ipoBody .nr-rows{grid-template-columns:minmax(0,max-content) max-content max-content;column-gap:8px}.ipo-chip{min-width:0;max-width:100%;overflow:hidden}.ipo-chip .tk{flex:none}.ipo-chip .what{min-width:0;overflow:hidden;text-overflow:ellipsis}@media (max-width:520px){.nr-grp{padding:12px 10px}.nr-grp summary{margin-left:4px}}#ipoBody .nr-grp+.sub{margin-top:14px}.ipo-star-s{font-size:14px;padding:3px 2px;margin:0 -2px}
 .img-set{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px}.img-set .img-note{margin:0!important}.img-set .info-settings{margin:0 4px 0 auto}.img-tools .status:empty{display:none}.img-hint{flex:1;min-width:0;color:var(--muted);font-size:13px;line-height:1.25}.img-tools:has(.status:not(:empty)) .img-hint{display:none}
-.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;text-decoration:none}.ipo-rows4{grid-template-columns:minmax(0,max-content) max-content max-content max-content!important}.ipo-ex{justify-self:start;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 4px;white-space:nowrap}#ipoBody .ipo-rows4{column-gap:6px}
+.ipo-tabs{margin:4px 0 14px}.ipo-tabs .tab{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}.ipo-rows4{grid-template-columns:minmax(0,max-content) max-content max-content max-content!important}.ipo-ex{justify-self:start;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 4px;white-space:nowrap}#ipoBody .ipo-rows4{column-gap:6px}
 .ipo-px{color:var(--muted);font-family:var(--f-mono);font-size:13px}
 .nr-grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:12px}.nr-grp summary{cursor:pointer;font-weight:600;font-size:16px;margin-left:2px}.nr-grp[open] summary{margin-bottom:10px}.nr-day h3+.nr-grp{margin-top:4px}
 /* New page: day picker in the heading, link that shows the day's list */
@@ -2615,16 +2615,16 @@ function ipoWlToggle(cik){ const l = ipoWlGet(), n = l.includes(cik) ? l.filter(
 let ipoTab = "today", IPO_TODAY = null;
 async function showIpo(tab){
   if (tab) ipoTab = tab;
+  await ipoLoadAll();   // counts on both tabs
+  $("#ipoTabToday").innerHTML = `New <span class="nr-n">${ipoNewItems().items.length}</span>`;
+  $("#ipoTabFiled").innerHTML = `Filed <span class="nr-n">${(ipoData.ipos || []).length}</span>`;
   $("#ipoTabToday").setAttribute("aria-selected", String(ipoTab === "today")); $("#ipoTabFiled").setAttribute("aria-selected", String(ipoTab === "filed"));
   $("#ipoSub").textContent = ipoTab === "today" ? "US IPOs that started trading in the last 30 days, today included: the Nasdaq and NYSE IPO calendars, plus listings the calendars miss whose final prospectus is on EDGAR. Company details come from SEC filings."
     : "Companies going public in the US, tracked from their SEC filings: registration (S-1 / F-1), price range, SEC clearance and final prospectus (424B4).";
   return ipoTab === "today" ? showIpoToday() : showIpoFiled();
 }
-async function showIpoToday(){
-  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
-  if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
-  await loadIpoPages();
-  const t = todayISO(), D = IPO_TODAY.days || {}, wlI = new Set(ipoWlGet());
+function ipoNewItems(){   // IPOs that started trading in the last 30 days: the exchange calendars plus EDGAR-only listings
+  const t = todayISO(), D = (IPO_TODAY && IPO_TODAY.days) || {};
   /* the last 30 days, today included; nothing in the future */
   const from = (d => (d.setDate(d.getDate() - 30), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
   const items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
@@ -2638,6 +2638,17 @@ async function showIpoToday(){
     items.push({sym: x.symbol, name: x.name, exchange: x.exchange.startsWith("NYSE American") ? "NYSE American" : x.exchange.startsWith("NYSE") ? "NYSE" : "Nasdaq",
       price: x.price || null, shares: x.shares || null, amount: x.price && x.shares ? x.price * x.shares : null, date: d, src: "SEC"});
   }
+  return {items, cikOf, t};
+}
+async function ipoLoadAll(){
+  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
+  if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
+}
+async function showIpoToday(){
+  if (!ipoData) { try { ipoData = await (await fetch("data/ipo.json", {cache: "no-cache"})).json(); } catch (e) { ipoData = {ipos: []}; } }
+  if (!IPO_TODAY) { try { IPO_TODAY = await (await fetch("data/ipo_today.json", {cache: "no-cache"})).json(); } catch (e) { IPO_TODAY = {days: {}}; } }
+  await loadIpoPages();
+  const wlI = new Set(ipoWlGet()), {items, cikOf, t} = ipoNewItems();
   const usd = v => v ? "$" + scaled(v / 1e6).join("") : "—";
   const amt = x => usd(x.amount) + (x.est && x.amount ? " est." : "");   // before final pricing: top of the range × shares
   const px = x => x.est ? (x.range ? `$${x.range.map(v => v.toFixed(2)).join("–")}` : "") : x.price ? `$${x.price.toFixed(2)}` : "";
