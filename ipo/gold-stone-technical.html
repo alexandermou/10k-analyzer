@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Price range</div><div class="v">$4–$5</div><div class="s">per share</div></div><div class="tile"><div class="l">Shares offered</div><div class="v">750,000</div><div class="s">sold by the company</div></div><div class="tile"><div class="l">Raise at $4.5 midpoint</div><div class="v">$3.38M</div><div class="s">750,000 × $4.5, before fees</div></div><div class="tile"><div class="l">Net proceeds (company est.)</div><div class="v">$2.01M</div><div class="s">at $4 a share</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Hong Kong software services company implementing and tuning algorithm-based solutions.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "gold-stone-technical-infographic.png", "imgName": "gold-stone-technical-IPO-F-1A-2026-11-16-infographic.png", "ticker": null, "cik": 2095509, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 4.670554, "t": "$4.67M", "tip": "$4.67M"}, {"k": "FY2026", "v": 5.866132, "t": "$5.87M", "tip": "$5.87M"}], "label": "Revenue, fiscal year: FY2025 $4.67M, FY2026 $5.87M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.063399, "t": "$1.06M", "tip": "$1.06M"}, {"k": "FY2026", "v": 1.583741, "t": "$1.58M", "tip": "$1.58M"}], "label": "Net result, fiscal year: FY2025 $1.06M, FY2026 $1.58M"}]};
+const PAGE = {"img": "gold-stone-technical-infographic.png", "imgName": "gold-stone-technical-IPO-F-1A-2026-11-16-infographic.png", "ticker": null, "cik": 2095509, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 4.670554, "t": "$4.67M", "tip": "$4.67M"}, {"k": "FY2026", "v": 5.866132, "t": "$5.87M", "tip": "$5.87M"}], "label": "Revenue, fiscal year: FY2025 $4.67M, FY2026 $5.87M"}, {"id": "c_op_0", "data": [{"k": "FY2025", "v": 1.409802, "t": "$1.41M", "tip": "$1.41M"}, {"k": "FY2026", "v": 1.900168, "t": "$1.90M", "tip": "$1.90M"}], "label": "Operating result, fiscal year: FY2025 $1.41M, FY2026 $1.90M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.063399, "t": "$1.06M", "tip": "$1.06M"}, {"k": "FY2026", "v": 1.583741, "t": "$1.58M", "tip": "$1.58M"}], "label": "Net result, fiscal year: FY2025 $1.06M, FY2026 $1.58M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Makes specialty chemicals and intermediates to ISO and GMP standards.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st 9 months</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "VAT-infographic.png", "imgName": "VAT-IPO-S-1A-2026-08-17-infographic.png", "ticker": "VAT", "cik": 2109801, "charts": [{"id": "c_rev_0", "data": [{"k": "9M 2025", "v": 22.102026, "t": "$22.1M", "tip": "$22.1M"}, {"k": "9M 2026", "v": 16.574573, "t": "$16.6M", "tip": "$16.6M"}], "label": "Revenue, 1st 9 months: 9M 2025 $22.1M, 9M 2026 $16.6M"}, {"id": "c_net_0", "data": [{"k": "9M 2025", "v": 7.033044, "t": "$7.03M", "tip": "$7.03M"}, {"k": "9M 2026", "v": 6.786999, "t": "$6.79M", "tip": "$6.79M"}], "label": "Net result, 1st 9 months: 9M 2025 $7.03M, 9M 2026 $6.79M"}]};
+const PAGE = {"img": "VAT-infographic.png", "imgName": "VAT-IPO-S-1A-2026-08-17-infographic.png", "ticker": "VAT", "cik": 2109801, "charts": [{"id": "c_rev_0", "data": [{"k": "9M 2025", "v": 22.102026, "t": "$22.1M", "tip": "$22.1M"}, {"k": "9M 2026", "v": 16.574573, "t": "$16.6M", "tip": "$16.6M"}], "label": "Revenue, 1st 9 months: 9M 2025 $22.1M, 9M 2026 $16.6M"}, {"id": "c_op_0", "data": [{"k": "9M 2025", "v": 6.985438, "t": "$6.99M", "tip": "$6.99M"}, {"k": "9M 2026", "v": 8.600518, "t": "$8.60M", "tip": "$8.60M"}], "label": "Operating result, 1st 9 months: 9M 2025 $6.99M, 9M 2026 $8.60M"}, {"id": "c_net_0", "data": [{"k": "9M 2025", "v": 7.033044, "t": "$7.03M", "tip": "$7.03M"}, {"k": "9M 2026", "v": 6.786999, "t": "$6.79M", "tip": "$6.79M"}], "label": "Net result, 1st 9 months: 9M 2025 $7.03M, 9M 2026 $6.79M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

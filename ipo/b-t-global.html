@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">500,000</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Not yet summarized; the SEC classifies it as: Wholesale-Professional &amp; Commercial Equipment &amp; Supplies. See the filing for its business.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   <section class="card"><h2>Who controls the votes</h2>
     <div class="meter"><div class="row"><span>Insiders' voting power</span><div class="track"><div class="fill alt" style="width:50.42%"></div></div><span class="pct">50.42%</span></div></div>
@@ -193,7 +193,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "b-t-global-infographic.png", "imgName": "b-t-global-IPO-F-1-2026-11-16-infographic.png", "ticker": null, "cik": 2156248, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 0.018138, "t": "$18.1K", "tip": "$18.1K"}, {"k": "FY2026", "v": 4.942543, "t": "$4.94M", "tip": "$4.94M"}], "label": "Revenue, fiscal year: FY2025 $18.1K, FY2026 $4.94M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": -0.042381, "t": "\u2212$42.4K", "tip": "\u2212$42.4K"}, {"k": "FY2026", "v": 0.243171, "t": "$243K", "tip": "$243K"}], "label": "Net result, fiscal year: FY2025 \u2212$42.4K, FY2026 $243K"}]};
+const PAGE = {"img": "b-t-global-infographic.png", "imgName": "b-t-global-IPO-F-1-2026-11-16-infographic.png", "ticker": null, "cik": 2156248, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 0.018138, "t": "$18.1K", "tip": "$18.1K"}, {"k": "FY2026", "v": 4.942543, "t": "$4.94M", "tip": "$4.94M"}], "label": "Revenue, fiscal year: FY2025 $18.1K, FY2026 $4.94M"}, {"id": "c_op_0", "data": [{"k": "FY2025", "v": -0.037831, "t": "\u2212$37.8K", "tip": "\u2212$37.8K"}, {"k": "FY2026", "v": 0.263545, "t": "$264K", "tip": "$264K"}], "label": "Operating result, fiscal year: FY2025 \u2212$37.8K, FY2026 $264K"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": -0.042381, "t": "\u2212$42.4K", "tip": "\u2212$42.4K"}, {"k": "FY2026", "v": 0.243171, "t": "$243K", "tip": "$243K"}], "label": "Net result, fiscal year: FY2025 \u2212$42.4K, FY2026 $243K"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

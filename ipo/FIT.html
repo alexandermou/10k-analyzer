@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">7.00M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Sells sports nutrition products to athletes and the mass market.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "FIT-infographic.png", "imgName": "FIT-IPO-F-1A-2026-11-03-infographic.png", "ticker": "FIT", "cik": 2065232, "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 9.318414, "t": "$9.32M", "tip": "$9.32M"}, {"k": "H1 2026", "v": 14.718642, "t": "$14.7M", "tip": "$14.7M"}], "label": "Revenue, 1st half: H1 2025 $9.32M, H1 2026 $14.7M"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": 0.364102, "t": "$364K", "tip": "$364K"}, {"k": "H1 2026", "v": 0.919267, "t": "$919K", "tip": "$919K"}], "label": "Net result, 1st half: H1 2025 $364K, H1 2026 $919K"}]};
+const PAGE = {"img": "FIT-infographic.png", "imgName": "FIT-IPO-F-1A-2026-11-03-infographic.png", "ticker": "FIT", "cik": 2065232, "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 9.318414, "t": "$9.32M", "tip": "$9.32M"}, {"k": "H1 2026", "v": 14.718642, "t": "$14.7M", "tip": "$14.7M"}], "label": "Revenue, 1st half: H1 2025 $9.32M, H1 2026 $14.7M"}, {"id": "c_op_0", "data": [{"k": "H1 2025", "v": 0.52273, "t": "$523K", "tip": "$523K"}, {"k": "H1 2026", "v": 1.171412, "t": "$1.17M", "tip": "$1.17M"}], "label": "Operating result, 1st half: H1 2025 $523K, H1 2026 $1.17M"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": 0.364102, "t": "$364K", "tip": "$364K"}, {"k": "H1 2026", "v": 0.919267, "t": "$919K", "tip": "$919K"}], "label": "Net result, 1st half: H1 2025 $364K, H1 2026 $919K"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

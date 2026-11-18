@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">1.50M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Automotive parts manufacturer.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   <section class="card"><h2>Who controls the votes</h2>
     <div class="meter"><div class="row"><span>Insiders' voting power</span><div class="track"><div class="fill alt" style="width:80.54%"></div></div><span class="pct">80.54%</span></div></div>
@@ -193,7 +193,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "SWA-infographic.png", "imgName": "SWA-IPO-S-1A-2026-11-06-infographic.png", "ticker": "SWA", "cik": 1698506, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2024", "v": 413.132675, "t": "$413M", "tip": "$413M"}, {"k": "FY2025", "v": 373.257752, "t": "$373M", "tip": "$373M"}, {"k": "FY2026", "v": 323.854938, "t": "$324M", "tip": "$324M"}], "label": "Revenue, fiscal year: FY2024 $413M, FY2025 $373M, FY2026 $324M"}, {"id": "c_net_0", "data": [{"k": "FY2024", "v": 13.708162, "t": "$13.7M", "tip": "$13.7M"}, {"k": "FY2025", "v": 11.267529, "t": "$11.3M", "tip": "$11.3M"}, {"k": "FY2026", "v": 16.928518, "t": "$16.9M", "tip": "$16.9M"}], "label": "Net result, fiscal year: FY2024 $13.7M, FY2025 $11.3M, FY2026 $16.9M"}]};
+const PAGE = {"img": "SWA-infographic.png", "imgName": "SWA-IPO-S-1A-2026-11-06-infographic.png", "ticker": "SWA", "cik": 1698506, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2024", "v": 413.132675, "t": "$413M", "tip": "$413M"}, {"k": "FY2025", "v": 373.257752, "t": "$373M", "tip": "$373M"}, {"k": "FY2026", "v": 323.854938, "t": "$324M", "tip": "$324M"}], "label": "Revenue, fiscal year: FY2024 $413M, FY2025 $373M, FY2026 $324M"}, {"id": "c_op_0", "data": [{"k": "FY2024", "v": 18.352886, "t": "$18.4M", "tip": "$18.4M"}, {"k": "FY2025", "v": 13.5321, "t": "$13.5M", "tip": "$13.5M"}, {"k": "FY2026", "v": 19.041255, "t": "$19.0M", "tip": "$19.0M"}], "label": "Operating result, fiscal year: FY2024 $18.4M, FY2025 $13.5M, FY2026 $19.0M"}, {"id": "c_net_0", "data": [{"k": "FY2024", "v": 13.708162, "t": "$13.7M", "tip": "$13.7M"}, {"k": "FY2025", "v": 11.267529, "t": "$11.3M", "tip": "$11.3M"}, {"k": "FY2026", "v": 16.928518, "t": "$16.9M", "tip": "$16.9M"}], "label": "Net result, fiscal year: FY2024 $13.7M, FY2025 $11.3M, FY2026 $16.9M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

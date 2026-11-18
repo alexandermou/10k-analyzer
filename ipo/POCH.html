@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">6.25M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Digital marketing services for advertisers, mostly in gaming, mobile apps and e-commerce.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "POCH-infographic.png", "imgName": "POCH-IPO-F-1A-2026-08-18-infographic.png", "ticker": "POCH", "cik": 2085836, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 24.206817, "t": "$24.2M", "tip": "$24.2M"}, {"k": "FY2026", "v": 33.063062, "t": "$33.1M", "tip": "$33.1M"}], "label": "Revenue, fiscal year: FY2025 $24.2M, FY2026 $33.1M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.016548, "t": "$1.02M", "tip": "$1.02M"}, {"k": "FY2026", "v": 1.077632, "t": "$1.08M", "tip": "$1.08M"}], "label": "Net result, fiscal year: FY2025 $1.02M, FY2026 $1.08M"}]};
+const PAGE = {"img": "POCH-infographic.png", "imgName": "POCH-IPO-F-1A-2026-08-18-infographic.png", "ticker": "POCH", "cik": 2085836, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 24.206817, "t": "$24.2M", "tip": "$24.2M"}, {"k": "FY2026", "v": 33.063062, "t": "$33.1M", "tip": "$33.1M"}], "label": "Revenue, fiscal year: FY2025 $24.2M, FY2026 $33.1M"}, {"id": "c_op_0", "data": [{"k": "FY2025", "v": 1.15382, "t": "$1.15M", "tip": "$1.15M"}, {"k": "FY2026", "v": 1.209372, "t": "$1.21M", "tip": "$1.21M"}], "label": "Operating result, fiscal year: FY2025 $1.15M, FY2026 $1.21M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.016548, "t": "$1.02M", "tip": "$1.02M"}, {"k": "FY2026", "v": 1.077632, "t": "$1.08M", "tip": "$1.08M"}], "label": "Net result, fiscal year: FY2025 $1.02M, FY2026 $1.08M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

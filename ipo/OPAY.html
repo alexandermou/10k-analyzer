@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">16.0M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Financial-technology company (payments and related services); its business overview couldn&#x27;t be read automatically.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "OPAY-infographic.png", "imgName": "OPAY-IPO-F-1A-2026-10-23-infographic.png", "ticker": "OPAY", "cik": 2103076, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2024", "v": 205.731, "t": "$206M", "tip": "$206M"}, {"k": "FY2025", "v": 536.251, "t": "$536M", "tip": "$536M"}], "label": "Revenue, fiscal year: FY2024 $206M, FY2025 $536M"}, {"id": "c_net_0", "data": [{"k": "FY2024", "v": -50.827, "t": "\u2212$50.8M", "tip": "\u2212$50.8M"}, {"k": "FY2025", "v": 72.47, "t": "$72.5M", "tip": "$72.5M"}], "label": "Net result, fiscal year: FY2024 \u2212$50.8M, FY2025 $72.5M"}]};
+const PAGE = {"img": "OPAY-infographic.png", "imgName": "OPAY-IPO-F-1A-2026-10-23-infographic.png", "ticker": "OPAY", "cik": 2103076, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2024", "v": 205.731, "t": "$206M", "tip": "$206M"}, {"k": "FY2025", "v": 536.251, "t": "$536M", "tip": "$536M"}], "label": "Revenue, fiscal year: FY2024 $206M, FY2025 $536M"}, {"id": "c_op_0", "data": [{"k": "FY2024", "v": -35.102, "t": "\u2212$35.1M", "tip": "\u2212$35.1M"}, {"k": "FY2025", "v": 107.1, "t": "$107M", "tip": "$107M"}], "label": "Operating result, fiscal year: FY2024 \u2212$35.1M, FY2025 $107M"}, {"id": "c_net_0", "data": [{"k": "FY2024", "v": -50.827, "t": "\u2212$50.8M", "tip": "\u2212$50.8M"}, {"k": "FY2025", "v": 72.47, "t": "$72.5M", "tip": "$72.5M"}], "label": "Net result, fiscal year: FY2024 \u2212$50.8M, FY2025 $72.5M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

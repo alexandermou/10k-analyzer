@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">9.88M</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Used-car dealer in Canada, also offering vehicle leasing, rental and related services.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">1st half</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   <section class="card"><h2>Who controls the votes</h2>
     <div class="meter"><div class="row"><span>Insiders' voting power</span><div class="track"><div class="fill alt" style="width:50.0%"></div></div><span class="pct">50%</span></div></div>
@@ -193,7 +193,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "uc-automotive-infographic.png", "imgName": "uc-automotive-IPO-F-1-2026-11-06-infographic.png", "ticker": null, "cik": 2144445, "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 22.446086, "t": "$22.4M", "tip": "$22.4M"}, {"k": "H1 2026", "v": 22.134359, "t": "$22.1M", "tip": "$22.1M"}], "label": "Revenue, 1st half: H1 2025 $22.4M, H1 2026 $22.1M"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": 0.48978, "t": "$490K", "tip": "$490K"}, {"k": "H1 2026", "v": 0.218805, "t": "$219K", "tip": "$219K"}], "label": "Net result, 1st half: H1 2025 $490K, H1 2026 $219K"}]};
+const PAGE = {"img": "uc-automotive-infographic.png", "imgName": "uc-automotive-IPO-F-1-2026-11-06-infographic.png", "ticker": null, "cik": 2144445, "charts": [{"id": "c_rev_0", "data": [{"k": "H1 2025", "v": 22.446086, "t": "$22.4M", "tip": "$22.4M"}, {"k": "H1 2026", "v": 22.134359, "t": "$22.1M", "tip": "$22.1M"}], "label": "Revenue, 1st half: H1 2025 $22.4M, H1 2026 $22.1M"}, {"id": "c_op_0", "data": [{"k": "H1 2025", "v": 0.640636, "t": "$641K", "tip": "$641K"}, {"k": "H1 2026", "v": 0.256154, "t": "$256K", "tip": "$256K"}], "label": "Operating result, 1st half: H1 2025 $641K, H1 2026 $256K"}, {"id": "c_net_0", "data": [{"k": "H1 2025", "v": 0.48978, "t": "$490K", "tip": "$490K"}, {"k": "H1 2026", "v": 0.218805, "t": "$219K", "tip": "$219K"}], "label": "Net result, 1st half: H1 2025 $490K, H1 2026 $219K"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

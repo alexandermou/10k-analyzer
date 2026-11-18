@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Founded in 1967, provides engineering, technology and operations services to NASA, the Department of Defense, other federal agencies and commercial space operators.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Loss-making: net loss of $11.5K in FY2026.</li></ul></section>
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "rothe-development-infographic.png", "imgName": "rothe-development-IPO-S-1A-2026-11-12-infographic.png", "ticker": null, "cik": 2108671, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 99.499334, "t": "$99.5M", "tip": "$99.5M"}, {"k": "FY2026", "v": 93.921919, "t": "$93.9M", "tip": "$93.9M"}], "label": "Revenue, fiscal year: FY2025 $99.5M, FY2026 $93.9M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.69413, "t": "$1.69M", "tip": "$1.69M"}, {"k": "FY2026", "v": -0.011546, "t": "\u2212$11.5K", "tip": "\u2212$11.5K"}], "label": "Net result, fiscal year: FY2025 $1.69M, FY2026 \u2212$11.5K"}]};
+const PAGE = {"img": "rothe-development-infographic.png", "imgName": "rothe-development-IPO-S-1A-2026-11-12-infographic.png", "ticker": null, "cik": 2108671, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 99.499334, "t": "$99.5M", "tip": "$99.5M"}, {"k": "FY2026", "v": 93.921919, "t": "$93.9M", "tip": "$93.9M"}], "label": "Revenue, fiscal year: FY2025 $99.5M, FY2026 $93.9M"}, {"id": "c_op_0", "data": [{"k": "FY2025", "v": 0.848832, "t": "$849K", "tip": "$849K"}, {"k": "FY2026", "v": 0.701494, "t": "$701K", "tip": "$701K"}], "label": "Operating result, fiscal year: FY2025 $849K, FY2026 $701K"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.69413, "t": "$1.69M", "tip": "$1.69M"}, {"k": "FY2026", "v": -0.011546, "t": "\u2212$11.5K", "tip": "\u2212$11.5K"}], "label": "Net result, fiscal year: FY2025 $1.69M, FY2026 \u2212$11.5K"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {

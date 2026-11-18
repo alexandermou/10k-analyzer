@@ -164,7 +164,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <p class="img-note dash-note pz">Pinch-zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Japanese company that recycles end-of-life electronics and industrial waste and provides secure data destruction.</p></section>
-  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
+  <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
   
   
   
@@ -191,7 +191,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
 </div>
 
 <script>
-const PAGE = {"img": "KOEI-infographic.png", "imgName": "KOEI-IPO-F-1A-2026-09-16-infographic.png", "ticker": "KOEI", "cik": 2070087, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 43.837761, "t": "$43.8M", "tip": "$43.8M"}, {"k": "FY2026", "v": 47.6658, "t": "$47.7M", "tip": "$47.7M"}], "label": "Revenue, fiscal year: FY2025 $43.8M, FY2026 $47.7M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.185085, "t": "$1.19M", "tip": "$1.19M"}, {"k": "FY2026", "v": 1.885665, "t": "$1.89M", "tip": "$1.89M"}], "label": "Net result, fiscal year: FY2025 $1.19M, FY2026 $1.89M"}]};
+const PAGE = {"img": "KOEI-infographic.png", "imgName": "KOEI-IPO-F-1A-2026-09-16-infographic.png", "ticker": "KOEI", "cik": 2070087, "charts": [{"id": "c_rev_0", "data": [{"k": "FY2025", "v": 43.837761, "t": "$43.8M", "tip": "$43.8M"}, {"k": "FY2026", "v": 47.6658, "t": "$47.7M", "tip": "$47.7M"}], "label": "Revenue, fiscal year: FY2025 $43.8M, FY2026 $47.7M"}, {"id": "c_op_0", "data": [{"k": "FY2025", "v": 2.087754, "t": "$2.09M", "tip": "$2.09M"}, {"k": "FY2026", "v": 3.502381, "t": "$3.50M", "tip": "$3.50M"}], "label": "Operating result, fiscal year: FY2025 $2.09M, FY2026 $3.50M"}, {"id": "c_net_0", "data": [{"k": "FY2025", "v": 1.185085, "t": "$1.19M", "tip": "$1.19M"}, {"k": "FY2026", "v": 1.885665, "t": "$1.89M", "tip": "$1.89M"}], "label": "Net result, fiscal year: FY2025 $1.19M, FY2026 $1.89M"}]};
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {
