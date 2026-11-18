@@ -1,4 +1,4 @@
-# 10-K Decoder: public financial data from SEC filings. Everyone, AI assistants included, is welcome to read and cite it.
+# 10KDecoder: public financial data from SEC filings. Everyone, AI assistants included, is welcome to read and cite it.
 
 User-agent: *
 Allow: /

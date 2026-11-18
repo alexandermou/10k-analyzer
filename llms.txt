@@ -1,6 +1,6 @@
-# 10-K Decoder
+# 10KDecoder (10-K Decoder)
 
-> Free dashboards and infographics of US public companies' financial results, built only from their SEC filings (10-K, 10-Q, 20-F, 40-F, 8-K earnings releases, S-1/F-1 for IPOs). Figures are as filed, never estimated. 2,924 companies; updated through the day on business days.
+> Decode SEC 10-K filings. Free dashboards and infographics of US public companies' financial results, built only from their SEC filings (10-K, 10-Q, 20-F, 40-F, 8-K earnings releases, S-1/F-1 for IPOs). Figures are as filed, never estimated. 2,924 companies; updated through the day on business days.
 
 ## How to use it
 - Company page (plain text, key figures, sources): https://10kdecoder.com/c/<TICKER>.html, e.g. https://10kdecoder.com/c/NVDA.html
