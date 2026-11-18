@@ -57,11 +57,11 @@ html.rot-lock.rot-cw body{transform:translateX(var(--lw)) rotate(90deg)}
 .cx-sk .cx-shrink{background:#1B2B45;box-shadow:0 0 0 2px #fff}
 .cx-sk .cx-shrink:hover,.cx-sk .cx-shrink:focus-visible{background:#2A3F63}
 </style></head><body>
-<title>10-K Decoder: public company financials at a glance, from SEC filings</title>
-<meta name="description" content="Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."><link rel="canonical" href="https://10kdecoder.com/">
-<meta property="og:type" content="website"><meta property="og:site_name" content="10-K Decoder"><meta property="og:title" content="10-K Decoder: public company financials at a glance">
+<title>10KDecoder: decode SEC 10-K filings · public company financials at a glance</title>
+<meta name="description" content="Decode SEC 10-K filings: free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."><link rel="canonical" href="https://10kdecoder.com/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="10KDecoder"><meta property="og:title" content="10KDecoder: public company financials at a glance">
 <meta property="og:description" content="Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."><meta property="og:url" content="https://10kdecoder.com/"><meta property="og:image" content="https://10kdecoder.com/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="sitemap" type="application/xml" href="sitemap.xml"><script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "10-K Decoder", "url": "https://10kdecoder.com/", "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}, {"@type": "WebApplication", "name": "10-K Decoder", "url": "https://10kdecoder.com/", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}]}</script>
+<link rel="sitemap" type="application/xml" href="sitemap.xml"><script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "10KDecoder", "alternateName": ["10KDecoder", "10K Decoder", "Decode SEC 10-K filings"], "url": "https://10kdecoder.com/", "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}, {"@type": "WebApplication", "name": "10KDecoder", "alternateName": "10KDecoder", "url": "https://10kdecoder.com/", "applicationCategory": "FinanceApplication", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Free dashboards and infographics of US public companies' results, built from their SEC filings (10-K, 10-Q, earnings releases, IPO prospectuses). Revenue, profit, cash flow and a revenue-to-profit flow chart for 2,900+ companies."}]}</script>
 <script data-goatcounter="https://10kanalyzer.goatcounter.com/count" data-goatcounter-settings='{"no_onload":true}' async src="//gc.zgo.at/count.js"></script>
 <script>/* Open the site once with ?nocount to stop counting your own visits on this browser; ?count turns counting back on */
 try { const u = new URL(location.href), off = u.searchParams.has("nocount"), on = u.searchParams.has("count");
@@ -112,8 +112,10 @@ button,input{font:inherit}
 .brand{display:block}   /* site name, then "Decode SEC filings" under it, on every screen size */
 .brand p{margin-top:2px}
 .brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
-.brand h1 span{color:inherit}
+.brand h1 span{color:inherit}.brand h1 .dim{opacity:.62}body:not(.home) .brand h1 .tld{display:none}   /* .com only on the home page; a dimmer Decoder reads as two words */
+.brand h1 .tld{font-size:.45em;font-weight:500;color:var(--muted);margin-left:1px;letter-spacing:0}
 .brand p{color:var(--muted);font-size:14px}
+body:not(.home) .brand h1{font-size:24px;line-height:1.05}body:not(.home) .brand p{font-size:12.5px;margin-top:0;line-height:1.2}   /* inner pages: a smaller name, the tagline tucked under it */
 .search{display:flex;gap:8px;flex-wrap:wrap}
 .search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .search input{flex:1 1 220px;min-width:0;height:48px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-family:var(--f-mono);font-size:17px;text-transform:uppercase;letter-spacing:.04em}
@@ -578,6 +580,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+.ov.ov-sk #ovTitle{display:none}.ov.ov-sk .ov-box img{width:auto;max-width:100%;max-height:calc(100svh - 110px);margin:0 auto}   /* turned income flow: the title is in the picture; as big as the screen allows */
+.ov.ov-sk.img-fs .ov-box{height:100%;justify-content:center}.ov.ov-sk.img-fs .ov-box img{max-height:100svh;max-width:100%;width:auto;margin:auto}
 
 /* Slides (authored at 1280x720, scaled to fit) */
 .stage{position:relative;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
@@ -614,7 +618,7 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .notes #snote{font-size:15px;line-height:1.6;max-width:72ch}
 /* Home: only the search box and the company selector; everything else appears once a company or list is opened */
 body.home .views,body.home #filing{display:none}
-body.home .brand{display:block;position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:0;right:0;text-align:center;pointer-events:none}body.home .brand a{pointer-events:auto}   /* home: title and subtitle centered at the very top */
+body.home .brand{display:block;position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:0;right:0;text-align:left;pointer-events:none;padding-left:max(16px,env(safe-area-inset-left,0px),calc((100% - 1180px) / 2 + 16px))}body.home .brand a{pointer-events:auto}   /* home: title and subtitle centered at the very top */
 body.home .wrap{min-height:calc(100svh - 120px);justify-content:center}
 body.home .shelf{width:100%;max-width:560px;margin:0 auto}
 body.home .picker select{max-width:none}
@@ -695,11 +699,12 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 </style>
 <nav class="topicons" aria-label="Site"><a href="#watchlist" id="wlIcon" aria-label="Watchlist" title="Watchlist"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></svg></a><a href="#" id="closeIcon" aria-label="Close" title="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a><a href="#" id="searchToggle" role="button" aria-label="Search for a company" aria-expanded="false" title="Search"><svg class="i-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><svg class="i-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></a><a href="./" id="homeIcon" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a><div class="hmenu"><button type="button" class="hm-btn" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="menuPanel"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav class="hm-panel" id="menuPanel" hidden aria-label="Menu"><a href="#latest">Latest<b class="hm-n" id="mNew" hidden></b></a><a href="#upcoming">Upcoming<b class="hm-n" id="mUp" hidden></b></a><a href="#ipo">IPO<b class="hm-n" id="mIpo" hidden></b></a><a href="#watchlist">★ Watchlist<b class="hm-n" id="mWl" hidden></b></a><a href="c/index.html">All companies A–Z</a><a href="#faq">FAQ</a><a href="#add-tickers">Add tickers</a><a href="#layout-settings">Layout settings</a></nav></div></nav>
 
-<noscript><p>10-K Decoder needs JavaScript for its dashboards. Browse the plain pages instead: <a href="c/index.html">all companies A–Z</a> · <a href="llms.txt">about this site</a>.</p></noscript>
+<p class="sr-only">10KDecoder (10-K Decoder): decode SEC 10-K filings. Free dashboards and infographics of US public companies' annual and quarterly reports, earnings releases and IPOs.</p>
+<noscript><p>10KDecoder needs JavaScript for its dashboards. Browse the plain pages instead: <a href="c/index.html">all companies A–Z</a> · <a href="llms.txt">about this site</a>.</p></noscript>
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
-      <h1><a href="./" id="homeLink" title="Home">10-K <span>Decoder</span></a></h1>
+      <h1><a href="./" id="homeLink" title="Home">10K<span class="dim">Decoder</span><small class="tld">.com</small></a></h1>
       <p>Decode SEC filings</p>
     </div>
     <p class="tagline">Read public company financials<br>at a glance</p>
@@ -1649,9 +1654,9 @@ async function makeInfographicBlobOnce(c){
     n.querySelectorAll(".rs-list").forEach(x => { x.style.display = "block"; x.style.columns = "2"; x.style.columnGap = "32px"; });
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
-    h.style.cssText = "display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
+    h.style.cssText = "display:block;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
     const nm0 = shortName(c.name), nmM = nm0.match(/^(.*?)(,?)\s+(Inc\.?|Corp\.?|Ltd\.?|LLC|Co\.?|plc|Limited|Incorporated)$/i);
-    h.innerHTML = `<div><p id="igNm" style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${nmM ? `${esc(nmM[1])}<span class="ig-suf">${esc(nmM[2])} ${esc(nmM[3])}</span>` : esc(nm0)}</p><p style="margin:4px 0 0;font:600 ${TALL ? 22 : WIDE ? 24 : FULLIG ? 21 : 26}px/1.2 'IBM Plex Sans',sans-serif;color:#55606E"><span style="color:#A9550D">${c.ticker}</span> · ${esc(c.fy)}</p><p style="margin:6px 0 0;font:500 15px 'IBM Plex Sans',sans-serif;color:#55606E">${c.form || "Form 10-K"} · ${esc(c.fy)} · ${esc(sd(c.period))} · filed ${esc(sd(c.filed))}</p></div>`;
+    h.innerHTML = `<div><p id="igNm" style="margin:0;font:700 ${TALL ? 34 : WIDE ? 38 : FULLIG ? 32 : 40}px/1.1 'IBM Plex Sans Condensed','Arial Narrow',sans-serif;color:#15202B">${nmM ? `${esc(nmM[1])}<span class="ig-suf">${esc(nmM[2])} ${esc(nmM[3])}</span>` : esc(nm0)}</p><p style="margin:4px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:6px;font:600 ${TALL ? 22 : WIDE ? 24 : FULLIG ? 21 : 26}px/1.2 'IBM Plex Sans',sans-serif;color:#55606E"><span><span style="color:#A9550D">${c.ticker}</span> · ${esc(c.fy)}</span><span style="font:500 15px 'IBM Plex Sans',sans-serif">· ${c.form || "Form 10-K"} · ${esc(sd(c.period))}</span><span style="margin-left:auto;padding-left:12px;font:500 15px 'IBM Plex Sans',sans-serif;white-space:nowrap">by 10KDecoder.com</span></p></div>`;   // one line: ticker · period · form · months ended, the site's name at the right end
     n.prepend(h);
     host.appendChild(n);
     { const nmEl = n.querySelector("#igNm"), suf = nmEl && nmEl.querySelector(".ig-suf");   // name on one line: drop "Inc." / "Corp." (and its comma) when it would wrap
@@ -1793,6 +1798,7 @@ function pageLock(){
   const h = document.documentElement, phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
   let fs = false; try { fs = !!(document.fullscreenElement || document.webkitFullscreenElement) && !($("#cxOv") && !$("#cxOv").hidden); } catch (e) {}
   try { if (typeof fsActive === "function" && fsActive()) fs = true; } catch (e) {}
+  if ($("#imgOverlay") && !$("#imgOverlay").hidden && $("#imgOverlay").classList.contains("ov-sk")) fs = true;   // the income flow picture keeps its place on the screen by itself (skOrient)
   const on = phone && innerWidth > innerHeight && !fs; rotLocked = on;
   h.classList.toggle("rot-lock", on);
   if (on) {
@@ -1850,7 +1856,7 @@ $("#tabShare").addEventListener("click", async () => {
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove();   // no share sheet here: save the picture
 });
 function showImage(url, title){
-  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
+  const ov = $("#imgOverlay"); ov.classList.remove("ov-sk"); $("#ovImg").style.transform = ""; $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>';
   $("#ovShare").hidden = !canShareImage();
   $("#imgOverlay .ov-box").focus({preventScroll: true});   // focus the dialog, not a button, so no button looks selected
@@ -1876,7 +1882,7 @@ const ovFsReal = () => (document.fullscreenElement || document.webkitFullscreenE
 function setImgFs(on){
   const ov = $("#imgOverlay");
   ov.classList.toggle("img-fs", on); ov.scrollTop = 0;
-  if (on) {
+  if (on && !ov.classList.contains("ov-sk")) {   // the turned income flow stays in the page, which doesn't turn with the phone
     const req = ov.requestFullscreen || ov.webkitRequestFullscreen;
     if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
   } else if (ovFsReal()) {
@@ -1906,7 +1912,7 @@ document.addEventListener("keydown", e => {
 });
 /* A click or tap on the dark area around the picture closes it, like the close button */
 $("#imgOverlay").addEventListener("click", e => { if (e.target === e.currentTarget) $("#ovClose").click(); });
-$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); $("#imgOverlay").hidden = true; ovFromTab = false; });
+$("#ovClose").addEventListener("click", () => { setImgFs(false); const img = $("#ovImg"); img.removeAttribute("src"); img.style.transform = ""; $("#imgOverlay").hidden = true; $("#imgOverlay").classList.remove("ov-sk"); ovFromTab = false; pageLock(); setBst(); });
 
 /* ---------------- Video ---------------- */
 const V = {bg:"#0E1A2B", panel:"#16263D", white:"#F3F6FA", muted:"#A3B3C8", amber:"#F2A93B", green:"#4CC38A", red:"#F07A64", red2:"#C9604E", blue:"#7FA6D8", blue2:"#43597A"};
@@ -1961,7 +1967,7 @@ function buildScenes(c){
     sl.lines.forEach((l, i) => { ctx.globalAlpha = ease(p * 1.4 - 0.3 - i * 0.2); rr(ctx, 64, 412 + i * 56, 8, 34, 2, V.blue); T(ctx, l, 90, 440 + i * 56, 28, V.white, FB, 500); }); ctx.globalAlpha = 1; }}));
   scenes.push({cap: `Source: ${c.name} ${c.form || "Form 10-K"}, filed ${c.filed}. The full report and infographic are in the other tabs.`, say: `That's ${c.short}'s ${c.fy.replace("FY", "fiscal ")} in brief. The full report and infographic are in the other tabs.`,
     draw(ctx, p){ ctx.fillStyle = V.bg; ctx.fillRect(0,0,1280,720); ctx.globalAlpha = ease(p);
-      T(ctx, "10-K Decoder", 640, 300, 64, V.white, FD, 700, "center"); T(ctx, c.name + " · " + c.fy, 640, 360, 30, V.amber, FB, 600, "center");
+      T(ctx, "10KDecoder", 640, 300, 64, V.white, FD, 700, "center"); T(ctx, c.name + " · " + c.fy, 640, 360, 30, V.amber, FB, 600, "center");
       T(ctx, c.accession ? "SEC accession " + c.accession : "SEC CIK " + c.cik, 640, 410, 22, V.muted, FM, 500, "center"); ctx.globalAlpha = 1; }});
   scenes.forEach(sc => { sc.dur = Math.max(6, sc.say.split(" ").length / 2.6 + 1.5); });
   return scenes;
@@ -2767,7 +2773,7 @@ function showPage(name, title){
   ["up", "new", "wl", "ipo"].forEach(k => $(`#${k}Btn`).toggleAttribute("aria-current", ({up: "upcoming", new: "new", wl: "watchlist", ipo: "ipo"})[k] === name));
   document.querySelectorAll(".vbtn[aria-current]").forEach(a => a.setAttribute("aria-current", "page"));
   $("#wlIcon").toggleAttribute("aria-current", name === "watchlist");
-  state.page = name; renderSpines(); document.title = `${title} · 10-K Decoder`;
+  state.page = name; renderSpines(); document.title = `${title} · 10KDecoder`;
 }
 function showAdd(t){ showPage("add", "Add tickers"); if (t != null) $("#addTicker").value = t; resetAdd(); window.scrollTo(0, 0); }
 function showLayout(){ showPage("layout", "Layout settings"); window.scrollTo(0, 0); }
@@ -2781,7 +2787,7 @@ function goHome(){
   renderSpines(); $("#pick").value = ""; $("#ticker").value = ""; document.body.classList.add("home");
   try { if (location.hash) history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
 }
-function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#addPage").hidden = true; $("#layoutPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10-K Decoder"; }
+function hideNew(){ $("#wlIcon").removeAttribute("aria-current"); document.body.classList.remove("faqmode", "company"); $("#newPage").hidden = true; $("#wlPage").hidden = true; $("#upPage").hidden = true; $("#faqPage").hidden = true; $("#addPage").hidden = true; $("#layoutPage").hidden = true; $("#ipoPage").hidden = true; document.querySelectorAll(".vbtn").forEach(a => a.removeAttribute("aria-current")); state.page = ""; document.title = "10KDecoder"; }
 
 /* ---------------- Watchlist: tickers kept in a cookie ("wl") for this site, for a year ---------------- */
 const WL_PATH = location.pathname.replace(/[^/]*$/, "") || "/";
@@ -2919,12 +2925,58 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   $("#cxShrink").addEventListener("click", close);
   ov.addEventListener("click", e => { if (!e.target.closest(".cx-stage") && !e.target.closest(".cx-shrink")) close(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
-  document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); open(b.closest(".card")); } });
+  /* The income statement flow opens as a picture, like the infographic: title on top, the chart below, with Full screen, Share and Close */
+  async function openSkImage(card){
+    /* Picture of the flow with its title band (statement, company, ticker, report). On a phone the picture is turned a quarter turn,
+       title at the top left: the page and the picture never turn with the phone, so turning the phone sideways shows it the right way up, big. */
+    const svg = card.querySelector("svg.sk-flat") || card.querySelector(".sankey svg"); if (!svg) return open(card);
+    const c = state.shown || LIBRARY[state.ticker] || {}, base = LIBRARY[state.ticker] || c, vb = svg.viewBox.baseVal;
+    /* 16:9 picture (9:16 once turned on a phone): the flow scaled to fit above a text band, centred, with room around it */
+    const W = 3200, H = 1800, kt = 2.9, band = Math.round(56 * kt), pad = Math.round(14 * kt), lead = Math.round(28 * kt);
+    const aw = W - lead - pad, ah = H - band - 2 * pad, sc = Math.min(aw / vb.width, ah / vb.height);
+    const CW = Math.round(vb.width * sc), CH = Math.round(vb.height * sc), cx = lead + Math.round((aw - CW) / 2), cy = pad + Math.round((ah - CH) / 2);
+    const phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
+    const chart = drawSvgToCanvas(svg, CW, CH, 1);
+    const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = H; const g = cvs.getContext("2d");
+    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, H); g.drawImage(chart, cx, cy); chart.width = chart.height = 0;
+    const k = kt, TB = H - band;   // text band starts here
+    const FAM = '"IBM Plex Sans", Helvetica, Arial, sans-serif', report = c.form || (/^Q\d/.test(c.fy || "") ? "10-Q" : "10-K");
+    g.textBaseline = "alphabetic"; g.textAlign = "left";
+    g.fillStyle = "#15202B"; g.font = `700 ${Math.round(20 * k)}px ${FAM}`;
+    g.fillText(`Income statement flow · ${base.name || c.name || ""}`, pad, TB + Math.round(24 * k));
+    g.fillStyle = "#5B6573"; g.font = `500 ${Math.round(13 * k)}px ${FAM}`;
+    const NUM = {One: 1, Two: 2, Three: 3, Four: 4, Five: 5, Six: 6, Seven: 7, Eight: 8, Nine: 9, Ten: 10, Eleven: 11, Twelve: 12};
+    const per = (c.period || "").replace(/\b(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Eleven|Twelve)\b/g, w => NUM[w]);   // "3 months ended", short
+    g.fillText([base.ticker || c.ticker, report, c.fy, per].filter(Boolean).join(" · "), pad, TB + Math.round(44 * k));
+    g.textAlign = "right"; g.font = `600 ${Math.round(14 * k)}px ${FAM}`; g.fillText("10KDecoder.com", W - pad, TB + Math.round(44 * k));
+    const toUrl = cv => new Promise(r => cv.toBlob(b => r(b), "image/png"));
+    const flatBlob = await toUrl(cvs); let portBlob = null;
+    if (phone) { const out = document.createElement("canvas"); out.width = cvs.height; out.height = cvs.width; const o = out.getContext("2d");
+      o.translate(out.width, 0); o.rotate(Math.PI / 2); o.drawImage(cvs, 0, 0); portBlob = await toUrl(out); out.width = out.height = 0; }   // quarter turn clockwise
+    cvs.width = cvs.height = 0; if (!flatBlob) return open(card);
+    lastImg = {blob: portBlob || flatBlob, name: `${base.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
+    if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(lastImg.blob);
+    for (const u of skUrls) URL.revokeObjectURL(u); skUrls = portBlob ? [lastImgUrl, URL.createObjectURL(flatBlob)] : [];
+    showImage(lastImgUrl, "Income statement flow");
+    $("#imgOverlay").classList.toggle("ov-sk", phone); if (phone) { pageLock(); skOrient(); }
+  }
+  /* The picture keeps its place on the phone's screen whichever way the phone is held: upright it is the turned picture;
+     turned sideways the browser turns its view, so the flat picture is shown (upside down when turned the other way). */
+  let skUrls = [];
+  function skOrient(){
+    const ov = $("#imgOverlay"), img = $("#ovImg"); if (ov.hidden || !ov.classList.contains("ov-sk") || skUrls.length < 2) return;
+    const land = innerWidth > innerHeight, ang = screen.orientation && typeof screen.orientation.angle === "number" ? screen.orientation.angle : (typeof window.orientation === "number" ? (window.orientation + 360) % 360 : 90);
+    const want = land ? skUrls[1] : skUrls[0]; if (img.getAttribute("src") !== want) img.src = want;
+    img.style.transform = land && ang === 270 ? "rotate(180deg)" : "";
+  }
+  ["resize", "orientationchange"].forEach(ev => window.addEventListener(ev, () => { skOrient(); setTimeout(skOrient, 300); }));
+  const openAny = card => card.classList.contains("sk-card") ? openSkImage(card) : open(card);
+  document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); openAny(b.closest(".card")); } });
   let last = null;
   document.addEventListener("pointerup", e => {
     const card = e.target.closest && e.target.closest(SEL); if (!card || e.target.closest("a,button,input,select,summary,.sp-hit")) { last = null; return; }
     const now = Date.now();
-    if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); open(card); }
+    if (last && last.card === card && now - last.t < 400 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 40) { last = null; getSelection().removeAllRanges(); openAny(card); }
     else last = {card, t: now, x: e.clientX, y: e.clientY};
   });
 })();
@@ -2955,13 +3007,13 @@ $("#fbForm").addEventListener("submit", async e => {
     const r = await fetch("https://formsubmit.co/ajax/" + FB_TO, {
       method: "POST", headers: {"Content-Type": "application/json", "Accept": "application/json"},
       body: JSON.stringify({name: name || "(not given)", email: email || "(not given)", ...(email ? {_replyto: email} : {}), message: msg, company: state.ticker, page: location.href.split("#")[0], sent: new Date().toISOString(),
-        subject: $("#fbSubj").value.trim(), _subject: $("#fbSubj").value.trim() || "10-K Decoder feedback", _template: "table", _captcha: "false"})
+        subject: $("#fbSubj").value.trim(), _subject: $("#fbSubj").value.trim() || "10KDecoder feedback", _template: "table", _captcha: "false"})
     });
     if (!r.ok) throw new Error("HTTP " + r.status);
     showFbThanks();
   } catch (err) {
     st.textContent = "Your feedback couldn't be sent from here. Please try again in a moment" +
-      (/(github\.io|10kdecoder\.com)$/.test(location.hostname) ? "." : ", or use the site at 10kdecoder.com.");
+      (/(github\.io|10kdecoder\.com)$/.test(location.hostname) ? "." : ", or use the site at 10KDecoder.com.");
   } finally { btn.disabled = false; }
 });
 /* feedback subject follows the tab being viewed, e.g. "Regarding AAPL Q4 2026 Report" */
