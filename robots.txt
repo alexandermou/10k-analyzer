@@ -1,0 +1,55 @@
+# 10-K Analyzer: public financial data from SEC filings. Everyone, AI assistants included, is welcome to read and cite it.
+
+User-agent: *
+Allow: /
+Disallow: /preview.html
+
+User-agent: GPTBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /preview.html
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: Claude-User
+Allow: /
+Disallow: /preview.html
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /preview.html
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /preview.html
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /preview.html
+
+User-agent: CCBot
+Allow: /
+Disallow: /preview.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /preview.html
+
+Sitemap: https://alexandermou.github.io/10k-analyzer/sitemap.xml
