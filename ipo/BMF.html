@@ -100,7 +100,7 @@ body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-
 body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
 body.shot .pair{grid-template-columns:1fr 1fr}
 body.shot .card{padding:16px 18px}
-body.shot .chart svg{height:200px}
+body.shot .chart svg{height:auto}
 .ov[hidden]{display:none}
 .ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
@@ -135,6 +135,7 @@ body.shot .chart svg{height:200px}
 #dashView{display:contents}
 
 @media (hover:hover) and (pointer:fine){.pz{display:none!important}}
+.chart tspan.sub{font-size:11px}
 
 .risks li{padding:4px 0 4px 12px}
 .rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
@@ -196,32 +197,29 @@ const PAGE = {"img": "BMF-infographic.png", "imgName": "BMF-IPO-F-1-2026-08-17-i
 
 /* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
 function bars(el, data, opt = {}) {
-  /* One zero line: bars rise above it for gains and hang below it for losses. All gains: the line is at the bottom; all losses: at the top. */
-  const W = 360, H = 190, padL = 6, padR = 6, base = 150;
-  const hi = Math.max(0, ...data.map(d => d.v)), lo = Math.min(0, ...data.map(d => d.v));
-  const top = hi > 0 ? 22 : 16, bot = lo < 0 ? base - 18 : base;      // room for value labels above gains / below losses
-  const y0 = hi - lo ? top + hi / (hi - lo) * (bot - top) : base, k = (bot - top) / ((hi - lo) || 1);
-  const bw = Math.min(70, (W - padL - padR) / data.length * 0.5), step = (W - padL - padR) / data.length;
+  /* Horizontal bars, newest period on top. One zero line: gains go right of it, losses left, in red. */
+  const rows = data.slice().reverse(), W = 360, rowH = 34, bh = 18, labW = 78, valW = 60, H = rows.length * rowH + 6;
+  const hi = Math.max(0, ...rows.map(d => d.v)), lo = Math.min(0, ...rows.map(d => d.v));
+  const pL = labW + (lo < 0 ? valW : 0), pR = W - 4 - (hi > 0 ? valW : 0), k = (pR - pL) / ((hi - lo) || 1), z = pL - lo * k;
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">`;
-  s += `<line x1="0" x2="${W}" y1="${y0}" y2="${y0}" stroke="var(--line)" stroke-width="1"/>`;
-  data.forEach((d, i) => {
-    const h = Math.abs(d.v) * k, r = Math.min(4, h), x = padL + step * i + (step - bw) / 2;
-    const col = d.v < 0 ? "var(--negbar)" : (i === data.length - 1 ? "var(--bar)" : "var(--bar2)");
+  rows.forEach((d, i) => {
+    const y = 4 + i * rowH, cy = y + rowH / 2, w = Math.abs(d.v) * k, r = Math.min(4, w / 2), by = cy - bh / 2;
+    const col = d.v < 0 ? "var(--negbar)" : (i === 0 ? "var(--bar)" : "var(--bar2)");
+    s += `<text x="0" y="${cy + 4}" text-anchor="start">${d.k}${d.s ? ` <tspan class="sub">${d.s}</tspan>` : ""}</text>`;
     if (d.v < 0) {
-      s += `<path d="M${x},${y0} V${y0 + h - r} q0,${r} ${r},${r} h${bw - 2 * r} q${r},0 ${r},-${r} V${y0} Z" fill="${col}"/>`;
-      s += `<text class="val" x="${x + bw / 2}" y="${y0 + h + 15}" text-anchor="middle">${d.t}</text>`;
+      s += `<path d="M${z},${by} H${z - w + r} q-${r},0 -${r},${r} V${by + bh - r} q0,${r} ${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z - w - 6}" y="${cy + 4}" text-anchor="end">${d.t}</text>`;
     } else {
-      s += `<path d="M${x},${y0} V${y0 - h + r} q0,-${r} ${r},-${r} h${bw - 2 * r} q${r},0 ${r},${r} V${y0} Z" fill="${col}"/>`;
-      s += `<text class="val" x="${x + bw / 2}" y="${y0 - h - 6}" text-anchor="middle">${d.t}</text>`;
+      s += `<path d="M${z},${by} H${z + w - r} q${r},0 ${r},${r} V${by + bh - r} q0,${r} -${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z + w + 6}" y="${cy + 4}" text-anchor="start">${d.t}</text>`;
     }
-    s += `<text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle">${d.k}</text>`;
-    if (d.s) s += `<text x="${x + bw / 2}" y="${base + 34}" text-anchor="middle">${d.s}</text>`;
-    s += `<rect class="hit" x="${padL + step * i}" y="${top - 16}" width="${step}" height="${H - top}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
+    s += `<rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
   });
+  s += `<line x1="${z}" x2="${z}" y1="2" y2="${H - 2}" stroke="var(--line)" stroke-width="1"/>`;
   el.innerHTML = s + `</svg><div class="tip"></div>`;
   const tip = el.querySelector(".tip");
   el.querySelectorAll(".hit").forEach(r => {
-    r.addEventListener("pointerenter", () => { const b = r.getBoundingClientRect(), p = el.getBoundingClientRect(); tip.textContent = r.dataset.tip; tip.style.left = (b.left - p.left + b.width / 2) + "px"; tip.style.top = "30px"; tip.style.opacity = 1; });
+    r.addEventListener("pointerenter", () => { const b = r.getBoundingClientRect(), p = el.getBoundingClientRect(); tip.textContent = r.dataset.tip; tip.style.left = (p.width / 2) + "px"; tip.style.top = (b.top - p.top - 6) + "px"; tip.style.opacity = 1; });
     r.addEventListener("pointerleave", () => tip.style.opacity = 0);
   });
 }
