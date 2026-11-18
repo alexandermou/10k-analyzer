@@ -112,7 +112,7 @@ button,input{font:inherit}
 .brand{display:block}   /* site name, then "Decode SEC filings" under it, on every screen size */
 .brand p{margin-top:2px}
 .brand h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
-.brand h1 span{color:inherit}
+.brand h1 span{color:inherit}.brand h1 .tld{font-size:.45em;font-weight:500;color:var(--muted);margin-left:1px;letter-spacing:0}
 .brand p{color:var(--muted);font-size:14px}
 .search{display:flex;gap:8px;flex-wrap:wrap}
 .search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -699,7 +699,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 <div class="wrap">
   <section class="shelf" aria-label="Find a company">
     <div class="brand">
-      <h1><a href="./" id="homeLink" title="Home">10-K <span>Decoder</span></a></h1>
+      <h1><a href="./" id="homeLink" title="Home">10KDecoder<small class="tld">.com</small></a></h1>
       <p>Decode SEC filings</p>
     </div>
     <p class="tagline">Read public company financials<br>at a glance</p>
