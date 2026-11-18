@@ -52,4 +52,4 @@ User-agent: Bingbot
 Allow: /
 Disallow: /preview.html
 
-Sitemap: https://alexandermou.github.io/10k-analyzer/sitemap.xml
+Sitemap: https://10kdecoder.com/sitemap.xml
