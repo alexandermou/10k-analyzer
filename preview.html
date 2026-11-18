@@ -2948,7 +2948,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
     const NUM = {One: 1, Two: 2, Three: 3, Four: 4, Five: 5, Six: 6, Seven: 7, Eight: 8, Nine: 9, Ten: 10, Eleven: 11, Twelve: 12};
     const per = (c.period || "").replace(/\b(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Eleven|Twelve)\b/g, w => NUM[w]);   // "3 months ended", short
     g.fillText([base.ticker || c.ticker, report, c.fy, per].filter(Boolean).join(" · "), pad, TB + Math.round(44 * k));
-    g.textAlign = "right"; g.font = `600 ${Math.round(14 * k)}px ${FAM}`; g.fillText("10KDecoder.com", W - pad, TB + Math.round(44 * k));
+    g.textAlign = "right"; g.font = `600 ${Math.round(14 * k)}px ${FAM}`; g.fillText("by 10KDecoder.com", W - pad, TB + Math.round(44 * k));
     const toUrl = cv => new Promise(r => cv.toBlob(b => r(b), "image/png"));
     const flatBlob = await toUrl(cvs); let portBlob = null;
     if (phone) { const out = document.createElement("canvas"); out.width = cvs.height; out.height = cvs.width; const o = out.getContext("2d");
