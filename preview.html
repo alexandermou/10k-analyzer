@@ -579,6 +579,8 @@ html.fs-lock,html.fs-lock body{overflow:hidden}
 .ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
 .ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
 .ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+.ov.ov-sk .ov-tt{visibility:hidden}.ov.ov-sk .ov-box img{width:auto;max-width:100%;max-height:calc(100svh - 110px);margin:0 auto}   /* turned income flow: the title is in the picture; as big as the screen allows */
+.ov.ov-sk.img-fs .ov-box img{max-height:none;width:100%}
 
 /* Slides (authored at 1280x720, scaled to fit) */
 .stage{position:relative;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
@@ -1851,7 +1853,7 @@ $("#tabShare").addEventListener("click", async () => {
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove();   // no share sheet here: save the picture
 });
 function showImage(url, title){
-  const ov = $("#imgOverlay"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
+  const ov = $("#imgOverlay"); ov.classList.remove("ov-sk"); $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
   $("#ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>';
   $("#ovShare").hidden = !canShareImage();
   $("#imgOverlay .ov-box").focus({preventScroll: true});   // focus the dialog, not a button, so no button looks selected
@@ -2922,14 +2924,28 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
   /* The income statement flow opens as a picture, like the infographic: title on top, the chart below, with Full screen, Share and Close */
   async function openSkImage(card){
+    /* Picture of the flow with its title band (statement, company, ticker, report). On a phone the picture is turned a quarter turn,
+       title at the top right: the page doesn't turn with the phone, so turning the phone sideways shows it the right way up, big. */
     const svg = card.querySelector("svg.sk-flat") || card.querySelector(".sankey svg"); if (!svg) return open(card);
-    const c = state.shown || LIBRARY[state.ticker] || {}, vb = svg.viewBox.baseVal, k = Math.min(3, 3200 / vb.width);
-    const cvs = drawSvgToCanvas(svg, Math.round(vb.width * k), Math.round(vb.height * k), 1);
-    const blob = await new Promise(r => cvs.toBlob(r, "image/png")); cvs.width = cvs.height = 0; if (!blob) return open(card);
-    lastImg = {blob, name: `${c.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
+    const c = state.shown || LIBRARY[state.ticker] || {}, base = LIBRARY[state.ticker] || c, vb = svg.viewBox.baseVal, k = Math.min(3, 3000 / vb.width);
+    const W = Math.round(vb.width * k), CH = Math.round(vb.height * k), band = Math.round(56 * k), pad = Math.round(14 * k);
+    const chart = drawSvgToCanvas(svg, W, CH, 1);
+    const cvs = document.createElement("canvas"); cvs.width = W; cvs.height = band + CH; const g = cvs.getContext("2d");
+    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, W, band + CH); g.drawImage(chart, 0, band); chart.width = chart.height = 0;
+    const FAM = '"IBM Plex Sans", Helvetica, Arial, sans-serif', report = c.form || (/^Q\d/.test(c.fy || "") ? "10-Q" : "10-K");
+    g.textBaseline = "alphabetic"; g.fillStyle = "#15202B"; g.font = `700 ${Math.round(20 * k)}px ${FAM}`;
+    g.fillText(`Income statement flow · ${base.name || c.name || ""}`, pad, Math.round(26 * k));
+    g.fillStyle = "#5B6573"; g.font = `500 ${Math.round(13 * k)}px ${FAM}`;
+    g.fillText([base.ticker || c.ticker, report, c.fy, c.period].filter(Boolean).join(" · ") + "  ·  10kdecoder.com", pad, Math.round(46 * k));
+    const phone = matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 600;
+    let out = cvs;
+    if (phone) { out = document.createElement("canvas"); out.width = cvs.height; out.height = cvs.width; const o = out.getContext("2d");
+      o.translate(out.width, 0); o.rotate(Math.PI / 2); o.drawImage(cvs, 0, 0); cvs.width = cvs.height = 0; }   // quarter turn clockwise: the title lands at the top right
+    const blob = await new Promise(r => out.toBlob(r, "image/png")); out.width = out.height = 0; if (!blob) return open(card);
+    lastImg = {blob, name: `${base.ticker || "company"}-${(c.fy || "").replace(/\s+/g, "-")}-income-statement-flow.png`};
     if (lastImgUrl) URL.revokeObjectURL(lastImgUrl); lastImgUrl = URL.createObjectURL(blob);
     showImage(lastImgUrl, "Income statement flow");
-    $("#ovStatus").innerHTML = `${esc([c.ticker, c.fy].filter(Boolean).join(" · "))}<span class="pz"> · Pinch-zoom for details.</span>`;
+    $("#imgOverlay").classList.toggle("ov-sk", phone);
   }
   const openAny = card => card.classList.contains("sk-card") ? openSkImage(card) : open(card);
   document.addEventListener("click", e => { const b = e.target.closest(".cx-btn"); if (b) { e.preventDefault(); openAny(b.closest(".card")); } });
