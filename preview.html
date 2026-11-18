@@ -2627,7 +2627,7 @@ function ipoNewItems(){   // IPOs that started trading in the last 30 days: the 
   const t = todayISO(), D = (IPO_TODAY && IPO_TODAY.days) || {};
   /* the last 30 days, today included; nothing in the future */
   const from = (d => (d.setDate(d.getDate() - 30), d.toISOString().slice(0, 10)))(new Date(t + "T12:00:00"));
-  const items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
+  let items = Object.keys(D).filter(x => x >= from && x <= t).flatMap(x => D[x].map(y => ({...y, date: x})));
   const cikOf = Object.fromEntries((ipoData.ipos || []).filter(x => x.symbol).map(x => [x.symbol, String(x.cik)]));
   /* the exchange calendars leave out SPACs and some small listings: add Nasdaq/NYSE IPOs whose final prospectus is on EDGAR.
      They start trading the business day after the SEC declares them effective. */
@@ -2638,6 +2638,10 @@ function ipoNewItems(){   // IPOs that started trading in the last 30 days: the 
     items.push({sym: x.symbol, name: x.name, exchange: x.exchange.startsWith("NYSE American") ? "NYSE American" : x.exchange.startsWith("NYSE") ? "NYSE" : "Nasdaq",
       price: x.price || null, shares: x.shares || null, amount: x.price && x.shares ? x.price * x.shares : null, date: d, src: "SEC"});
   }
+  /* regular IPOs only: keep listings our SEC tracker follows (S-1 / F-1 to 424B4); bank conversions, Reg A+ and uplistings drop out */
+  const inTracker = x => cikOf[x.sym] || (x.sym.endsWith("U") && cikOf[x.sym.slice(0, -1)]);
+  items = items.filter(inTracker);
+  for (const x of items) if (!cikOf[x.sym]) cikOf[x.sym] = cikOf[x.sym.slice(0, -1)];
   return {items, cikOf, t};
 }
 async function ipoLoadAll(){
