@@ -97,7 +97,9 @@ body.shot .star-btn{display:none}
 body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
-body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+body.shot .brand{display:none}
+.shot-by{display:none}body.shot header{position:relative}
+body.shot .shot-by{display:block;position:absolute;top:0;right:0;font-size:15px;font-weight:500;color:var(--muted)}   /* the site's name at the infographic's top right */
 body.shot .pair{grid-template-columns:1fr 1fr}
 body.shot .card{padding:16px 18px}
 body.shot .chart svg{height:auto}
@@ -156,6 +158,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     <span class="icons"><a href="../" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></span>
   </div>
   <header>
+    <span class="shot-by">by 10KDecoder.com</span>
     <span class="kicker">IPO filing, visualized</span>
     <h1>LOGOOM TECHNOLOGIES, INC.<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
     
@@ -174,7 +177,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     <p class="note">Share of voting power held by the founders or controlling holders after the offering, as stated in the filing.</p></section>
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li><li>Insiders keep control: about 50% of the voting power after the offering.</li></ul></section>
   
-  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Because we have a limited operating history, you may not be able to accurately evaluate our operations</li><li>Our investors may lose their entire investment because our financial status creates a doubt whether we will continue as a going concern</li><li>We are dependent on outside financing for continuation of our operations</li><li>We have limited resources and operational capacity, and we may not manage growth effectively</li><li>Our operating results may fluctuate, which could have a negative impact on our ability to grow our client base, establish sustainable revenues…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><p class="note">The filing doesn't set out its risks in a list we could read.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: LOGOOM TECHNOLOGIES, INC.'s <a href="https://www.sec.gov/Archives/edgar/data/2124913/000164033426001434/logoom_s1.htm" target="_blank" rel="noopener">Form S-1, filed with the SEC on Aug 31, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>

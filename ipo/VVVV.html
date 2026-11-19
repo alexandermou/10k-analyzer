@@ -90,7 +90,9 @@ body.shot .star-btn{display:none}
 body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
-body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+body.shot .brand{display:none}
+.shot-by{display:none}body.shot header{position:relative}
+body.shot .shot-by{display:block;position:absolute;top:0;right:0;font-size:15px;font-weight:500;color:var(--muted)}
 body.shot .pair{grid-template-columns:1fr 1fr}
 body.shot .card{padding:16px 18px}
 body.shot .chart svg{height:200px}
@@ -147,6 +149,7 @@ body.shot .chart svg{height:auto!important}
   </div>
 
   <header>
+    <span class="shot-by">by 10KDecoder.com</span>
     <span class="kicker">IPO filing, visualized</span>
     <h1>vVARDIS Holding AG<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
     <p class="sub">Drill-free treatment for early-stage tooth decay · Zug, Switzerland</p>

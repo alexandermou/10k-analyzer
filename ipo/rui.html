@@ -97,7 +97,9 @@ body.shot .star-btn{display:none}
 body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
-body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+body.shot .brand{display:none}
+.shot-by{display:none}body.shot header{position:relative}
+body.shot .shot-by{display:block;position:absolute;top:0;right:0;font-size:15px;font-weight:500;color:var(--muted)}   /* the site's name at the infographic's top right */
 body.shot .pair{grid-template-columns:1fr 1fr}
 body.shot .card{padding:16px 18px}
 body.shot .chart svg{height:auto}
@@ -156,6 +158,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     <span class="icons"><a href="../" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></span>
   </div>
   <header>
+    <span class="shot-by">by 10KDecoder.com</span>
     <span class="kicker">IPO filing, visualized</span>
     <h1>RUI Holdings Inc<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
     
@@ -175,7 +178,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Insiders keep control: about 95.06% of the voting power after the offering.</li></ul></section>
   <section class="card wide"><h2>The numbers</h2><div class="tw "><table><thead><tr><th>$</th><th>FY2024</th><th>FY2025</th><th>YoY</th></tr></thead><tbody><tr><td>Revenue</td><td>3.14M</td><td>13.7M</td><td class="g">+335%</td></tr><tr><td>Net result</td><td>(954K)</td><td>1.03M</td><td class="">n/m</td></tr></tbody></table></div>
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier; a bigger loss shows as a negative change. Green is better for the company, red worse; n/m where the sign flips.</p></section>
-  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Our business depends on a license to use the AIoT cloud platform, and the loss…</li><li>Breaches of and other types of security incidents involving our PRC Subsidiaries’ systems could negatively impact our business, our brand…</li><li>Disruptions in our subsidiaries’ supply chain could adversely affect our subsidiaries’ operations, ultimately harming our business…</li><li>High customer concentration exposes our subsidiaries to all of the risks faced by their major customers…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><ol class="rs-list rs-strategy"><li>Driving growth through exemplary case studies</li><li>Leveraging acquisitions for market consolidation; and</li><li>Expansion into new markets</li></ol><p class="note">The filing&#x27;s own strategy headings, shortened.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><p class="note">The filing doesn't set out its risks in a list we could read.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: RUI Holdings Inc's <a href="https://www.sec.gov/Archives/edgar/data/2094989/000118518526004253/ruihold424b4092326.htm" target="_blank" rel="noopener">Form 424B4, filed with the SEC on Sep 24, 2026</a>  (final prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>

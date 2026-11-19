@@ -97,7 +97,9 @@ body.shot .star-btn{display:none}
 body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
 body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
 body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
-body.shot .brand{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+body.shot .brand{display:none}
+.shot-by{display:none}body.shot header{position:relative}
+body.shot .shot-by{display:block;position:absolute;top:0;right:0;font-size:15px;font-weight:500;color:var(--muted)}   /* the site's name at the infographic's top right */
 body.shot .pair{grid-template-columns:1fr 1fr}
 body.shot .card{padding:16px 18px}
 body.shot .chart svg{height:auto}
@@ -156,6 +158,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
     <span class="icons"><a href="../" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></span>
   </div>
   <header>
+    <span class="shot-by">by 10KDecoder.com</span>
     <span class="kicker">IPO filing, visualized</span>
     <h1>Einride AB<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
     
@@ -172,7 +175,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
   
-  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>Autonomous and electric truck technologies are emerging and rapidly evolving technologies and involve significant risks and uncertainties…</li><li>Our vehicles may experience malfunctions or breakdowns or need to upgrade or adapt to changing technologies</li><li>We have a history of net losses, and we may not achieve or maintain profitability in the future</li><li>Our limited operating history makes it difficult to evaluate our future prospects and the risks and challenges we may encounter</li><li>Our future business depends in large part on our ability to continue to develop and successfully commercialize our autonomous…</li><li>The Einride Driver, Control Tower, Saga and Autonomous Truck may not be accepted and adopted by the market, the public, regulators…</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><p class="note">The filing doesn't set out its risks in a list we could read.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: Einride AB's <a href="https://www.sec.gov/Archives/edgar/data/2095096/000149315226042440/formf-1.htm" target="_blank" rel="noopener">Form F-1, filed with the SEC on Sep 14, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>
