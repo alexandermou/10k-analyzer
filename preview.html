@@ -115,6 +115,7 @@ button,input{font:inherit}
 .brand h1 span{color:inherit}.brand h1 .dim{opacity:.62}body:not(.home) .brand h1 .tld{display:none}   /* .com only on the home page; a dimmer Decoder reads as two words */
 .brand h1 .tld{font-size:.45em;font-weight:500;color:var(--muted);margin-left:1px;letter-spacing:0}
 .brand p{color:var(--muted);font-size:14px}
+.ev-list li{margin-bottom:10px}.ev-list .ev-q{color:var(--muted)}.ev-list a{font-size:13px;white-space:nowrap}
 body:not(.home) .brand h1{font-size:24px;line-height:1.05}body:not(.home) .brand p{font-size:12.5px;margin-top:0;line-height:1.2}   /* inner pages: a smaller name, the tagline tucked under it */
 .search{display:flex;gap:8px;flex-wrap:wrap}
 .search label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -1021,6 +1022,67 @@ function renderReport(c){
     </div>
   </div>`;
 }
+
+/* ---------------- Quarter summary: the numbers in words, then what the company filed between this report and the previous one ---------------- */
+const EV_ITEM = {"1.01": "Entered a material agreement", "1.02": "Ended a material agreement", "1.03": "Bankruptcy or receivership", "1.05": "Cybersecurity incident",
+  "2.01": "Completed an acquisition or sale", "2.03": "Took on new debt", "2.04": "Debt payment accelerated", "2.05": "Restructuring or job cuts", "2.06": "Impairment charge",
+  "3.01": "Stock listing notice", "3.02": "Sold unregistered shares", "3.03": "Shareholder rights changed", "4.01": "Auditor change", "4.02": "Past financial statements withdrawn",
+  "5.01": "Change in control", "5.02": "Leadership, board or executive pay", "5.03": "Bylaws or fiscal year changed", "5.07": "Shareholder meeting votes", "8.01": "Other announcement"};
+const evLabel = e => /^NT /.test(e.f) ? `Notice of a late ${e.f.slice(3)}` : /13D/i.test(e.f) ? "Large shareholder filing (13D)" : (e.items || []).map(i => EV_ITEM[i]).filter(Boolean).slice(0, 2).join(" · ") || e.f;
+const evUrl = (c, e) => `https://www.sec.gov/Archives/edgar/data/${parseInt(c.cik, 10)}/${e.acc.replace(/-/g, "")}/${e.doc}`;
+function qSummary(c, annual){
+  const per = c.fy, prevFy = c.prevQ && c.prevQ.fy, m = v => money(c, v);
+  const ch = (a, b) => { const y = yoy(a, b); return y === null ? null : y >= 0 ? `up ${yoyStr(a, b).replace("+", "")}` : `down ${yoyStr(a, b).replace("−", "")}`; };
+  const bar = l => { for (const s of c.sections) if (s.type === "bars") { const it = s.items.find(i => (Array.isArray(l) ? l : [l]).includes(i.label)); if (it) return it; } return null; };
+  const ended = sd(c.period).replace(/\s*\(.*\)\s*$/, "").replace(/^(three|3) months ended/i, "quarter ended");
+  const out = [];
+  let p1 = `${c.short || c.name} had revenue of ${m(c.revenue)} in ${per} (${ended})`;
+  const ry = ch(c.revenue, c.revenuePrior), rq = c.prevQ ? ch(c.revenue, c.prevQ.revenue) : null;
+  p1 += ry ? `, ${ry} from a year earlier${rq ? ` and ${rq} from ${prevFy}` : ""}.` : ".";
+  if (c.opIncome != null && c.revenue > 0) {
+    const mg = c.opIncome / c.revenue * 100, mgP = c.revenuePrior > 0 && c.opIncomePrior != null ? c.opIncomePrior / c.revenuePrior * 100 : null;
+    p1 += ` ${c.opIncome >= 0 ? "Operating income" : "The operating loss"} was ${m(Math.abs(c.opIncome))}, a ${mg.toFixed(1)}% margin` + (mgP !== null ? ` versus ${mgP.toFixed(1)}% a year earlier.` : ".");
+  }
+  out.push(p1);
+  const ni = c.netIncome, nP = c.netIncomePrior, eps = bar(["Earnings per share", "Loss per share"]);
+  let p2 = ni == null ? "" : ni >= 0 ? `Net income was ${m(ni)}` : `The net loss was ${m(-ni)}`;
+  if (p2 && nP != null) p2 += nP >= 0 ? `, against ${m(nP)} of net income a year earlier` : `, against a ${m(-nP)} loss a year earlier`;
+  if (p2 && eps) p2 += `; diluted EPS was ${eps.cur < 0 ? "−" : ""}$${Math.abs(eps.cur).toFixed(2)} (${eps.prior < 0 ? "−" : ""}$${Math.abs(eps.prior).toFixed(2)} a year earlier)`;
+  if (p2) p2 += ".";
+  const ocf = bar("Operating cash flow"), fcf = bar("Free cash flow");
+  if (ocf) p2 += ` Operating cash flow was ${m(ocf.cur)}` + (fcf ? ` and free cash flow ${m(fcf.cur)}` : "") + ".";
+  if (p2) out.push(p2.trim());
+  if (c.fiscalQ === 4 && /10-K/.test(c.form || "") && annual && annual.revenue)
+    out.push(`This is the fourth quarter: the full year in the 10-K less the first nine months. For ${annual.fy} as a whole, revenue was ${money(annual, annual.revenue)}${annual.opIncome != null ? ` and operating income ${money(annual, annual.opIncome)}` : ""}` +
+      (annual.revenue > 0 && c.revenue > 0 ? `, so the fourth quarter brought ${(c.revenue / annual.revenue * 100).toFixed(0)}% of the year's revenue` : "") + `; the year's own summary is on the ${annual.fy} tab.`);
+  if (c.form === "Earnings release" && c.erAuto) out.push("These figures come from the earnings release. The 10-Q (or 10-K) will add the cash flow and balance sheet, and replace this tab.");
+  /* what moved most, beyond the headline lines */
+  const moves = [];
+  c.sections.forEach(s => (s.items || s.tiles || []).forEach(it => {
+    if (s.type !== "bars" && s.type !== "tiles") return;
+    if (["Revenue", "Net income", "Net loss", "Operating income", "Operating loss"].includes(it.label) || /per share/i.test(it.label)) return;
+    const cur = it.cur != null ? it.cur : it.qoq ? it.qoq[0] : null, prior = it.prior != null ? it.prior : it.spark && it.spark.length === 5 ? it.spark[0] : null;
+    if (cur == null || prior == null || !(Math.abs(prior) > 0)) return;
+    const r = cur / prior - 1; if (!isFinite(r)) return;
+    if (!moves.some(x => x.l === it.label)) moves.push({l: it.label, cur, prior, r, sh: it.sparkK === "sh"});
+  }));
+  moves.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+  const fmt = x => x.sh ? `${Math.round(x.cur).toLocaleString()}M` : m(x.cur);
+  const stood = moves.filter(x => Math.abs(x.r) >= 0.1 && Math.sign(x.cur) === Math.sign(x.prior)).slice(0, 4)
+    .map(x => `${x.l}: ${fmt(x)}, ${x.r >= 0 ? "up" : "down"} ${x.r >= 1 ? (x.cur / x.prior).toFixed(1) + "× from" : Math.abs(x.r * 100).toFixed(0) + "% from"} ${x.sh ? Math.round(x.prior).toLocaleString() + "M" : m(x.prior)} a year earlier.`);
+  const ev = c.events || [], before = ev.filter(e => !e.since), since = ev.filter(e => e.since);
+  const li = e => `<li><b>${esc(mdy(e.d))} · ${esc(evLabel(e))}</b>${e.t ? `<br><span class="ev-q">“${esc(e.t.replace(/^["“]|["”]$/g, ""))}”</span>` : ""} <a href="${esc(evUrl(c, e))}" target="_blank" rel="noopener">${esc(e.f)}</a></li>`;
+  const since0 = prevFy ? `since the ${esc(prevFy)} report` : "before this report";
+  return `<div class="report"><div class="prose">
+      ${out.map(p => `<p>${esc(p)}</p>`).join("")}
+      ${stood.length ? `<h3>What moved most</h3><ul>${stood.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${c.events ? `<h3>What the company filed ${since0}</h3>
+      ${before.length ? `<ul class="ev-list">${before.map(li).join("")}</ul>` : `<p class="sub">No 8-K events between the previous report and this one, other than earnings releases.</p>`}
+      ${since.length ? `<h3>Filed after this report</h3><ul class="ev-list">${since.map(li).join("")}</ul>` : ""}
+      <p class="sub">Events are the company's 8-K filings (and late-filing notices or 13D stakes) filed between the two reports, earnings releases aside. Quotes are the opening sentence of each filing's main item, as filed.</p>` : ""}
+    </div></div>`;
+}
+function renderQReport(c){ $("#view-report").innerHTML = qSummary(c, LIBRARY[state.ticker]); $("#view-report").dataset.for = state.ticker + "|" + state.period; }
 
 /* ---------------- Sankey ---------------- */
 function ribbon(x0,a0,b0,x1,a1,b1,cls){
@@ -2339,7 +2401,7 @@ async function openCompany(t, view, period){
   }
   const c = LIBRARY[t];
   const qs = c.quarters || [];
-  if (period === undefined) period = view && !["infographic", "image"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
+  if (period === undefined) period = view && !["infographic", "image", "report"].includes(view) ? "" : latestPeriod(c);   // no tab asked for: the most recently filed report (report/media views are 10-K only)
   if (!qs.some(q => pid(q) === period)) period = "";
   let shown = c;
   if (period) {
@@ -2362,12 +2424,14 @@ async function openCompany(t, view, period){
   $("#view-infographic").classList.toggle("is-qtr", !!period);
   renderInfographic(shown);
   /* The written report, slides and video exist for the annual report only */
-  if (fresh) { renderReport(c); loadSlides(c); loadVideo(c); }
-  ["media", "report"].forEach(x => { $("#tab-" + x).hidden = !!period; }); $("#viewTabs").style.setProperty("--n", period ? 2 : 4);   // the written report, slides and video are for the annual report
+  if (fresh) { loadSlides(c); loadVideo(c); }
+  if (period) renderQReport(shown);
+  else if (fresh || $("#view-report").dataset.for !== t) { renderReport(c); $("#view-report").dataset.for = t; }
+  $("#tab-media").hidden = !!period; $("#viewTabs").style.setProperty("--n", period ? 3 : 4);   // slides and video are for the annual report; every tab has a summary
   $("#view-feedback").hidden = true; $("#fbLink").setAttribute("aria-expanded", "false");
   renderSpines();
   let v = view || state.view;
-  if (period && !["infographic", "image"].includes(v)) v = "infographic";
+  if (period && !["infographic", "image", "report"].includes(v)) v = "infographic";
   setView(v);
 }
 function renderPeriods(c){
