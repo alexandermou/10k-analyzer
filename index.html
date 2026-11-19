@@ -1004,6 +1004,7 @@ function renderReport(c){
       <ul>${r.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
       <h3>What to watch</h3>
       <ul>${r.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
+      <div id="fyMore"></div>
     </div>
     <div class="side">
       <div class="card">
@@ -1021,6 +1022,7 @@ function renderReport(c){
       </div>
     </div>
   </div>`;
+  fyMore(c);
 }
 
 /* ---------------- Quarter summary: the numbers in words, then what the company filed between this report and the previous one ---------------- */
@@ -1030,6 +1032,44 @@ const EV_ITEM = {"1.01": "Entered a material agreement", "1.02": "Ended a materi
   "5.01": "Change in control", "5.02": "Leadership, board or executive pay", "5.03": "Bylaws or fiscal year changed", "5.07": "Shareholder meeting votes", "8.01": "Other announcement"};
 const evLabel = e => /^NT /.test(e.f) ? `Notice of a late ${e.f.slice(3)}` : /13D/i.test(e.f) ? "Large shareholder filing (13D)" : (e.items || []).map(i => EV_ITEM[i]).filter(Boolean).slice(0, 2).join(" · ") || e.f;
 const evUrl = (c, e) => `https://www.sec.gov/Archives/edgar/data/${parseInt(c.cik, 10)}/${e.acc.replace(/-/g, "")}/${e.doc}`;
+function qMoves(c){   /* what moved most, beyond the headline lines: the biggest year-over-year changes among the other figures */
+  const m = v => money(c, v);
+  const moves = [];
+  c.sections.forEach(s => (s.items || s.tiles || []).forEach(it => {
+    if (s.type !== "bars" && s.type !== "tiles") return;
+    if (["Revenue", "Net income", "Net loss", "Operating income", "Operating loss"].includes(it.label) || /per share/i.test(it.label)) return;
+    const cur = it.cur != null ? it.cur : it.qoq ? it.qoq[0] : null, prior = it.prior != null ? it.prior : it.spark && it.spark.length === 5 ? it.spark[0] : null;
+    if (cur == null || prior == null || !(Math.abs(prior) > 0)) return;
+    const r = cur / prior - 1; if (!isFinite(r)) return;
+    if (!moves.some(x => x.l === it.label)) moves.push({l: it.label, cur, prior, r, sh: it.sparkK === "sh"});
+  }));
+  moves.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+  const fmt = x => x.sh ? `${Math.round(x.cur).toLocaleString()}M` : m(x.cur);
+  const stood = moves.filter(x => Math.abs(x.r) >= 0.1 && Math.sign(x.cur) === Math.sign(x.prior)).slice(0, 4)
+    .map(x => `${x.l}: ${fmt(x)}, ${x.r >= 0 ? "up" : "down"} ${x.r >= 1 ? (x.cur / x.prior).toFixed(1) + "× from" : Math.abs(x.r * 100).toFixed(0) + "% from"} ${x.sh ? Math.round(x.prior).toLocaleString() + "M" : m(x.prior)} a year earlier.`);
+  return stood;
+}
+const evLi = c => e => `<li><b>${esc(mdy(e.d))} · ${esc(evLabel(e))}</b>${e.t ? `<br><span class="ev-q">“${esc(e.t.replace(/^["“]|["”]$/g, ""))}”</span>` : ""} <a href="${esc(evUrl(c, e))}" target="_blank" rel="noopener">${esc(e.f)}</a></li>`;
+/* the fiscal year's summary: the same "what moved" and "what the company filed" parts, from the year's figures and the quarter tabs' filings */
+function fyMore(c){
+  const el = $("#fyMore"); if (!el) return;
+  const stood = qMoves(c);
+  el.innerHTML = stood.length ? `<h3>What moved most</h3><ul>${stood.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+  loadQuarters(c.ticker).then(qs => {
+    if (!$("#fyMore") || state.ticker !== c.ticker || state.period) return;
+    const y = (c.fy.match(/\d{4}/) || [""])[0];
+    const k = qs.findIndex(q => q.fiscalQ === 4 && /10-K/.test(q.form || "") && (q.fy.match(/\d{4}/) || [""])[0] === y);
+    if (k < 0 || !qs.some(q => q.events)) return;
+    const dedupe = a => a.filter((e, i) => a.findIndex(x => x.acc === e.acc) === i).sort((p, q) => q.d < p.d ? -1 : 1);
+    const during = dedupe(qs.slice(0, k + 1).filter(q => (q.fy.match(/\d{4}/) || [""])[0] === y).flatMap(q => (q.events || []).filter(e => !e.since)));
+    const since = dedupe(qs.slice(k).flatMap(q => (q.events || []).filter(e => q !== qs[k] || e.since)).concat(qs.slice(k + 1).flatMap(q => q.events || [])));
+    const li = evLi(c), prevQ = qs[k - 1] && qs[k - 1].fy;
+    el.innerHTML += `<h3>What the company filed before this 10-K</h3>
+      ${during.length ? `<ul class="ev-list">${during.map(li).join("")}</ul>` : `<p class="sub">No 8-K events in that time, other than earnings releases.</p>`}
+      ${since.length ? `<h3>Filed since this 10-K</h3><ul class="ev-list">${since.map(li).join("")}</ul>` : ""}
+      <p class="sub">8-K filings (and late-filing notices or 13D stakes), earnings releases aside${prevQ ? `; before the 10-K, from the ${esc(prevQ)} report on` : ""}. Quotes are the opening sentence of each filing's main item, as filed. Each quarter's Summary tab has its own list.</p>`;
+  }).catch(() => {});
+}
 function qSummary(c, annual){
   const per = c.fy, prevFy = c.prevQ && c.prevQ.fy, m = v => money(c, v);
   const ch = (a, b) => { const y = yoy(a, b); return y === null ? null : y >= 0 ? `up ${yoyStr(a, b).replace("+", "")}` : `down ${yoyStr(a, b).replace("−", "")}`; };
@@ -1056,22 +1096,9 @@ function qSummary(c, annual){
     out.push(`This is the fourth quarter: the full year in the 10-K less the first nine months. For ${annual.fy} as a whole, revenue was ${money(annual, annual.revenue)}${annual.opIncome != null ? ` and operating income ${money(annual, annual.opIncome)}` : ""}` +
       (annual.revenue > 0 && c.revenue > 0 ? `, so the fourth quarter brought ${(c.revenue / annual.revenue * 100).toFixed(0)}% of the year's revenue` : "") + `; the year's own summary is on the ${annual.fy} tab.`);
   if (c.form === "Earnings release" && c.erAuto) out.push("These figures come from the earnings release. The 10-Q (or 10-K) will add the cash flow and balance sheet, and replace this tab.");
-  /* what moved most, beyond the headline lines */
-  const moves = [];
-  c.sections.forEach(s => (s.items || s.tiles || []).forEach(it => {
-    if (s.type !== "bars" && s.type !== "tiles") return;
-    if (["Revenue", "Net income", "Net loss", "Operating income", "Operating loss"].includes(it.label) || /per share/i.test(it.label)) return;
-    const cur = it.cur != null ? it.cur : it.qoq ? it.qoq[0] : null, prior = it.prior != null ? it.prior : it.spark && it.spark.length === 5 ? it.spark[0] : null;
-    if (cur == null || prior == null || !(Math.abs(prior) > 0)) return;
-    const r = cur / prior - 1; if (!isFinite(r)) return;
-    if (!moves.some(x => x.l === it.label)) moves.push({l: it.label, cur, prior, r, sh: it.sparkK === "sh"});
-  }));
-  moves.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
-  const fmt = x => x.sh ? `${Math.round(x.cur).toLocaleString()}M` : m(x.cur);
-  const stood = moves.filter(x => Math.abs(x.r) >= 0.1 && Math.sign(x.cur) === Math.sign(x.prior)).slice(0, 4)
-    .map(x => `${x.l}: ${fmt(x)}, ${x.r >= 0 ? "up" : "down"} ${x.r >= 1 ? (x.cur / x.prior).toFixed(1) + "× from" : Math.abs(x.r * 100).toFixed(0) + "% from"} ${x.sh ? Math.round(x.prior).toLocaleString() + "M" : m(x.prior)} a year earlier.`);
+  const stood = qMoves(c);
   const ev = c.events || [], before = ev.filter(e => !e.since), since = ev.filter(e => e.since);
-  const li = e => `<li><b>${esc(mdy(e.d))} · ${esc(evLabel(e))}</b>${e.t ? `<br><span class="ev-q">“${esc(e.t.replace(/^["“]|["”]$/g, ""))}”</span>` : ""} <a href="${esc(evUrl(c, e))}" target="_blank" rel="noopener">${esc(e.f)}</a></li>`;
+  const li = evLi(c);
   const since0 = prevFy ? `since the ${esc(prevFy)} report` : "before this report";
   return `<div class="report"><div class="prose">
       ${out.map(p => `<p>${esc(p)}</p>`).join("")}
