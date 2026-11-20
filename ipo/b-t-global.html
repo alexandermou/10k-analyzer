@@ -169,7 +169,7 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   </header>
   <div class="tabs" role="tablist" aria-label="Views"><button class="tab" role="tab" id="tab-dash" aria-selected="true">Dashboard</button><button class="tab" role="tab" id="tab-img" aria-selected="false">Infographic</button></div>
   <div id="dashView">
-  <p class="img-note dash-note pz">Pinch-zoom for details.</p>
+  <p class="img-note dash-note pz">Pinch to zoom for details.</p>
   <section class="card wide"><h2>The offering</h2><div class="tiles"><div class="tile"><div class="l">Shares offered</div><div class="v">500,000</div><div class="s">sold by the company</div></div></div></section>
   <section class="card wide what"><h2>What the company does</h2><p>Not yet summarized; the SEC classifies it as: Wholesale-Professional &amp; Commercial Equipment &amp; Supplies. See the filing for its business.</p></section>
   <section class="card wide"><h2>Revenue</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_rev_0"></div></div></div></section><section class="card wide"><h2>Operating result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_op_0"></div></div></div></section><section class="card wide"><h2>Net result</h2><div class="pair"><div><p class="h3">Fiscal year</p><div class="chart" id="c_net_0"></div></div></div></section>
@@ -180,11 +180,11 @@ body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
   <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>Insiders keep control: about 50.42% of the voting power after the offering.</li></ul></section>
   <section class="card wide"><h2>The numbers</h2><div class="tw "><table><thead><tr><th>$</th><th>FY2025</th><th>FY2026</th><th>YoY</th></tr></thead><tbody><tr><td>Revenue</td><td>18.1K</td><td>4.94M</td><td class="g">+27,150%</td></tr><tr><td>Operating result</td><td>(37.8K)</td><td>264K</td><td class="">n/m</td></tr><tr><td>Net result</td><td>(42.4K)</td><td>243K</td><td class="">n/m</td></tr></tbody></table></div>
     <p class="note">Values as filed, shortened (K = thousand, M = million, B = billion); losses in parentheses. Change columns compare each period with the same period a year earlier; a bigger loss shows as a negative change. Green is better for the company, red worse; n/m where the sign flips.</p></section>
-  <section class="card wide rs-card"><h2>Risks</h2><ol class="rs-list rs-risks"><li>You may face difficulties in protecting your interests, and your ability to protect your rights through U.S. courts may be limited because B&amp;T Cayman…</li><li>Adverse changes in political and economic policies of the PRC government could have a material adverse effect on the overall economic growth of…</li><li>The uncertainty regarding the enforcement of laws and the risk that rules and regulations in China can change quickly with little advance notice…</li><li>A failure by our shareholders or beneficial owners who are PRC residents to comply with certain PRC foreign exchange regulations could restrict our…</li><li>We may be exposed to liabilities under the U.S. Foreign Corrupt Practices Act and Chinese anti-corruption law</li></ol><p class="note">The filing&#x27;s own risk-factor headings, shortened.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
+  <section class="card wide rs-card"><h2>Risks</h2><p class="note">The filing doesn't set out its risks in a list we could read.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
   <p class="src">Source: B &amp; T Global Holding Ltd.'s <a href="https://www.sec.gov/Archives/edgar/data/2156248/000149315226051984/formf-1.htm" target="_blank" rel="noopener">Form F-1, filed with the SEC on Nov 16, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
   </div>
   <div id="imgView" hidden>
-    <div class="img-tools"><p class="img-note"><span class="pz">Pinch-zoom for details.</span></p><span class="status" id="imgStatus" role="status"></span>
+    <div class="img-tools"><p class="img-note"><span class="pz">Pinch to zoom for details.</span></p><span class="status" id="imgStatus" role="status"></span>
       <button type="button" class="img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
       <button type="button" class="img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
     <img id="tabImg" alt="Infographic of this IPO filing">
@@ -255,7 +255,7 @@ function setTab(v){
 }
 $("tab-dash").addEventListener("click", () => setTab("dash")); $("tab-img").addEventListener("click", () => setTab("image"));
 let ovFromTab = false;
-$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>'; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
+$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").innerHTML = '<span class="pz">Pinch to zoom for details.</span>'; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
 $("tabShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return;
   if (canShareImage()) { try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) {} return; }
   const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove(); });

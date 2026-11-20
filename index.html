@@ -783,7 +783,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
         <p>Foreign companies listed in the US (foreign private issuers) don't file 10-Ks or 10-Qs. They file an annual report on Form 20-F (Form 40-F for many Canadian companies), and their interim results, if any, are furnished on Form 6-K.</p>
         <p>SEC rules already allow them to report every half-year instead of every quarter, and many only file annual results in tagged form. That's why some of them have half-year charts or no interim charts at all.</p></details>
       <details><summary>What do the tabs on a company page show?</summary>
-        <ul><li><b>Dashboard:</b> the key charts for the period.</li><li><b>Infographic:</b> one shareable image of the results.<span class="pz"> Pinch-zoom for details.</span></li><li><b>Media:</b> the same results as slides or a short video.</li><li><b>Summary:</b> a written recap.</li></ul></details>
+        <ul><li><b>Dashboard:</b> the key charts for the period.</li><li><b>Infographic:</b> one shareable image of the results.<span class="pz"> Pinch to zoom for details.</span></li><li><b>Media:</b> the same results as slides or a short video.</li><li><b>Summary:</b> a written recap.</li></ul></details>
       <details><summary>What do the small line charts show?</summary>
         <ul><li>On a quarterly report: the last 5 quarters.</li>
         <li>On an annual report: the last 5 quarters leading up to the year end, so you can see the trend inside the year.</li>
@@ -831,7 +831,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
       <button class="tab" role="tab" id="tab-report" data-view="report" aria-selected="false">Summary</button>
     </div>
     <div id="view-image" role="tabpanel" aria-labelledby="tab-image" hidden>
-      <div class="img-set"><p class="img-note"><span class="pz">Pinch-zoom for details.</span></p><a class="info-settings" href="#layout-settings">Settings</a></div>
+      <div class="img-set"><p class="img-note"><span class="pz">Pinch to zoom for details.</span></p><a class="info-settings" href="#layout-settings">Settings</a></div>
       <div class="img-tools">
         <button type="button" class="ic-btn img-ic" id="tabRedraw" aria-label="Redraw the picture" title="Redraw"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button><span class="img-hint">Refresh if a chart is incomplete</span><span class="status" id="imgTabStatus" role="status"></span>
         <button type="button" class="ic-btn img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -906,7 +906,7 @@ body.home .sitefoot{display:flex;justify-content:center;gap:20px;padding:0 16px 
 <div class="cx-ov" id="cxOv" hidden role="dialog" aria-modal="true" aria-label="Card, full screen"><button type="button" class="cx-shrink" id="cxShrink" aria-label="Shrink" title="Shrink"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/></svg></button><div class="cx-stage" id="cxStage"></div></div>
 <div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
   <div class="ov-box" tabindex="-1">
-    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status"><span class="pz">Pinch-zoom for details.</span></p></div>
+    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status"><span class="pz">Pinch to zoom for details.</span></p></div>
       <div class="ov-acts"><button class="ov-ic" type="button" id="ovFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
     <button class="ov-exitfs" type="button" id="ovExitFs" aria-label="Exit full screen" title="Exit full screen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
     <img id="ovImg" alt="Infographic">
@@ -1653,7 +1653,7 @@ function rsCards(c){
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
 function renderInfographic(c){
-  $("#view-infographic").innerHTML = `<p class="img-note pz">Pinch-zoom for details.</p>
+  $("#view-infographic").innerHTML = `<p class="img-note pz">Pinch to zoom for details.</p>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
     <div class="sec"><h3>Total company <small>· ${esc(c.fy)}</small>${!c.quarter && (c.sparkQ || c.sparkH) ? (q => `<small class="sec-note">Fiscal-year figures · sparklines ${esc(q[0])} – ${esc(q[q.length - 1])}</small>`)(c.sparkQ || c.sparkH) : ""}</h3><div class="grid">${segBig(c, "total")}${prepEps(c)}</div></div>
     ${c.segments && c.segments.items.length > 1 ? `<div class="sec"><h3>Segment results <small>· ${esc(c.fy)}, change vs ${esc(c.fyPrior)}</small></h3><div class="grid seg-grid">${segBig(c, "segments")}</div>${c.segments.note ? `<p class="sub">${esc(c.segments.note)}</p>` : ""}</div>` : ""}
@@ -1948,7 +1948,7 @@ $("#tabShare").addEventListener("click", async () => {
 });
 function showImage(url, title){
   const ov = $("#imgOverlay"); ov.classList.remove("ov-sk"); $("#ovImg").style.transform = ""; $("#ovImg").src = url; ov.hidden = false; $("#ovTitle").textContent = title || "Infographic";
-  $("#ovStatus").innerHTML = '<span class="pz">Pinch-zoom for details.</span>';
+  $("#ovStatus").innerHTML = '<span class="pz">Pinch to zoom for details.</span>';
   $("#ovShare").hidden = !canShareImage();
   $("#imgOverlay .ov-box").focus({preventScroll: true});   // focus the dialog, not a button, so no button looks selected
 }
@@ -3008,7 +3008,7 @@ const upBadge = () => upcomingDays().then(u => badge("#upCount", u.today.length 
   function open(card){
     stage.style.cssText = ""; delete stage.dataset.rot; ov.classList.remove("cx-sk", "cx-skv");
     const k = card.cloneNode(true); k.querySelectorAll(".cx-btn").forEach(x => x.remove()); k.style.margin = "0";
-    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note pz"; n.textContent = "Pinch-zoom for details."; h3.insertAdjacentElement("afterend", n); }
+    if (card.classList.contains("sk-card")) { ov.classList.add("cx-sk", "cx-skv"); const h3 = k.querySelector("h3"); if (h3) { const n = document.createElement("p"); n.className = "cx-note pz"; n.textContent = "Pinch to zoom for details."; h3.insertAdjacentElement("afterend", n); }
       stage.replaceChildren(k); ov.hidden = false; document.body.style.overflow = "hidden"; layoutSk(); }
     else {
       const LW = pw() < 700 ? 360 : 560;   // layout width: wide enough that every dot gets its value
