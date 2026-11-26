@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fidelity Chainlink Fund IPO at a glance · 10KDecoder: decode SEC filings</title>
+<meta name="description" content="Fidelity Chainlink Fund IPO: No price range yet · latest SEC filing Nov 25, 2026. Offering, use of money raised, revenue and results from its S-1 filed Nov 25, 2026, at a glance. Decode SEC filings with 10KDecoder.">
+<link rel="canonical" href="https://10kdecoder.com/ipo/fidelity-chainlink-fund.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="10KDecoder"><meta property="og:title" content="Fidelity Chainlink Fund IPO at a glance">
+<meta property="og:description" content="Fidelity Chainlink Fund IPO: No price range yet · latest SEC filing Nov 25, 2026. Offering, use of money raised, revenue and results from its S-1 filed Nov 25, 2026, at a glance. Decode SEC filings with 10KDecoder."><meta property="og:image" content="https://10kdecoder.com/ipo/fidelity-chainlink-fund-infographic.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E9EDF2; --ink:#15202B; --muted:#55606E; --line:#D7DDE5;
+  --navy:#1D3557; --accent:#A9550D; --accent-soft:#FBEBD8; --pos:#17703F; --neg:#A8321F; --pos-bg:#E2F2E8; --neg-bg:#FAE5E0;
+  --n-bg:#E6EAF0; --n-fg:#3B4452; --bar:#1D3557; --bar2:#9AAFC9; --negbar:#B8543F;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F151C; --surface:#17202A; --sunk:#1E2833; --ink:#E6EBF0; --muted:#9DA9B7; --line:#2C3744;
+  --navy:#9DBDE6; --accent:#EBA05A; --accent-soft:#33261A; --pos:#6BCF95; --neg:#F28E78; --pos-bg:#173326; --neg-bg:#3A1F1A;
+  --n-bg:#26313E; --n-fg:#C7D0DB; --bar:#7FA6D8; --bar2:#3B4B5E; --negbar:#E07A63; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:880px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top a{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;color:var(--ink);background:var(--surface);border:1px solid var(--line)}
+.top a:hover{color:var(--accent);border-color:var(--accent)}
+.kicker{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+h1{font-family:var(--f-display);font-size:34px;line-height:1.1;margin:2px 0 6px}
+.sub{color:var(--muted);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ipo-status{margin:8px 0 0;font-size:14px;color:var(--muted)}
+.chip{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--n-bg);color:var(--n-fg)}
+.chip.go{background:var(--pos-bg);color:var(--pos)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+h2{font-family:var(--f-display);font-size:22px;margin:0 0 4px}
+.card>p.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.tile{background:var(--sunk);border-radius:10px;padding:12px 14px}
+.tile .l{font-size:13px;color:var(--muted)}
+.tile .v{font-family:var(--f-mono);font-weight:600;font-size:22px;margin-top:2px}
+.tile .s{font-size:12px;color:var(--muted)}
+.what p{margin:8px 0 0}
+.what ul{margin:8px 0 0;padding-left:20px}
+.chart{margin-top:10px;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--f-body);fill:var(--muted);font-size:12px}
+.chart .val{font-family:var(--f-mono);fill:var(--ink);font-size:12px;font-weight:600}
+.chart .hit{fill:transparent;cursor:default}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .1s}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pair>div{min-width:0}
+@media (max-width:640px){.pair{grid-template-columns:1fr}.tile .v{font-size:19px}th,td{font-size:11.5px;padding:6px 4px}.card.wide:has(.tw){padding-left:12px;padding-right:12px}th:first-child,td:first-child{padding-left:0}}
+.h3{font-weight:600;font-size:15px;margin:0}
+.meter{margin-top:12px}
+.meter .row{display:grid;grid-template-columns:120px 1fr 56px;align-items:center;gap:10px;margin-top:8px;font-size:14px}
+.meter .track{height:14px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.meter .fill{height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+.meter .fill.alt{background:var(--accent)}
+.meter .pct{font-family:var(--f-mono);font-weight:600;text-align:right}
+.risks{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.risks li{border-left:3px solid var(--accent);padding:2px 0 2px 12px}
+.risks b{display:block}
+.tw{overflow-x:auto;margin:0}
+.tables{gap:8px 24px}
+.shot-only{display:none}
+body.shot .shot-only{display:block}
+body.shot .tables{display:none}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}
+td.g{color:var(--pos)}td.b{color:var(--neg)}
+th,td{text-align:right;padding:6px 6px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--f-mono)}
+th:first-child,td:first-child{text-align:left;font-family:var(--f-body)}
+th{color:var(--muted);font-weight:600;font-family:var(--f-body)}
+details summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:10px}
+summary{list-style:none;display:flex;align-items:center;gap:8px}summary::-webkit-details-marker{display:none}
+summary::after{content:"\25BC";margin-left:auto;padding-left:12px;flex:none;font-size:.7em;transition:transform .15s}details[open]>summary::after{transform:rotate(180deg)}
+.src{font-size:13px;color:var(--muted)}
+.src a{color:var(--navy)}
+.top .icons{display:flex;gap:6px}
+.top a.toplink{width:auto;height:auto;display:inline;border:0;background:none;border-radius:0;color:var(--navy);font-weight:600;font-size:16px;text-decoration:none;padding:8px 2px}
+.top a.toplink:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+body:not(.haswl) #wlIcon{display:none}
+.star-btn{display:inline-flex;align-items:center;justify-content:center;width:1.1em;height:1.1em;margin-left:.2em;vertical-align:-.08em;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:.85em;line-height:1;cursor:pointer;padding:0}
+.star-btn:hover{color:var(--accent);background:var(--accent-soft)}.star-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.star-btn[aria-pressed="true"]{color:var(--accent)}
+body.shot .star-btn{display:none}
+.tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:var(--bg);font:600 15px var(--f-body);cursor:pointer}
+.btn:disabled{opacity:.6}
+.dl-btn{display:inline-flex;align-items:center;gap:12px}.dl-btn .dl-ic{flex:none;padding-left:12px;border-left:1px solid currentColor;box-sizing:content-box;opacity:.9}
+.status{font-size:13px;color:var(--muted)}
+.brand{display:none}
+/* infographic layout (used to draw the PNG) */
+body.shot .top,body.shot .tools,body.shot .tabs,body.shot #imgView,body.shot .dash-note{display:none}
+body.shot .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:28px}
+body.shot header,body.shot .wide,body.shot .src,body.shot .brand{grid-column:1/-1}
+body.shot .brand{display:none}
+.shot-by{display:none}body.shot header{position:relative}
+body.shot .shot-by{display:block;position:absolute;top:0;right:0;font-size:15px;font-weight:500;color:var(--muted)}   /* the site's name at the infographic's top right */
+body.shot .pair{grid-template-columns:1fr 1fr}
+body.shot .card{padding:16px 18px}
+body.shot .chart svg{height:auto}
+.ov[hidden]{display:none}
+.ov{position:fixed;inset:0;z-index:50;background:rgba(10,15,22,.72);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ov-box{background:var(--surface);border-radius:14px;padding:10px 12px 12px;width:100%;max-width:920px;display:flex;flex-direction:column;gap:12px}
+.ov-acts{display:flex;gap:8px;flex:none}
+.ov-head{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.ov-tt{min-width:0;display:flex;flex-direction:column;gap:1px}
+#ovTitle{margin:0;font-weight:600;font-size:16px;line-height:1.25;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-hint{margin:0;font-size:12px;line-height:1.3;color:var(--muted)}
+.ov-ic{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.ov-ic.primary{background:var(--navy);border-color:var(--navy);color:var(--bg)}
+.ov-ic:active{transform:scale(.95)}
+.ov-box:focus{outline:none}
+.ov-ic:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ov-exitfs{display:none}
+.ov.img-fs .ov-exitfs{display:grid;place-items:center;position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px);z-index:1002;width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(10,15,22,.12);color:#fff;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ov.img-fs .ov-head{display:none}
+#ovImg{touch-action:manipulation;cursor:zoom-in;-webkit-user-select:none;user-select:none}
+.ov.img-fs{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#05080d;z-index:1001}
+.ov.img-fs .ov-box{max-width:none;padding:0;border-radius:0;background:transparent;gap:0}
+.ov.img-fs #ovImg{border:0;border-radius:0;cursor:zoom-out}
+.ov-box img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+
+.tabs{display:flex;gap:4px;background:var(--n-bg);padding:4px;border-radius:12px;width:max-content;max-width:100%;margin-top:4px}
+.tab{min-height:40px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:600 15px var(--f-body);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+[hidden]{display:none!important}
+.img-note{margin:0;color:var(--muted);font-size:13px;flex:1;white-space:nowrap}.img-tools .status{flex:0 1 auto}.img-tools .status:empty{display:none}.dash-note{margin:6px 0 -6px}
+.img-tools{display:flex;align-items:center;gap:10px;padding:0 0 4px;margin-top:4px}
+.img-tools .status{flex:1;min-width:0}
+.img-ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+#tabImg{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+#dashView{display:contents}
+
+@media (hover:hover) and (pointer:fine){.pz{display:none!important}}
+.chart tspan.sub{font-size:11px}
+.chart .chg{font-family:var(--f-mono);font-size:11px;font-weight:600}.chg-note{margin:2px 0 0;font-size:11px;color:var(--muted)}.chart .chg.up{fill:var(--pos)}.chart .chg.down{fill:var(--neg)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.risks li{padding:4px 0 4px 12px}
+.rs-list{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:rs;display:grid;gap:10px}
+.rs-list li{counter-increment:rs;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;line-height:1.45}
+.rs-list li::before{content:counter(rs);display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font:600 13px var(--f-mono);background:var(--n-bg);color:var(--n-fg)}
+.rs-list.rs-risks li::before{background:var(--neg-bg);color:var(--neg)}
+.rs-list.rs-strategy li::before{background:var(--pos-bg);color:var(--pos)}
+body.shot .rs-list{display:block;columns:2;column-gap:28px}
+body.shot .rs-list li{break-inside:avoid;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="toplink" href="../#ipo">IPO</a>
+    <span class="icons"><a href="../" aria-label="Home" title="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg></a></span>
+  </div>
+  <header>
+    <span class="shot-by">by 10KDecoder.com</span>
+    <span class="kicker">IPO filing, visualized</span>
+    <h1>Fidelity Chainlink Fund<button type="button" class="star-btn" id="starBtn" aria-pressed="false">☆</button></h1>
+    
+    <div class="chips"><span class="chip">S-1 · Nov 25, 2026</span><span class="chip go">Filed</span></div>
+    <p class="ipo-status">No price range yet · latest SEC filing Nov 25, 2026.</p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Views"><button class="tab" role="tab" id="tab-dash" aria-selected="true">Dashboard</button><button class="tab" role="tab" id="tab-img" aria-selected="false">Infographic</button></div>
+  <div id="dashView">
+  <p class="img-note dash-note pz">Pinch to zoom for details.</p>
+  <section class="card wide"><h2>The offering</h2><div class="tiles"></div></section>
+  <section class="card wide what"><h2>What the company does</h2><p>Not yet summarized; see the filing for its business.</p></section>
+  
+  
+  
+  <section class="card"><h2>Things to weigh</h2><ul class="risks"><li>The filing&#x27;s financial tables couldn&#x27;t be read reliably, so none are shown here.</li></ul></section>
+  
+  <section class="card wide rs-card"><h2>Risks</h2><p class="note">The filing doesn't set out its risks in a list we could read.</p></section><section class="card wide rs-card"><h2>Strategy</h2><p class="note">The filing doesn't set out its strategy in a list we could read.</p></section>
+  <p class="src">Source: Fidelity Chainlink Fund's <a href="https://www.sec.gov/Archives/edgar/data/2166611/000119312526477751/d85304ds1.htm" target="_blank" rel="noopener">Form S-1, filed with the SEC on Nov 25, 2026</a>  (preliminary prospectus). Figures are as filed; changes are worked out from them. Not investment advice.</p>
+  </div>
+  <div id="imgView" hidden>
+    <div class="img-tools"><p class="img-note"><span class="pz">Pinch to zoom for details.</span></p><span class="status" id="imgStatus" role="status"></span>
+      <button type="button" class="img-ic" id="tabFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button type="button" class="img-ic" id="tabShare" aria-label="Share" title="Share"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+    <img id="tabImg" alt="Infographic of this IPO filing">
+  </div>
+  <div class="brand"><span>10KDecoder</span><span>10KDecoder.com</span></div><p class="sr-only">10KDecoder (10-K Decoder): decode SEC 10-K filings and IPO prospectuses into dashboards and infographics.</p>
+</div>
+<div class="ov" id="imgOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box" tabindex="-1">
+    <div class="ov-head"><div class="ov-tt"><p id="ovTitle">Infographic</p><p class="ov-hint" id="ovStatus" role="status">Double-tap: full screen or back</p></div>
+      <div class="ov-acts"><button class="ov-ic" type="button" id="ovFs" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="ov-ic" type="button" id="ovShare" aria-label="Share image" title="Share image" hidden><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14.5V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M8.5 10.5h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg></button><button class="ov-ic" type="button" id="ovClose" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>
+    <button class="ov-exitfs" type="button" id="ovExitFs" aria-label="Exit full screen" title="Exit full screen"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
+    <img id="ovImg" alt="Infographic">
+  </div>
+</div>
+
+<script>
+const PAGE = {"img": "fidelity-chainlink-fund-infographic.png", "imgName": "fidelity-chainlink-fund-IPO-S-1-2026-11-25-infographic.png", "ticker": null, "cik": 2166611, "charts": []};
+
+/* Bar charts drawn from the filing's figures ($ millions). One series per chart, so no legend; hover shows the value. */
+function bars(el, data, opt = {}) {
+  /* Horizontal bars, newest period on top (opt.keep: as given). One zero line: gains go right of it, losses left, in red.
+     Each value carries its change vs the row below (the same period a year earlier); a bigger loss is a negative change; n/m when the sign flips. */
+  const rows = opt.keep ? data.slice() : data.slice().reverse(), chg = !opt.noChg && rows.length > 1;
+  const W = 360, rowH = 32, bh = 18, labW = opt.labW || 66, valW = chg ? 104 : 60, H = rows.length * rowH + 6;
+  const hi = Math.max(0, ...rows.map(d => d.v)), lo = Math.min(0, ...rows.map(d => d.v));
+  const pL = labW + (lo < 0 ? valW : 0), pR = W - 4 - (hi > 0 ? valW : 0), k = (pR - pL) / ((hi - lo) || 1), z = pL - lo * k;
+  const pct = (d, o) => { if (!chg || !o) return ""; const c = o.v && (d.v < 0) === (o.v < 0) ? (d.v - o.v) / Math.abs(o.v) * 100 : null;
+    const t = c === null ? "n/m" : (c >= 0 ? "+" : "−") + (Math.abs(c) >= 100 ? Math.round(Math.abs(c)).toLocaleString("en-US") : Math.abs(c).toFixed(1)) + "%";
+    return `<tspan class="chg ${c === null ? "" : c >= 0 ? "up" : "down"}">${t}</tspan>`; };
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opt.label}">`;
+  rows.forEach((d, i) => {
+    const y = 4 + i * rowH, cy = y + rowH / 2, w = Math.abs(d.v) * k, r = Math.min(4, w / 2), by = cy - bh / 2;
+    const col = d.v < 0 ? "var(--negbar)" : (i === 0 && !opt.keep ? "var(--bar)" : "var(--bar2)"), p = pct(d, rows[i + 1]);
+    s += `<text x="0" y="${cy + 4}" text-anchor="start">${d.k}${d.s && !opt.noSub ? ` <tspan class="sub">${d.s}</tspan>` : ""}</text>`;
+    if (d.v < 0) {
+      s += `<path d="M${z},${by} H${z - w + r} q-${r},0 -${r},${r} V${by + bh - r} q0,${r} ${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z - w - 6}" y="${cy + 4}" text-anchor="end">${p}${p ? "<tspan> </tspan>" : ""}${d.t}</text>`;
+    } else {
+      s += `<path d="M${z},${by} H${z + w - r} q${r},0 ${r},${r} V${by + bh - r} q0,${r} -${r},${r} H${z} Z" fill="${col}"/>`;
+      s += `<text class="val" x="${z + w + 6}" y="${cy + 4}" text-anchor="start">${d.t}${p ? "<tspan> </tspan>" + p : ""}</text>`;
+    }
+    s += `<rect class="hit" x="0" y="${y}" width="${W}" height="${rowH}" data-tip="${d.k}: ${d.tip || d.t}"/>`;
+  });
+  s += `<line x1="${z}" x2="${z}" y1="2" y2="${H - 2}" stroke="var(--line)" stroke-width="1"/>`;
+  el.innerHTML = s + `</svg>${chg ? '<p class="chg-note">% = change vs the same period a year earlier</p>' : ""}<div class="tip"></div>`;
+  const tip = el.querySelector(".tip");
+  el.querySelectorAll(".hit").forEach(r => {
+    r.addEventListener("pointerenter", () => { const b = r.getBoundingClientRect(), p = el.getBoundingClientRect(); tip.textContent = r.dataset.tip; tip.style.left = (p.width / 2) + "px"; tip.style.top = (b.top - p.top - 6) + "px"; tip.style.opacity = 1; });
+    r.addEventListener("pointerleave", () => tip.style.opacity = 0);
+  });
+}
+const $ = id => document.getElementById(id);
+/* charts from the page data */
+for (const ch of PAGE.charts) bars($(ch.id), ch.data, {label: ch.label, ...(ch.opt || {})});
+/* Infographic: a PNG drawn from this page's figures (same layout, desktop width, light theme), shown with save / share */
+const IMG = {url: PAGE.img, name: PAGE.imgName};
+let lastImg = null, lastImgUrl = null;
+const shareFileOf = () => lastImg ? new File([lastImg.blob], lastImg.name, {type: "image/png"}) : null;
+function canShareImage(){ try { const f = shareFileOf(); return !!(f && navigator.share && navigator.canShare && navigator.canShare({files: [f]})); } catch (e) { return false; } }
+const loadImg = async () => { if (!lastImg) { const r = await fetch(IMG.url, {cache: "no-cache"}); if (!r.ok) throw 0; lastImg = {blob: await r.blob(), name: IMG.name}; lastImgUrl = URL.createObjectURL(lastImg.blob); } return lastImgUrl; };
+/* Menu bar: Dashboard (this page) and Infographic (the picture, with full screen and share) */
+function setTab(v){
+  $("dashView").hidden = v === "image"; $("imgView").hidden = v !== "image";
+  $("tab-dash").setAttribute("aria-selected", v !== "image"); $("tab-img").setAttribute("aria-selected", v === "image");
+  if (v === "image" && !$("tabImg").getAttribute("src")) { $("imgStatus").textContent = "Loading the image…"; loadImg().then(u => { $("tabImg").src = u; $("imgStatus").textContent = ""; }).catch(() => { $("imgStatus").textContent = "The image couldn't be loaded right now. Try again in a moment."; }); }
+  try { history.replaceState(null, "", v === "image" ? "#infographic" : location.pathname + location.search); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+$("tab-dash").addEventListener("click", () => setTab("dash")); $("tab-img").addEventListener("click", () => setTab("image"));
+let ovFromTab = false;
+$("tabFs").addEventListener("click", () => { if (!lastImgUrl) return; ovFromTab = true; $("ovImg").src = lastImgUrl; ov.hidden = false; $("ovStatus").innerHTML = '<span class="pz">Pinch to zoom for details.</span>'; $("ovShare").hidden = !canShareImage(); setImgFs(true); });
+$("tabShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return;
+  if (canShareImage()) { try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) {} return; }
+  const a = document.createElement("a"); a.href = lastImgUrl; a.download = lastImg.name; document.body.appendChild(a); a.click(); a.remove(); });
+$("ovFs").addEventListener("click", () => setImgFs(true));   // full screen in place of the old save button (saving is in the share sheet)
+$("ovShare").addEventListener("click", async () => { const f = shareFileOf(); if (!f) return; try { await navigator.share({files: [f], title: lastImg.name}); } catch (e) { if (!e || e.name !== "AbortError") $("ovStatus").textContent = "Sharing isn't available here. Use the save button instead."; } });
+const ov = $("imgOverlay"), ovFsReal = () => (document.fullscreenElement || document.webkitFullscreenElement) === ov;
+function setImgFs(on){
+  ov.classList.toggle("img-fs", on); ov.scrollTop = 0;
+  if (on) { const req = ov.requestFullscreen || ov.webkitRequestFullscreen; if (req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) { try { const r = req.call(ov); if (r && r.catch) r.catch(() => {}); } catch (e) {} } }
+  else if (ovFsReal()) { const ex = document.exitFullscreen || document.webkitExitFullscreen; try { const r = ex.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+}
+const toggleImgFs = () => setImgFs(!ov.classList.contains("img-fs"));
+$("ovExitFs").addEventListener("click", e => { e.stopPropagation(); setImgFs(false); if (ovFromTab) { ovFromTab = false; $("ovImg").removeAttribute("src"); ov.hidden = true; } });   // the exit button sits outside the picture, so it never ends up in a saved image
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { if (!ovFsReal() && ov.classList.contains("img-fs") && !(document.fullscreenElement || document.webkitFullscreenElement) && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) ov.classList.remove("img-fs"); }));
+let lastTap = {t: 0, x: 0, y: 0}, lastToggle = 0;
+$("ovImg").addEventListener("pointerup", e => { if (e.pointerType === "mouse") return; const now = Date.now();
+  if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) { e.preventDefault(); lastTap.t = 0; lastToggle = now; toggleImgFs(); } else lastTap = {t: now, x: e.clientX, y: e.clientY}; });
+$("ovImg").addEventListener("dblclick", e => { e.preventDefault(); if (Date.now() - lastToggle > 500) toggleImgFs(); });
+$("ovClose").addEventListener("click", () => { setImgFs(false); $("ovImg").removeAttribute("src"); ov.hidden = true; ovFromTab = false; });
+ov.addEventListener("click", e => { if (e.target === e.currentTarget) $("ovClose").click(); });
+document.addEventListener("keydown", e => { if (e.key !== "Escape" || ov.hidden) return; if (ov.classList.contains("img-fs")) setImgFs(false); else $("ovClose").click(); });
+
+/* Watchlist star: the IPO watchlist (a cookie of SEC registration numbers, shared with the site's IPO list; path = the site folder, one level up) */
+const CIK = String(PAGE.cik), WL_PATH = location.pathname.replace(/ipo\/[^/]*$/, "") || "/";
+const wlGet = () => { const m = document.cookie.match(/(?:^|;\s*)wlipo=([^;]*)/); return m ? decodeURIComponent(m[1]).split(",").filter(x => /^\d{1,10}$/.test(x)) : []; };
+function wlSet(list){ document.cookie = `wlipo=${encodeURIComponent(list.join(","))}; max-age=${list.length ? 31536000 : 0}; path=${WL_PATH}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; wlShow(); }
+function wlShow(){ const on = wlGet().includes(CIK), b = $("starBtn"); if (!b) return;
+  b.setAttribute("aria-pressed", on); b.textContent = on ? "★" : "☆"; b.title = on ? "Remove from your watchlist" : "Add to your watchlist"; b.setAttribute("aria-label", b.title); }
+$("starBtn").addEventListener("click", () => { const l = wlGet(); wlSet(l.includes(CIK) ? l.filter(t => t !== CIK) : l.concat(CIK)); });
+wlShow();
+if (location.hash === "#infographic") setTab("image");
+if (new URLSearchParams(location.search).has("shot")) document.body.classList.add("shot");
+
+</script>
+</body>
+</html>
