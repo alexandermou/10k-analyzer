@@ -254,7 +254,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fhead h2 .fy-tag{font-style:normal;color:var(--muted);font-weight:600}
 .meta{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px}
 .meta b{color:var(--ink);font-weight:600}
-.meta .m-one{white-space:nowrap}   /* one line: form · filed date · period */
+.meta .m-one>*{white-space:nowrap}   /* form · filed date · period: one line when it fits, else wraps between the parts */
 .img-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:52vh;margin-top:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--muted);text-align:center}
 .img-wait[hidden]{display:none}.img-wait p{margin:0;font-size:16px;font-weight:600;color:var(--ink)}.img-wait small{font-size:13px}
 .img-spin{width:30px;height:30px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:imgspin .9s linear infinite}
@@ -282,7 +282,7 @@ a.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
 .fb-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .fb-row .btn{height:44px}
 .fb-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-@media (max-width:640px){.tabs{width:calc(var(--n,4) * (100% - 4px) / 4 + 4px)}.tab{flex:1 1 0;padding:0 6px;font-size:14px;min-width:0}}   /* each tab is a quarter of the row; the shaded bar shrinks to fit the tabs shown */
+@media (max-width:640px){.tabs{gap:2px;width:max-content;min-width:calc(var(--n,4) * (100% - 4px) / 4 + 4px);overflow-x:auto;scrollbar-width:none}.tab{flex:1 0 auto;padding:0 5px;font-size:14px;white-space:nowrap}}   /* each tab is as wide as its word plus a share of the spare room, so labels never run together; larger phone text widens the bar, then scrolls it */
 .fb-thanks .btn,.fb-row .btn{align-self:flex-start;width:auto}
 /* Filing strip: the annual report and the latest quarters */
 .periods{display:flex;gap:8px;flex-wrap:wrap}.periods[hidden],.tab[hidden]{display:none}
@@ -2448,7 +2448,7 @@ async function openCompany(t, view, period){
     $("#fname").innerHTML = `${esc(w[1])}<bdi class="nm-a" style="white-space:nowrap">${esc(w[2])}${m && m[2] ? '<bdi class="nm-c">,</bdi>' : ""}</bdi>${m ? ` <bdi class="nm-b" style="white-space:nowrap"><bdi class="nm-suf">${esc(m[3])}</bdi>${STAR}</bdi>` : `<bdi class="nm-b">${STAR}</bdi>`}<br><span>${c.ticker}</span> <em class="fy-tag">· ${esc(shown.fy)}</em>`;
     fitName(); requestAnimationFrame(() => { fitName(); setTimeout(fitName, 150); }); }
   wlChanged();   // sets the star next to the name
-  $("#fmeta").innerHTML = `<span class="m-one"><b>${esc(shown.form || "Form 10-K")}</b> · Filed ${esc(sd(shown.filed))} · ${esc(sd(shown.period).replace(/\s*\(.*\)\s*$/, ""))}</span>`;
+  $("#fmeta").innerHTML = `<span class="m-one"><b>${esc(shown.form || "Form 10-K")}</b> · <span>Filed ${esc(sd(shown.filed))}</span> · <span>${esc(sd(shown.period).replace(/\s*\(.*\)\s*$/, ""))}</span></span>`;
   renderPeriods(c);
   $("#view-infographic").classList.toggle("is-qtr", !!period);
   renderInfographic(shown);
