@@ -1126,6 +1126,11 @@ function rotSvg(str){
   const w = m[1], h = m[2], at = str.indexOf(">", str.indexOf("<svg")) + 1, end = str.lastIndexOf("</svg>");
   return str.slice(0, at).replace(m[0], `viewBox="0 0 ${h} ${w}" data-rot="${w} ${h}"`) + `<g class="rotg" transform="translate(${h},0) rotate(90)">` + str.slice(at, end) + "</g></svg>";
 }
+/* Share of total expense = cost of revenue + operating expenses (before any expense credits); interest and tax are not included */
+function expShare(c, v){
+  const t = Math.max(c.cogs, 0) + c.opex.reduce((a, o) => a + o[1], 0);
+  return v >= 0 && t > 0 && v <= t ? (v / t * 100).toFixed(1) + "% of total expense" : "";
+}
 function sankey(c){
   if (c.opIncome < 0) return sankeyLoss(c);
   const s = 358 / c.revenue, H = v => Math.max(v * s, 0);
@@ -1194,9 +1199,10 @@ function sankey(c){
       credits.forEach(([n, v], k) => out.push(`<text x="${LX}" y="${cy + 40 + 19 * k}" font-size="12" class="t-m" font-weight="400">${esc(n)} <tspan class="t-p" font-weight="400">+${f(v)}</tspan></text>`));
     } else {
       out.push(txt(LX, cy - 3, esc(it.n), it.n.length > 34 ? 10.5 : 12, "t-m", 400));
-      out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">${it.lab || "(" + f(it.v) + ")"} <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, it.pv ?? it.v)}</tspan></text>`);
+      out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">${it.lab || "(" + f(it.v) + ")"} <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, it.pv ?? it.v)}${it.opex ? " of revenue" : ""}</tspan></text>`);
+      if (it.opex) out.push(txt(LX, cy + 31, expShare(c, it.v), 12, "t-m", 400));
     }
-    cur = y0 + Math.max(h, 26) + (it.net ? 26 + 19 * credits.length : 16);
+    cur = y0 + (it.opex ? Math.max(h + 16, h / 2 + 52) : Math.max(h, 26) + (it.net ? 26 + 19 * credits.length : 16));
     if (it.summary) {
       const rows = [["Pre-tax loss", "(" + f(-pretax) + ")"]];
       if (c.tax) rows.push([c.tax > 0 ? "Income tax" : "Tax benefit", c.tax > 0 ? "(" + f(c.tax) + ")" : "+" + f(-c.tax)]);
@@ -1222,7 +1228,7 @@ function sankey(c){
     else out.push(txt(x + NW/2, cy + 5, l2, 13, "t-w", 700, "middle"));
   };
   node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
-  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW/2, cogsY + cogsH / 2 + Math.max(cogsH / 2 + 15, 36), expShare(c, c.cogs), 11, "t-m", 400, "middle")); }
   if (opexT > 0) node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
   out.push(txt(OX + NW/2, 18, c.totalLabels ? c.totalLabels[0] : "Operating income", 12, "t-m", 600, "middle"));
   out.push(txt(OX + NW/2, 36, pctOf(c, c.opIncome) + " margin", 12, "t-p", 700, "middle"));
@@ -1236,7 +1242,7 @@ function sankey(c){
   if (lossBelow) {} else { out.push(`<rect x="${PX}" y="${ptY}" width="${NW}" height="${Math.max(ptH, 18)}" rx="5" class="npos"/>`); }
   if (lossBelow) {} else if (ptH >= 40) { out.push(txt(PX + NW/2, ptY + ptH/2 - 4, "Pre-tax income", 11, "t-ws", 600, "middle")); out.push(txt(PX + NW/2, ptY + ptH/2 + 14, f(pretax), 14, "t-w", 700, "middle")); }
   else out.push(txt(PX + NW/2, ptY + Math.max(ptH, 18)/2 + 4, "Pre-tax " + f(pretax), 11.5, "t-w", 700, "middle"));
-  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  const height = Math.ceil(Math.max(srcBottom, c.cogs > 0 ? cogsY + cogsH / 2 + Math.max(cogsH / 2 + 18, 40) : cogsY + cogsH, cur, opexY + opexH) + 10);
   return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} ${c.cogsLabel.replace("*","").toLowerCase()}, ${f(opexT)} operating expenses, ${f(c.opIncome)} operating income, ${f(c.netIncome)} net income.`)}">${out.join("")}</svg>`;
 }
 
@@ -1277,8 +1283,9 @@ function sankeyLoss(c){
     out.push(ribbon(OX + NW, facc, facc + H(v), FX, cur, cur + H(v), "fn"));
     out.push(`<rect x="${FX}" y="${cur}" width="8" height="${h}" class="nneg"/>`);
     out.push(txt(LX, cy - 3, esc(n), 12, "t-m", 400));
-    out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">(${f(v)}) <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, v)}</tspan></text>`);
-    facc += H(v); cur += Math.max(h, 26) + 16;
+    out.push(`<text x="${LX}" y="${cy + 14}" font-size="14.5" class="t-n" font-weight="400">(${f(v)}) <tspan font-size="12" font-weight="400" class="t-m">· ${pctOf(c, v)} of revenue</tspan></text>`);
+    out.push(txt(LX, cy + 31, expShare(c, v), 12, "t-m", 400));
+    facc += H(v); cur += Math.max(h + 16, h / 2 + 52);
   });
   // nodes
   out.push(`<rect x="${RX}" y="${revY}" width="${NW}" height="${revH}" rx="8" class="nrev"/>`);
@@ -1294,7 +1301,7 @@ function sankeyLoss(c){
   };
   if (gpH >= 20) node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
   extras.forEach(e => node(GX, e.y, e.box, e.credit ? "npos" : "nneg", esc(e.n), e.credit ? "+" + f(e.v) : "(" + f(e.v) + ")"));
-  if (c.cogs > 0) node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs));
+  if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW/2, cogsY + cogsH / 2 + Math.max(cogsH / 2 + 15, 36), expShare(c, c.cogs), 11, "t-m", 400, "middle")); }
   node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
   // below the operating line
   const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : label.length > 24 ? 10.5 : 12, "t-m", 400)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
@@ -1307,7 +1314,7 @@ function sankeyLoss(c){
   out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
   row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
   out.push(txt(LX, ry + 30, pctOf(c, c.netIncome) + " of revenue", 11.5, "t-m", 400));
-  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, cur, opexY + opexH) + 10);
+  const height = Math.ceil(Math.max(srcBottom, c.cogs > 0 ? cogsY + cogsH / 2 + Math.max(cogsH / 2 + 18, 40) : cogsY + cogsH, cur, opexY + opexH) + 10);
   return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} cost of revenue, ${f(opexT)} operating expenses before credits, operating loss ${f(loss)}, net loss ${f(-c.netIncome)}.`)}">${out.join("")}</svg>`;
 }
 
