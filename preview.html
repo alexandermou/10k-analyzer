@@ -1131,14 +1131,14 @@ function expShare(c, v){
   const t = Math.max(c.cogs, 0) + c.opex.reduce((a, o) => a + o[1], 0);
   return v >= 0 && t > 0 && v <= t ? (v / t * 100).toFixed(1) + "% of total expense" : "";
 }
-/* A cost box too small to hold its text gets every label under it, in page colours, so nothing is clipped */
+/* A cost box too small to hold its text gets every label at the end of its branch (right of the box), in page colours */
 const COGS_SMALL = 64;
 function cogsSmall(c, x, y, h){
-  const mid = x + 46, b = y + Math.max(h, 1.5);
+  const lx = x + 100, mid = y + Math.max(h, 1.5) / 2;
   return `<rect x="${x}" y="${y}" width="92" height="${Math.max(h, 1.5)}" rx="${Math.min(8, h / 2)}" class="nneg"/>`
-    + txt(mid, b + 15, esc(c.cogsLabel), 12, "t-m", 400, "middle")
-    + `<text x="${mid}" y="${b + 32}" font-size="14.5" class="t-n" font-weight="400" text-anchor="middle">(${money(c, c.cogs)}) <tspan font-size="12" class="t-m">· ${pctOf(c, c.cogs)} of revenue</tspan></text>`
-    + txt(mid, b + 48, expShare(c, c.cogs), 12, "t-m", 400, "middle");
+    + txt(lx, mid - 12, esc(c.cogsLabel), 12, "t-m", 400)
+    + `<text x="${lx}" y="${mid + 5}" font-size="14.5" class="t-n" font-weight="400">(${money(c, c.cogs)}) <tspan font-size="12" class="t-m">· ${pctOf(c, c.cogs)} of revenue</tspan></text>`
+    + txt(lx, mid + 21, expShare(c, c.cogs), 12, "t-m", 400);
 }
 function sankey(c){
   if (c.opIncome < 0) return sankeyLoss(c);
@@ -1147,7 +1147,14 @@ function sankey(c){
   const f = v => money(c, v), out = [];
   const gp = c.revenue - c.cogs, gpH = H(gp), cogsH = H(c.cogs), revH = H(c.revenue);
   const credT = (c.opexCredits || []).reduce((a, x) => a + x[1], 0), showCred = credT > 0.02 * c.revenue && gp >= c.opIncome, credH = showCred ? H(credT) : 0;
-  const gpY = 30, credY = gpY + gpH + 16, cogsY = gpY + gpH + 70 + (showCred ? Math.max(credH, 44) + 30 : 0), revY = cogsY + cogsH - revH;
+  const gpY = 30, credY = gpY + gpH + 16;
+  /* the cost of revenue branch ends in text to the right of its box, so that text has to sit below the operating-expense column */
+  const colH = c.opex.reduce((a, o) => a + o[1], 0), colOi = H(c.opIncome);
+  const colNon = c.nonOp > 0 ? 50 + Math.max(colOi + 14, 34) + H(c.nonOp) : 0;
+  /* lowest point of that column: the operating-expense box or the band flowing into it, else operating income */
+  const colB = colH > 0 || gp - c.opIncome > 0.0005 * c.revenue
+    ? Math.max(50 + colOi + 110, colNon ? colNon + 44 : 0) + Math.max(colH > 0 ? H(colH) : 0, gpH - colOi) : Math.max(50 + Math.max(colOi, 16), colNon);
+  const cogsY = Math.max(gpY + gpH + 70 + (showCred ? Math.max(credH, 44) + 30 : 0), c.cogs > 0 ? colB + 12 + (cogsH < COGS_SMALL ? 26 : 8) - cogsH / 2 : 0), revY = cogsY + cogsH - revH;
   // sources
   const gap = 6, boxes = c.sources.map(([n, v]) => ({n, v, h: H(v), bh: Math.max(46, H(v))}));
   const total = boxes.reduce((a, b) => a + b.bh, 0) + gap * (boxes.length - 1);
@@ -1238,7 +1245,7 @@ function sankey(c){
   };
   node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
   if (c.cogs > 0 && cogsH < COGS_SMALL) out.push(cogsSmall(c, GX, cogsY, cogsH));
-  else if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW/2, cogsY + cogsH + 15, expShare(c, c.cogs), 11, "t-m", 400, "middle")); }
+  else if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW + 8, cogsY + cogsH / 2 + 4, expShare(c, c.cogs), 12, "t-m", 400)); }
   if (opexT > 0) node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
   out.push(txt(OX + NW/2, 18, c.totalLabels ? c.totalLabels[0] : "Operating income", 12, "t-m", 600, "middle"));
   out.push(txt(OX + NW/2, 36, pctOf(c, c.opIncome) + " margin", 12, "t-p", 700, "middle"));
@@ -1252,7 +1259,7 @@ function sankey(c){
   if (lossBelow) {} else { out.push(`<rect x="${PX}" y="${ptY}" width="${NW}" height="${Math.max(ptH, 18)}" rx="5" class="npos"/>`); }
   if (lossBelow) {} else if (ptH >= 40) { out.push(txt(PX + NW/2, ptY + ptH/2 - 4, "Pre-tax income", 11, "t-ws", 600, "middle")); out.push(txt(PX + NW/2, ptY + ptH/2 + 14, f(pretax), 14, "t-w", 700, "middle")); }
   else out.push(txt(PX + NW/2, ptY + Math.max(ptH, 18)/2 + 4, "Pre-tax " + f(pretax), 11.5, "t-w", 700, "middle"));
-  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH + (c.cogs > 0 ? (cogsH < COGS_SMALL ? 52 : 18) : 0), cur, opexY + opexH) + 10);
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, c.cogs > 0 && cogsH < COGS_SMALL ? cogsY + cogsH / 2 + 28 : 0, cur, opexY + opexH) + 10);
   return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} ${c.cogsLabel.replace("*","").toLowerCase()}, ${f(opexT)} operating expenses, ${f(c.opIncome)} operating income, ${f(c.netIncome)} net income.`)}">${out.join("")}</svg>`;
 }
 
@@ -1312,7 +1319,7 @@ function sankeyLoss(c){
   if (gpH >= 20) node(GX, gpY, gpH, "npos", esc(c.gpLabel), f(gp), pctOf(c, gp));
   extras.forEach(e => node(GX, e.y, e.box, e.credit ? "npos" : "nneg", esc(e.n), e.credit ? "+" + f(e.v) : "(" + f(e.v) + ")"));
   if (c.cogs > 0 && cogsH < COGS_SMALL) out.push(cogsSmall(c, GX, cogsY, cogsH));
-  else if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW/2, cogsY + cogsH + 15, expShare(c, c.cogs), 11, "t-m", 400, "middle")); }
+  else if (c.cogs > 0) { node(GX, cogsY, cogsH, "nneg", esc(c.cogsLabel), "(" + f(c.cogs) + ")", pctOf(c, c.cogs)); out.push(txt(GX + NW + 8, cogsY + cogsH / 2 + 4, expShare(c, c.cogs), 12, "t-m", 400)); }
   node(OX, opexY, opexH, "nneg", "Op. expenses", "(" + f(opexT) + ")", pctOf(c, opexT));
   // below the operating line
   const row = (y0, label, val, cls, big) => { out.push(txt(LX, y0, label, big ? 13 : label.length > 24 ? 10.5 : 12, "t-m", 400)); out.push(txt(1176, y0, val, big ? 18 : 14, cls, 700, "end")); };
@@ -1325,7 +1332,7 @@ function sankeyLoss(c){
   out.push(`<rect x="${LX}" y="${ry - 14}" width="${1176 - LX}" height="1" class="nneg"/>`);
   row(ry + 10, esc(c.netLabel), f(c.netIncome), c.netIncome < 0 ? "t-n" : "t-p", true);
   out.push(txt(LX, ry + 30, pctOf(c, c.netIncome) + " of revenue", 11.5, "t-m", 400));
-  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH + (c.cogs > 0 ? (cogsH < COGS_SMALL ? 52 : 18) : 0), cur, opexY + opexH) + 10);
+  const height = Math.ceil(Math.max(srcBottom, cogsY + cogsH, c.cogs > 0 && cogsH < COGS_SMALL ? cogsY + cogsH / 2 + 28 : 0, cur, opexY + opexH) + 10);
   return `<svg viewBox="0 0 1180 ${height}" role="img" aria-label="${esc(`Income flow: ${f(c.revenue)} revenue, ${f(c.cogs)} cost of revenue, ${f(opexT)} operating expenses before credits, operating loss ${f(loss)}, net loss ${f(-c.netIncome)}.`)}">${out.join("")}</svg>`;
 }
 
