@@ -1677,6 +1677,23 @@ function rsCards(c){
   return card("risks", "Risks", c.risks, `The ${esc(form)} doesn't set out its risks in a list we could read.`) +
          card("strategy", "Strategy", c.strategy, `The ${esc(form)} doesn't set out its strategy in a list we could read.`);
 }
+/* Risk changes (quarter tabs): what the 10-Q adds to the 10-K's risk factors, in the filing's words (build_risk_changes.py) */
+let RISKCHG = null;
+function loadRiskChanges(){ if (!RISKCHG) RISKCHG = fetch("data/risk_changes.json", {cache: "no-cache"}).then(r => r.ok ? r.json() : {}).catch(() => ({})); return RISKCHG; }
+function riskChangeCard(d){
+  const first = d.filings[0], last = d.filings[d.filings.length - 1], base = `${esc(d.base.year)} 10-K`;
+  const link = f => `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.form)} filed ${esc(sd(longDate(f.filed)))}</a>`;
+  const body = last.added.length
+    ? `<p class="sub rs-note">New since the ${base}:</p><ol class="rs-list rs-risks" style="columns:1">${last.added.map(x => `<li><span><b>${esc(x.head)}.</b> ${esc(x.line)}${x.line.endsWith("…") ? "" : "."}</span></li>`).join("")}</ol>`
+    : `<p class="sub rs-note">${last.noChange && !last.unread ? `No material changes from the ${base}'s risk factors.` : "This filing updates its risk factors in a form we couldn't read as a list. See the filing."}</p>`;
+  const amended = last !== first && last.added.length && !first.added.length ? ` The original ${link(first)} reported no material changes.` : "";
+  return `<div class="card rs-card"><h3 class="rs-h">Risk changes</h3>${body}<p class="sub rs-note">From Item 1A of the ${link(last)}, in the company's words.${amended} Compared with the <a href="${esc(d.base.url)}" target="_blank" rel="noopener" style="white-space:nowrap">${base}</a>.</p></div>`;
+}
+const longDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m - 1]} ${d}, ${y}`; };
+function fillRiskChanges(c){
+  const slot = $("#view-infographic .rc-slot"); if (!slot) return;
+  loadRiskChanges().then(all => { const d = (all[c.ticker] || {})[c.accession]; if (d && slot.isConnected) slot.outerHTML = riskChangeCard(d); });
+}
 function renderInfographic(c){
   $("#view-infographic").innerHTML = `<p class="img-note pz">Pinch to zoom for details.</p>
   <div id="infoBody" style="display:flex;flex-direction:column;gap:22px">
@@ -1687,9 +1704,10 @@ function renderInfographic(c){
       <div class="sankey">${rotSvg(sankey(c))}${sankey(c).replace("<svg ", "<svg class=\"sk-flat\" ")}</div>
     </div>`}
     ${renderSections(c)}
-    ${c.quarter ? "" : rsCards(c)}
+    ${c.quarter ? `<div class="rc-slot" hidden></div>` : rsCards(c)}
     <div class="foot"><p><b>Source:</b> ${esc(c.name)} ${c.form || "Form 10-K"} for ${c.fy} (${esc(sd(c.period))}; filed ${esc(sd(c.filed))}). SEC CIK ${esc(c.cik)}. <a href="${esc(secUrl(c))}" target="_blank" rel="noopener">View the filing on SEC EDGAR</a></p>${c.footnotes.map(n => `<p>${esc(n)}</p>`).join("")}</div>
   </div>`;
+  if (c.quarter) fillRiskChanges(c);
   }
 
 /* ---------------- Infographic download (PNG, always light theme, desktop width) ---------------- */
@@ -1758,6 +1776,7 @@ async function makeInfographicBlobOnce(c){
   document.body.appendChild(host); const blobUrls = [];
   try {
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await loadRiskChanges();   // so the risk-changes card is in place before the page is copied into the picture
     const n = $("#infoBody").cloneNode(true); n.removeAttribute("id"); n.querySelectorAll(".cx-btn").forEach(x => x.remove());
     if (FULLIG) n.classList.add("ig-full"); if (TALL) n.classList.add("ig-tall"); if (WIDE) n.classList.add("ig-wide");
     n.style.width = (FULLIG ? W : 1160) + "px"; n.style.padding = (FULLIG ? "26px" : "32px"); n.style.background = "#F3F5F8"; n.style.boxSizing = "content-box";
@@ -1767,7 +1786,7 @@ async function makeInfographicBlobOnce(c){
     n.querySelectorAll(".seg-card.wide .seg-val .chip").forEach(x => { x.style.fontSize = "13px"; x.style.padding = "3px 10px"; x.style.whiteSpace = "nowrap"; });
     n.querySelectorAll(".seg-card.wide .lbl").forEach(x => { x.style.fontSize = "14px"; });
     n.querySelectorAll(".barhead .sub").forEach(x => { x.textContent = x.textContent.replace(" · scroll sideways on a phone", ""); });
-    n.querySelectorAll(".rs-list").forEach(x => { x.style.display = "block"; x.style.columns = "2"; x.style.columnGap = "32px"; });
+    n.querySelectorAll(".rs-list").forEach(x => { x.style.display = "block"; x.style.columns = x.children.length > 1 ? "2" : "1"; x.style.columnGap = "32px"; });
     n.querySelectorAll(".rs-list li").forEach(x => { x.style.breakInside = "avoid"; x.style.marginBottom = "10px"; });
     const h = document.createElement("div");
     h.style.cssText = "display:block;border-bottom:1px solid #D7DDE5;padding-bottom:14px";
