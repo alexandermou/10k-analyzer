@@ -1002,7 +1002,7 @@ function renderReport(c){
   <div class="report">
     <div class="prose">
       ${r.summary.map(p => `<p>${esc(p)}</p>`).join("")}
-      <h3>What stood out</h3>
+      <h3>Highlights</h3>
       <ul>${r.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
       <h3>What to watch</h3>
       <ul>${r.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>
@@ -1104,7 +1104,7 @@ function qSummary(c, annual){
   const since0 = prevFy ? `since the ${esc(prevFy)} report` : "before this report";
   return `<div class="report"><div class="prose">
       ${out.map(p => `<p>${esc(p)}</p>`).join("")}
-      ${stood.length ? `<h3>What moved most</h3><ul>${stood.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${stood.length ? `<h3>Highlights</h3><ul>${stood.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       ${c.events ? `<h3>What the company filed ${since0}</h3>
       ${before.length ? `<ul class="ev-list">${before.map(li).join("")}</ul>` : `<p class="sub">No 8-K events between the previous report and this one, other than earnings releases.</p>`}
       ${since.length ? `<h3>Filed after this report</h3><ul class="ev-list">${since.map(li).join("")}</ul>` : ""}
@@ -1549,7 +1549,7 @@ function sparkline(c, it, wide){
   if (wide) return `<div class="spark wide${full ? " full" : ""}"><div class="sp-plot">${svg}${ptLabels}</div>${axis}${axisFull}</div>`;
   return `<div class="spark">${svg}<span>${esc(sq(q[0]))} – ${esc(sq(q[last]))}${half ? " · half-year filer" : ""}</span></div>`;
 }
-function head(sec){ return sec.title ? `<h3>${esc(sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
+function head(sec){ return sec.title ? `<h3>${esc(sec.title === "Highlights" ? "Key metrics" : sec.title)}${sec.note ? ` <small>· ${esc(sec.note)}</small>` : ""}</h3>` : ""; }
 function renderSection(c, sec){
   /* a long card title wraps to two lines: give every title in the row two lines so the numbers line up (only when cards sit side by side) */
   const tl = list => list.some(x => String(x.label || "").length > 20) ? " two-line-wide" : "";
@@ -2254,7 +2254,7 @@ function buildSlides(c){
   }
   if (hasCash) add("Cash flow", `<h3 class="sl-h">Free cash flow ${f(cashSec[2].cur)}</h3>${rows(cashSec.map(i => [i.label, i.cur, i.prior, i.money]))}`, sc[4].say, sc[4].cap);
   c.video.spotlights.forEach((sl, k) => add(sl.kicker, `<p class="sl-big">${esc(sl.big)}</p><p class="sl-sub" style="color:var(--accent);font-weight:600">${esc(sl.sub)}</p><div class="sl-lines">${sl.lines.map(l => `<p>${esc(l)}</p>`).join("")}</div>`, (spots[k] || sl).say, sl.cap));
-  add("What stood out", `<ul class="sl-list">${c.report.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What stood out. " + c.report.highlights.map(sayify).join(" "), c.report.highlights.join(" "));
+  add("Highlights", `<ul class="sl-list">${c.report.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "Highlights. " + c.report.highlights.map(sayify).join(" "), c.report.highlights.join(" "));
   add("What to watch", `<ul class="sl-list">${c.report.watch.map(h => `<li>${esc(h)}</li>`).join("")}</ul>`, "What to watch. " + c.report.watch.map(sayify).join(" "), c.report.watch.join(" "));
   add("Source", `<div class="sl-center"><h3 class="sl-h">${esc(c.name)} ${c.form || "Form 10-K"}</h3><p class="sl-sub">${esc(c.period)} · filed ${esc(c.filed)}</p><p class="sl-sub num">CIK ${c.cik}${c.accession ? ` · accession ${c.accession}` : ""}</p></div>`, sc[sc.length - 1].say, sc[sc.length - 1].cap);
   return out;
